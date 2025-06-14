@@ -2,19 +2,23 @@
 import os
 import re
 import shutil
+from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Annotated, Optional, Tuple
 
+import rdflib
 import typer
+from typer import Argument, Option
 
-from nanopub import Nanopub, NanopubConf, load_profile
+from nanopub import Nanopub, NanopubClaim, NanopubConf, load_profile
 from nanopub._version import __version__
 from nanopub.definitions import DEFAULT_PROFILE_PATH, USER_CONFIG_DIR
 from nanopub.profile import Profile, ProfileError, generate_keyfiles
 from nanopub.templates.nanopub_introduction import NanopubIntroduction
 from nanopub.utils import MalformedNanopubError
 
-cli = typer.Typer(help="Nanopub Command Line Interface")
+cli = typer.Typer(help="Nanopub Command Line Interface", no_args_is_help=True)
 
 PRIVATE_KEY_FILE = 'id_rsa'
 PUBLIC_KEY_FILE = 'id_rsa.pub'
@@ -73,7 +77,8 @@ def sign(
     else:
         config = NanopubConf(profile=load_profile())
 
-    folder_path, filename = os.path.split(filepath)
+    folder_path = filepath.parent
+    filename = f'{filepath.stem}.trig'
     np = Nanopub(
         conf=config,
         rdf=filepath
@@ -234,6 +239,100 @@ def setup(
 
 def _rsa_keys_exist():
     return DEFAULT_PRIVATE_KEY_PATH.exists() or DEFAULT_PUBLIC_KEY_PATH.exists()
+
+
+create = typer.Typer(
+    help=(
+        'Create a Nanopublication from a template '
+        'and print it to standard output.'
+    ),
+    no_args_is_help=True,
+)
+
+
+class DataFormat(StrEnum):
+    """Linked Data format."""
+
+    TRIG = 'trig'
+    RDF_XML = 'xml'
+    NQUADS = 'nquads'
+    JSON_LD = 'json-ld'
+
+
+@dataclass
+class CreateParameters:
+    output_format: DataFormat
+
+    def show(self, nanopublication: Nanopub):
+        print(nanopublication.rdf.serialize(format=self.output_format.value))
+
+
+class CreateNanopubContext(typer.Context):
+    obj: CreateParameters
+
+
+@create.callback()
+def _create_callback(ctx: typer.Context, output_format: DataFormat = DataFormat.TRIG):
+    ctx.obj = CreateParameters(output_format=output_format)
+
+
+cli.add_typer(create, name='create')
+
+
+@create.command(help='Create a nanopub from an assertion graph')
+def from_assertion(
+    ctx: CreateNanopubContext,
+    filepath: Annotated[Path, Argument(exists=True, dir_okay=False)],
+    was_derived_from: Annotated[
+        str | None,
+        Option(
+            help=(
+                'URI of a statement which this nanopublication is derived from.'
+            )
+        )
+    ] = None,
+):
+    """Create a nanopublication based on assertion."""
+    config = NanopubConf(
+        profile=load_profile(),
+        derived_from=was_derived_from,
+        add_pubinfo_generated_time=True,
+        attribute_publication_to_profile=True,
+    )
+
+    np = Nanopub(
+        assertion=rdflib.Graph().parse(filepath),
+        conf=config,
+    )
+
+    ctx.obj.show(np)
+
+
+@create.command()
+def claim(
+    ctx: CreateNanopubContext,
+    text: Annotated[list[str], typer.Argument()],
+):
+    """
+    Create a nanopublication based on a free-form textual claim.
+
+    If multiple arguments are provided, they will be joined with a whitespace
+    to form one text.
+    """
+    claim_text = ' '.join(text)
+
+    config = NanopubConf(
+        profile=load_profile(),
+        add_pubinfo_generated_time=True,
+        attribute_publication_to_profile=True,
+    )
+
+    np = NanopubClaim(
+        conf=config,
+        claim=claim_text,
+    )
+
+    ctx.obj.show(np)
 
 
 if __name__ == '__main__':

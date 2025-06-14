@@ -6,7 +6,7 @@ import re
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 import rdflib
 import requests
@@ -193,7 +193,7 @@ class Nanopub:
             raise MalformedNanopubError("The nanopub is not valid, cannot sign it")
 
 
-    def publish(self) -> tuple(str, str, str | None):
+    def publish(self) -> Tuple[str, str, str | None]:
         """Publish a Nanopub object"""
         if not self.source_uri:
             self.sign()
@@ -209,7 +209,7 @@ class Nanopub:
             self._concept_uri = f"{self.source_uri}#{str(self._introduces_concept)}"
             log.info(f"Published concept to {self._concept_uri}")
             return self.source_uri, self._conf.use_server, self._concept_uri
-        
+
         return self.source_uri, self._conf.use_server
 
 
