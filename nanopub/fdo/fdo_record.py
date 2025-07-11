@@ -1,6 +1,6 @@
 from rdflib import Graph, URIRef, Literal
-from typing import Optional, Union
-from rdflib.namespace import RDFS, DCTERMS
+from typing import Optional, Union, List
+from rdflib.namespace import RDFS, DCTERMS, PROV
 from nanopub.namespaces import HDL, FDOF, FDOC
 
 
@@ -13,7 +13,7 @@ class FdoRecord:
 
     def __init__(
         self,
-        nanopub: Optional[Graph] = None,
+        assertion: Optional[Graph] = None,
         *,
         profile_uri: Optional[Union[str, URIRef]] = None,
         label: Optional[str] = None,
@@ -21,19 +21,29 @@ class FdoRecord:
     ):
         self.id: Optional[str] = None
         self.tuples: dict[URIRef, Union[Literal, URIRef]] = {}
-
-        if nanopub:
+        
+        if assertion:
             # Init from assertion graph
-            for s, p, o in nanopub:
-                # Accept both DCTERMS.conformsTo and FDOC.hasFdoProfile
+            for s, p, o in assertion:
                 if (p == DCTERMS.conformsTo or p == FDOC.hasFdoProfile) and self.id is None:
                     self.id = self.extract_handle(o)
-                self.tuples[p] = o
 
+                if p == FDOF.isMaterializedBy:
+                    self.set_data_ref(o)
+                else:
+                    existing = self.tuples.get(p)
+                    if existing is None:
+                        self.tuples[p] = o
+                    elif isinstance(existing, list):
+                        if o not in existing:
+                            existing.append(o)
+                    else:
+                        if existing != o:
+                            self.tuples[p] = [existing, o]
             if self.id is None:
                 raise ValueError("Missing required FDO profile statement")
 
-        if nanopub is None:
+        if assertion is None:
             # Init from explicit params
             if profile_uri is None:
                 raise ValueError("profile_uri is required when nanopub assertion graph not given")
@@ -64,7 +74,15 @@ class FdoRecord:
         if not self.id:
             raise ValueError("FDO ID is not set")
         subject = URIRef(f"https://hdl.handle.net/{self.id}")
-        return [(subject, p, o) for p, o in self.tuples.items()]
+        triples = []
+        for p, o in self.tuples.items():
+            if isinstance(o, list):
+                for item in o:
+                    triples.append((subject, p, item))
+            else:
+                triples.append((subject, p, o))
+        return triples
+
 
     def get_graph(self) -> Graph:
         g = Graph()
@@ -76,9 +94,20 @@ class FdoRecord:
         val = self.tuples.get(DCTERMS.conformsTo) or self.tuples.get(FDOC.hasFdoProfile)
         return URIRef(val) if val else None
 
-    def get_data_ref(self) -> Optional[URIRef]:
+    def get_data_ref(self) -> Optional[Union[URIRef, List[URIRef]]]:
         val = self.tuples.get(FDOF.isMaterializedBy)
-        return URIRef(val) if val else None
+
+        if val is None:
+            return None
+
+        if isinstance(val, list):
+            uris = [URIRef(v) for v in val]
+            print(len(uris))
+            for uri in uris:
+                print("DataRef URI:", uri)
+            return uris[0] if len(uris) == 1 else uris
+
+        return URIRef(val)
 
     def get_label(self) -> Optional[str]:
         val = self.tuples.get(RDFS.label)
@@ -98,7 +127,20 @@ class FdoRecord:
         self.tuples[pred] = URIRef(uri)
 
     def set_data_ref(self, uri: Union[str, URIRef]) -> None:
-        self.tuples[FDOF.isMaterializedBy] = URIRef(uri)
+        uri_ref = URIRef(uri)
+        existing = self.tuples.get(FDOF.isMaterializedBy)
+
+        if existing is None:
+            self.tuples[FDOF.isMaterializedBy] = uri_ref
+
+        elif isinstance(existing, list):
+            if uri_ref not in existing:
+                existing.append(uri_ref)
+
+        else:
+            if existing != uri_ref:
+                self.tuples[FDOF.isMaterializedBy] = [existing, uri_ref]
+        print(self.tuples[FDOF.isMaterializedBy])
 
     def set_property(self, predicate: Union[str, URIRef], value: Union[str, URIRef, Literal]) -> None:
         pred = URIRef(predicate)
@@ -115,8 +157,29 @@ class FdoRecord:
         else:
             self.tuples[DCTERMS.hasPart] = iri
 
+    def add_derivation(self, iri: URIRef):
+        """
+        Adds a prov:wasDerivedFrom triple to the record.
+        Handles multiple values as a list.
+        """
+        predicate = PROV.wasDerivedFrom
+        existing = self.tuples.get(predicate)
+
+        if existing:
+            if isinstance(existing, list):
+                if iri not in existing:
+                    existing.append(iri)
+            elif existing != iri:
+                self.tuples[predicate] = [existing, iri]
+        else:
+            self.tuples[predicate] = iri
+
     def copy(self) -> "FdoRecord":
-        new_record = FdoRecord()
+        new_record = FdoRecord(
+            profile_uri=self.get_profile(),
+            label=self.get_label(),
+            dataref=self.get_data_ref()
+        )
         new_record.id = self.id
         new_record.tuples = self.tuples.copy()
         return new_record

@@ -1,9 +1,10 @@
 from nanopub import Nanopub
+import json
 import rdflib
 from typing import Optional
 from rdflib.namespace import RDF, RDFS, DCTERMS
 from nanopub.namespaces import HDL, FDOF, NPX, FDOC
-from nanopub.constants import FDO_PROFILE_HANDLE, FDO_DATA_REF_HANDLE
+from nanopub.constants import FDO_PROFILE_HANDLE, FDO_DATA_REF_HANDLE, FDO_DATA_REFS_HANDLE
 from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.nanopub_conf import NanopubConf
 from nanopub.fdo.utils import looks_like_handle, looks_like_url, handle_to_iri
@@ -50,6 +51,7 @@ class FdoNanopub(Nanopub):
         label = None
         fdo_profile = None
         data_ref = None
+        data_refs = []
         other_attributes = []
 
         for entry in values:
@@ -64,6 +66,12 @@ class FdoNanopub(Nanopub):
                 fdo_profile = entry_value
             elif entry_type == FDO_DATA_REF_HANDLE:
                 data_ref = entry_value
+            elif entry_type == FDO_DATA_REFS_HANDLE:
+                try:
+                    data_refs = json.loads(entry_value)
+                except json.JSONDecodeError:
+                    print("Warning: DataRefs value is not valid JSON:", entry_value)
+                    data_refs = []
             else:
                 other_attributes.append((entry_type, entry_value))
 
@@ -71,6 +79,10 @@ class FdoNanopub(Nanopub):
 
         if data_ref:
             np.add_fdo_data_ref(data_ref)
+        
+        if len(data_refs) > 0:
+            for ref in data_refs:
+                np.add_fdo_data_ref(ref)
 
         for attr_type, val in other_attributes:
             np.add_attribute(attr_type, val)
@@ -131,6 +143,33 @@ class FdoNanopub(Nanopub):
             else:
                 raise ValueError(f"Invalid aggregate format: {agg}")
             record.add_aggregate(iri)
+
+        npub = cls.create_with_fdo_iri(record, fdo_iri, conf=conf)
+
+        return npub
+    
+    @classmethod
+    def create_derivation_fdo(cls,
+                    fdo_iri: rdflib.URIRef | str,
+                    profile_uri: str,
+                    label: str,
+                    sources: list[str],
+                    conf: Optional[NanopubConf] = None,
+                    ) -> "FdoNanopub":
+        """
+        Create an FDO nanopub that is derived from one or more source IRIs or handles.
+        Adds prov:wasDerivedFrom for each source.
+        """
+        record = FdoRecord(profile_uri=profile_uri, label=label)
+
+        for source in sources:
+            if looks_like_url(source):
+                iri = rdflib.URIRef(source)
+            elif looks_like_handle(source):
+                iri = handle_to_iri(source)
+            else:
+                raise ValueError(f"Invalid source format: {source}")
+            record.add_derivation(iri)
 
         npub = cls.create_with_fdo_iri(record, fdo_iri, conf=conf)
 

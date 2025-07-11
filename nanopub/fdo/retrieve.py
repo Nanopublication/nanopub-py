@@ -5,23 +5,24 @@ from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo import FdoNanopub
 from rdflib import RDF, URIRef, Graph
 from nanopub.namespaces import FDOF
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Union, List
 
 def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> FdoRecord:
     try:
         np = resolve_in_nanopub_network(iri_or_handle, conf=conf)
         if np is not None:
-            record = FdoRecord(nanopub=np.assertion)
+            record = FdoRecord(assertion=np.assertion)
             return record
 
         if looks_like_handle(iri_or_handle):
             np = FdoNanopub.handle_to_nanopub(iri_or_handle)
-            return FdoRecord(nanopub=np.assertion)
+            record = FdoRecord(assertion=np.assertion)
+            return record
 
         if iri_or_handle.startswith("https://hdl.handle.net/"):
             handle = iri_or_handle.replace("https://hdl.handle.net/", "")
             np = FdoNanopub.handle_to_nanopub(handle)
-            return FdoRecord(nanopub=np.assertion)
+            return FdoRecord(assertion=np.assertion)
 
     except Exception as e:
         raise ValueError(f"Could not resolve FDO: {iri_or_handle}") from e
@@ -59,21 +60,36 @@ def resolve_in_nanopub_network(iri_or_handle: str, conf: Optional[NanopubConf] =
 def retrieve_record_from_id(iri_or_handle: str):
     if looks_like_handle(iri_or_handle):
         np = FdoNanopub.handle_to_nanopub(iri_or_handle)
-        return FdoRecord(nanopub=np.assertion)
+        return FdoRecord(assertion=np.assertion)
     else:
         raise NotImplementedError("Non-handle IRIs not yet supported")
 
 
-def retrieve_content_from_id(iri_or_handle: str) -> bytes:
+def retrieve_content_from_id(iri_or_handle: str) -> Union[bytes, List[bytes]]:
     fdo_record = resolve_id(iri_or_handle)
 
-    content_url = fdo_record.get_data_ref()
-    if not content_url:
+    content_ref = fdo_record.get_data_ref()
+
+    if not content_ref:
         raise ValueError("FDO has no file / DataRef (isMaterializedBy)")
 
-    response = requests.get(str(content_url))
-    response.raise_for_status()
-    return response.content
+    if isinstance(content_ref, URIRef) or isinstance(content_ref, str):
+        if isinstance(content_ref, str):
+            content_ref = URIRef(content_ref)
+        response = requests.get(str(content_ref))
+        response.raise_for_status()
+        return response.content
+
+    elif isinstance(content_ref, list):
+        contents = []
+        for uri in content_ref:
+            response = requests.get(str(uri))
+            response.raise_for_status()
+            contents.append(response.content)
+        return contents
+
+    else:
+        raise TypeError(f"Unexpected type for content_ref: {type(content_ref)}")
 
 
 def resolve_handle_metadata(handle: str) -> dict:

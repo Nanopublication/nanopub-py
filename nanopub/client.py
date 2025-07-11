@@ -367,3 +367,16 @@ class NanopubClient:
                 warnings.warn(f"SPARQL query failed on {endpoint_url}: {e}")
 
         raise RuntimeError("SPARQL query failed on all nanopub endpoints.")
+
+    def execute_query_template(self, query_pid: str, params: Dict[str, str]) -> List[dict]:
+        """
+        Executes a nanopub query template (CSV-based) and returns rows as a list of dicts.
+        """
+        for query_url in self.query_urls:
+            try:
+                csv_text = self._query_api_csv(params=params, endpoint=query_pid, query_url=query_url)
+                reader = csv.DictReader(StringIO(csv_text))
+                return list(reader)
+            except Exception as e:
+                warnings.warn(f"Query failed on {query_url}: {e}")
+        raise RuntimeError("Failed to retrieve query result from any query server")

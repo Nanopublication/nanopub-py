@@ -35,6 +35,8 @@ def update_record(
             )
             new_np.sign()
             return new_np.publish() if publish else (None, None, None)
+        if str(existing_pubkey) != str(current_pubkey):
+            return (None, None, None)
 
     else:
         npub = FdoNanopub.create_with_fdo_iri(
