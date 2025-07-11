@@ -2,102 +2,82 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://fair-workflows.github.io/nanopub/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/getting-started/development/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/getting-started/setup/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/getting-started/test-server/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/getting-started/use-the-cli/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/getting-started/what-are-nanopubs/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/publishing/profile/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/publishing/publish-nanopublications/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/publishing/retraction/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/publishing/setting-subgraphs/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/publishing/templates/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/publishing/using-publication-namespace/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/reference/client/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/reference/config/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/reference/namespaces/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/reference/nanopub/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/reference/profile/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/reference/templates/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/searching/fetching/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
     <url>
          <loc>https://fair-workflows.github.io/nanopub/searching/searching/</loc>
-         <lastmod>2024-02-13</lastmod>
-         <changefreq>daily</changefreq>
+         <lastmod>2025-07-11</lastmod>
     </url>
 </urlset>
