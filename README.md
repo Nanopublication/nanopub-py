@@ -6,15 +6,23 @@
 [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu)
 [![DOI](https://zenodo.org/badge/302247101.svg)](https://zenodo.org/badge/latestdoi/302247101)
 
-# nanopub-py
+# nanopub-py-fdo
 
 The ```nanopub-py``` library provides a high-level, user-friendly Python interface for searching, publishing and retracting nanopublications.
+with additional support for FAIR Digital Objects (FDOs).
+
+It implements the formal structure defined in the [official nanopublication
+guidelines](http://nanopub.net/guidelines/working_draft/) and the specification
+for FDOs as defined by the [FDO Forum](https://fairdo.org/).
 
 Nanopublications are a formalized and machine-readable way of communicating the smallest possible units of publishable information. See [the documentation](https://nanopublication.github.io/nanopub-py/getting-started/what-are-nanopubs) for more information.
 
+
 # Documentation
 
-Checkout the **[user documentation 📖 ](https://nanopublication.github.io/nanopub-py)**
+For FDO-specific guidance, check out the notebooks [FDO Nanopub operations](examples/FDO+Nanopub+operations.ipynb) and [FDO Query](examples/FDO+Query.ipynb).
+
+For guidance on using nanopublications check out the **[user documentation 📖 ](https://nanopublication.github.io/nanopub-py)**.
 
 # Setup
 Install using pip:
@@ -28,8 +36,8 @@ np setup
 ```
 This will ask you a few questions, then it will use that information to add and store RSA keys to sign your nanopublications with, (optionally) publish a nanopublication with your name and ORCID iD to declare that you are using these RSA keys, and store your ORCID iD to automatically add as author to the provenance of any nanopublication you will publish using this library.
 
-## Quick Start
 
+## Quick Start
 
 ### Publishing nanopublications
 ```python
