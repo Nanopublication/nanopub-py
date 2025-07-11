@@ -20,7 +20,7 @@ Nanopublications are a formalized and machine-readable way of communicating the 
 
 # Documentation
 
-For FDO-specific guidance, check out the notebooks [FDO Nanopub operations](examples/FDO+Nanopub+operations.ipynb) and [FDO Query](examples/FDO+Query.ipynb).
+For FDO-specific guidance, check out the notebooks [FDO Nanopub operations](examples/FDO Nanopub operations.ipynb) and [FDO Query](examples/FDO Query.ipynb).
 
 For guidance on using nanopublications check out the **[user documentation 📖 ](https://nanopublication.github.io/nanopub-py)**.
 
