@@ -98,7 +98,7 @@ See the [development page](https://nanopublication.github.io/nanopub-py/getting-
 
 nanopub-java is free software under the Apache License. See [LICENSE](LICENSE).
 
-The commits since 14 April 2025 (commit `dae4c9c564`) are also available under the MIT License. See [LICENSE_20250414](LICENSE_20250414).
+The commits since 14 April 2025 (commit `dae4c9c5`) are also available under the MIT License. See [LICENSE_20250414](LICENSE_20250414).
 
 
 ## Copyright
