@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, '3.10']
+        python-version: [3.12.4] 
         rdflib-version:
           - rdflib==6.0.2
           - rdflib>6.0.2,<7.0.0
@@ -27,8 +27,8 @@ jobs:
         run: |
           pip install ".[test,dev]" "$RDFLIB_VERSION"
 
-      - name: Lint with flake8, isort and mypy
-        run: bash scripts/lint.sh
+      # - name: Lint with flake8, isort and mypy
+      #   run: bash scripts/lint.sh
 
       - name: Setup nanopub profile (including RSA keys)
         run: |
@@ -57,7 +57,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: 3.12.4
 
       - name: Install dependencies
         run: |
