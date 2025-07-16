@@ -575,7 +575,7 @@ class Nanopub:
         Furthermore, the URI the nanopub is published to is not known ahead of time.
         """
         bnode_map: dict = {}
-        for s, p, o, c in g.quads():
+        for s, p, o, c in g.quads(None):
             if isinstance(s, BNode):
                 g.remove((s, p, o, c))
                 if str(s) not in bnode_map:
