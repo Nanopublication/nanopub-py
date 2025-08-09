@@ -26,6 +26,7 @@ jobs:
           RDFLIB_VERSION: ${{ matrix.rdflib-version }}
         run: |
           pip install "$RDFLIB_VERSION"
+          pip install -e ".[test]"
 
       # - name: Lint with flake8, isort and mypy
       #   run: bash scripts/lint.sh
