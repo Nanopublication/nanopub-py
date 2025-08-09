@@ -11,7 +11,7 @@ jobs:
         python-version: [ 3.12.4 ]
         rdflib-version:
           - rdflib==6.0.2
-          - rdflib>6.0.2,<7.1.4
+          - rdflib==7.1.4
 
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
         env:
           RDFLIB_VERSION: ${{ matrix.rdflib-version }}
         run: |
-          pip install ".[test,dev]" "$RDFLIB_VERSION"
+          pip install "$RDFLIB_VERSION"
 
       # - name: Lint with flake8, isort and mypy
       #   run: bash scripts/lint.sh
