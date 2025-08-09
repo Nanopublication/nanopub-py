@@ -4,9 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nanopub"
+version = "2.0.1"
 description = "Python client for Nanopublications"
 readme = "README.md"
-requires-python = ">=3.12.0"
+requires-python = ">=3.12"
 license = { file = "LICENSE" }
 authors = [
     { name = "Robin Richardson", email = "r.richardson@esciencecenter.nl" },
@@ -24,29 +25,30 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
 dynamic = ["version"]
 
 dependencies = [
-    "rdflib >=6.0.2",
+    "rdflib >=7.1.4",
     "requests",
     "typer",
     "yatiml",
-    "pycryptodome >=3.15.0",
-    "SPARQLWrapper",
-    "pyshacl"
+    "pycryptodome >=3.23.0",
 ]
 
 [project.optional-dependencies]
 test = [
-    "pytest >=7.1.3",
-    "pytest-cov >=3.0.0",
+    "pytest >=8.4.1",
+    "pytest-cov >=6.2.1",
     "coveralls",
-    "mypy >=0.991",
-    "isort >=5.11.0",
-    "flake8 >=5.0.0",
-    "Flake8-pyproject >=1.2.2",
+    "mypy >=1.17.1",
+    "isort >=6.1",
+    "flake8 >=7.3",
+    "Flake8-pyproject >=1.2.3",
     "flaky",
 ]
 doc = [
@@ -70,11 +72,11 @@ np = "nanopub.__main__:cli"
 
 
 [project.urls]
-Homepage = "https://nanopublication.github.io/nanopub-py/"
-Documentation = "https://nanopublication.github.io/nanopub-py/"
-History = "https://github.com/Nanopublication/nanopub-py/releases"
-Tracker = "https://github.com/Nanopublication/nanopub-py/issues"
-Source = "https://github.com/Nanopublication/nanopub-py"
+Homepage = "https://fair-workflows.github.io/nanopub"
+Documentation = "https://fair-workflows.github.io/nanopub"
+History = "https://github.com/fair-workflows/nanopub/releases"
+Tracker = "https://github.com/fair-workflows/nanopub/issues"
+Source = "https://github.com/fair-workflows/nanopub"
 
 
 
@@ -147,10 +149,4 @@ no_implicit_optional = false
 [tool.pytest.ini_options]
 markers = [
     "no_rsa_key: mark a test as a test only run when there is no nanopub RSA key setup.",
-    "network: mark a test that requires network access.",
-    "flaky: mark test as flaky to rerun it on failure",
 ]
-filterwarnings = [
-    "ignore:.*ConjunctiveGraph is deprecated.*:DeprecationWarning" # rdflib warning from the parsers, already using Dataset in our own code, see also: https://github.com/RDFLib/rdflib/issues/3064
-]
-
