@@ -7,10 +7,7 @@ from nanopub import NanopubUpdate
 
 
 def update_record(
-    fdo_iri: str,
-    record: FdoRecord,
-    publish: bool,
-    conf: NanopubConf
+    fdo_iri: str, record: FdoRecord, publish: bool, conf: NanopubConf
 ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
     Update or create an FDO nanopub depending on whether a source nanopub URI is resolvable
@@ -43,6 +40,6 @@ def update_record(
             fdo_record=record,
             fdo_iri=fdo_iri,
             data_ref=record.get_data_ref(),
-            conf=conf
+            conf=conf,
         )
         return npub.publish() if publish else (None, None, None)

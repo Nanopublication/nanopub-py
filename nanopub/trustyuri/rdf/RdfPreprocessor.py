@@ -23,7 +23,7 @@ def transform(uri, hashstr, baseuri, bnodemap):
 
     if baseuri is None:
         try:
-            return URIRef(RdfUtils.normalize(uri, hashstr).decode('utf-8'))
+            return URIRef(RdfUtils.normalize(uri, hashstr).decode("utf-8"))
         except Exception:
             return URIRef(RdfUtils.normalize(uri, hashstr))
     return RdfUtils.get_trustyuri(uri, baseuri, hashstr, bnodemap)

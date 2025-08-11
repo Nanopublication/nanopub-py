@@ -24,9 +24,13 @@ conf = NanopubConf(
 )
 
 assertion = Graph()
-assertion.add((
-    URIRef('http://test'), namespaces.HYCL.claims, Literal('This is a test for the nanopub python library')
-))
+assertion.add(
+    (
+        URIRef("http://test"),
+        namespaces.HYCL.claims,
+        Literal("This is a test for the nanopub python library"),
+    )
+)
 
 np = Nanopub(conf=conf, assertion=assertion)
 

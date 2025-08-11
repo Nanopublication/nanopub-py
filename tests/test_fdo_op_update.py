@@ -23,12 +23,16 @@ def sample_record():
 
 @patch("nanopub.fdo.update.resolve_in_nanopub_network")
 @patch("nanopub.fdo.update.NanopubUpdate")
-def test_update_existing_nanopub(mock_update_cls, mock_resolve, sample_conf, sample_record):
+def test_update_existing_nanopub(
+    mock_update_cls, mock_resolve, sample_conf, sample_record
+):
     existing_npub = MagicMock()
     existing_npub.signed_with_public_key = sample_conf.profile.public_key
     existing_npub.source_uri = "https://example.org/np/existing"
     existing_npub.assertion = Graph()
-    existing_npub.assertion.add((URIRef("http://example.org/s"), URIRef("http://example.org/p"), Literal("o")))
+    existing_npub.assertion.add(
+        (URIRef("http://example.org/s"), URIRef("http://example.org/p"), Literal("o"))
+    )
 
     mock_resolve.return_value = existing_npub
 
@@ -36,7 +40,12 @@ def test_update_existing_nanopub(mock_update_cls, mock_resolve, sample_conf, sam
     mock_update.publish.return_value = ("updated_uri", "updated_head", "updated_sig")
     mock_update_cls.return_value = mock_update
 
-    result = update_record("https://hdl.handle.net/21.T11966/abc123", sample_record, publish=True, conf=sample_conf)
+    result = update_record(
+        "https://hdl.handle.net/21.T11966/abc123",
+        sample_record,
+        publish=True,
+        conf=sample_conf,
+    )
 
     mock_update_cls.assert_called_once()
     mock_update.sign.assert_called_once()
@@ -50,21 +59,33 @@ def test_no_update_when_keys_differ(mock_resolve, sample_conf, sample_record):
     existing_npub.signed_with_public_key = "different-key"
     mock_resolve.return_value = existing_npub
 
-    result = update_record("https://hdl.handle.net/21.T11966/abc123", sample_record, publish=True, conf=sample_conf)
+    result = update_record(
+        "https://hdl.handle.net/21.T11966/abc123",
+        sample_record,
+        publish=True,
+        conf=sample_conf,
+    )
 
     assert result == (None, None, None)
 
 
 @patch("nanopub.fdo.update.resolve_in_nanopub_network")
 @patch("nanopub.fdo.update.FdoNanopub.create_with_fdo_iri")
-def test_create_new_nanopub_when_none_exists(mock_create, mock_resolve, sample_conf, sample_record):
+def test_create_new_nanopub_when_none_exists(
+    mock_create, mock_resolve, sample_conf, sample_record
+):
     mock_resolve.return_value = None
 
     mock_np = MagicMock()
     mock_np.publish.return_value = ("new_uri", "new_head", "new_sig")
     mock_create.return_value = mock_np
 
-    result = update_record("https://hdl.handle.net/21.T11966/abc123", sample_record, publish=True, conf=sample_conf)
+    result = update_record(
+        "https://hdl.handle.net/21.T11966/abc123",
+        sample_record,
+        publish=True,
+        conf=sample_conf,
+    )
 
     mock_create.assert_called_once_with(
         fdo_record=sample_record,

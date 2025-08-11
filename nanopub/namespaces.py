@@ -1,6 +1,7 @@
 """
 This module holds handy namespaces that are often used in nanopublications.
 """
+
 from rdflib import Namespace
 
 NP = Namespace("http://www.nanopub.org/nschema#")

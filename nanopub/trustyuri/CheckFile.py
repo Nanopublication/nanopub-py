@@ -18,7 +18,7 @@ def check(args):
     module_id = tail[:2]
     module = ModuleDirectory.get_module(module_id)
     try:
-        content = codecs.open(filename, 'r', 'utf-8').read()
+        content = codecs.open(filename, "r", "utf-8").read()
     except Exception:
         content = urlopen(filename).read()
     resource = TrustyUriResource(filename, content, tail)

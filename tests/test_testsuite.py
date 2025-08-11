@@ -9,11 +9,12 @@ import pytest
 
 pytest.skip("Temporary skip: test file under refactor", allow_module_level=True)
 
+
 def test_testsuite_valid_plain():
-    test_files = Path("./tests/testsuite/valid/plain").rglob('*')
+    test_files = Path("./tests/testsuite/valid/plain").rglob("*")
 
     for test_file in test_files:
-        print(f'☑️ Testing valid plain nanopub: {test_file}')
+        print(f"☑️ Testing valid plain nanopub: {test_file}")
         if "/signed." in str(test_file):
             continue
 
@@ -23,25 +24,19 @@ def test_testsuite_valid_plain():
         else:
             np_g.parse(test_file)
 
-        np = Nanopub(
-            conf=testsuite_conf,
-            rdf=np_g
-        )
+        np = Nanopub(conf=testsuite_conf, rdf=np_g)
         assert np.is_valid
 
 
 def test_testsuite_valid_signed():
-    test_files = Path("./tests/testsuite/valid/signed").rglob('*')
+    test_files = Path("./tests/testsuite/valid/signed").rglob("*")
 
     for test_file in test_files:
-        print(f'☑️ Testing valid plain nanopub: {test_file}')
+        print(f"☑️ Testing valid plain nanopub: {test_file}")
         if "/signed." in str(test_file):
             continue
 
-        np = Nanopub(
-            conf=testsuite_conf,
-            rdf=test_file
-        )
+        np = Nanopub(conf=testsuite_conf, rdf=test_file)
         assert np.is_valid
         assert np.metadata.trusty is not None
         assert np.metadata.signature is not None
@@ -50,19 +45,14 @@ def test_testsuite_valid_signed():
         # assert np.has_valid_signature
 
 
-
 def test_testsuite_valid_trusty():
-    test_files = Path("./tests/testsuite/valid/trusty").rglob('*')
+    test_files = Path("./tests/testsuite/valid/trusty").rglob("*")
 
     for test_file in test_files:
-        print(f'☑️ Testing valid trusty nanopub: {test_file}')
-        np = Nanopub(
-            conf=testsuite_conf,
-            rdf=test_file
-        )
+        print(f"☑️ Testing valid trusty nanopub: {test_file}")
+        np = Nanopub(conf=testsuite_conf, rdf=test_file)
         assert np.is_valid
         assert np.metadata.trusty is not None
-
 
 
 def test_testsuite_sign_valid():
@@ -79,17 +69,14 @@ def test_testsuite_sign_valid():
     ]
 
     for test_file in test_files:
-        print(f'✒️ Testing signing valid nanopub: {test_file}')
+        print(f"✒️ Testing signing valid nanopub: {test_file}")
         np_g = Dataset()
         if test_file.endswith(".xml"):
             np_g.parse(test_file, format="trix")
         else:
             np_g.parse(test_file)
 
-        np = Nanopub(
-            conf=testsuite_conf,
-            rdf=np_g
-        )
+        np = Nanopub(conf=testsuite_conf, rdf=np_g)
         java_np = java_wrap.sign(np)
         np.sign()
         assert np.has_valid_signature
@@ -107,11 +94,8 @@ def test_testsuite_valid_signature():
     # java -jar lib/nanopub-1.38-jar-with-dependencies.jar sign tests/testsuite/transform/signed/rsa-key1/simple1.in.trig
 
     for test_file in test_files:
-        print(f'✅ Testing validating signed valid nanopub: {test_file}')
-        np = Nanopub(
-            conf=testsuite_conf,
-            rdf=Path(test_file)
-        )
+        print(f"✅ Testing validating signed valid nanopub: {test_file}")
+        np = Nanopub(conf=testsuite_conf, rdf=Path(test_file))
         assert np.is_valid
         assert np.has_valid_signature
         assert np.has_valid_trusty
@@ -119,15 +103,12 @@ def test_testsuite_valid_signature():
 
 
 def test_testsuite_invalid_plain():
-    test_files = Path("./tests/testsuite/invalid/plain").rglob('*')
+    test_files = Path("./tests/testsuite/invalid/plain").rglob("*")
 
     for test_file in test_files:
-        print(f'❎ Testing validating invalid nanopub: {test_file}')
+        print(f"❎ Testing validating invalid nanopub: {test_file}")
         try:
-            np = Nanopub(
-                conf=testsuite_conf,
-                rdf=Path(test_file)
-            )
+            np = Nanopub(conf=testsuite_conf, rdf=Path(test_file))
             np.is_valid
             assert False
         except MalformedNanopubError as e:

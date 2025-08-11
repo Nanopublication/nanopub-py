@@ -14,7 +14,7 @@ HDL_PREFIX = "https://hdl.handle.net/"
 
 HANDLE_METADATA = {
     "responseCode": 1,
-    "handle": "21.T11966/996c38676da9ee56f8ab", 
+    "handle": "21.T11966/996c38676da9ee56f8ab",
     "values": [
         {
             "index": 3,
@@ -59,11 +59,9 @@ HANDLE_METADATA_WITH_DATAREF = {
 
 JSON_SCHEMA = {
     "type": "object",
-    "required": [
-        "21.T11966/FdoProfile",
-        "21.T11966/b5b58656b1fa5aff0505"
-    ]
+    "required": ["21.T11966/FdoProfile", "21.T11966/b5b58656b1fa5aff0505"],
 }
+
 
 @pytest.fixture
 def valid_fdo_record():
@@ -72,6 +70,7 @@ def valid_fdo_record():
         label="Example FDO",
     )
     return record
+
 
 @patch("nanopub.fdo.validate.resolve_in_nanopub_network")
 @patch("nanopub.fdo.validate.requests.get")
@@ -92,11 +91,12 @@ def test_validate_fdo_record_success(mock_get, mock_resolve, valid_fdo_record):
 
     assert result.is_valid is True
 
+
 @patch("nanopub.fdo.validate.resolve_in_nanopub_network")
 @patch("nanopub.fdo.validate.requests.get")
 def test_validate_fdo_record_failure(mock_get, mock_resolve, valid_fdo_record):
     mock_resolve.return_value = None
-    
+
     incomplete_metadata = {
         "responseCode": 1,
         "handle": FDO_HANDLE,
@@ -123,14 +123,23 @@ def test_validate_fdo_record_failure(mock_get, mock_resolve, valid_fdo_record):
     assert result.is_valid is False
     assert "JSON Schema entry not found in FDO profile." in result.errors
 
+
 @patch("nanopub.fdo.validate.requests.get")
 @patch("nanopub.fdo.validate.resolve_in_nanopub_network")
 def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
     record_graph = Graph()
     subject = URIRef("https://example.org/fdo/1")
     record_graph.add((subject, RDF.type, FDOF.FAIRDigitalObject))
-    record_graph.add((subject, URIRef("https://example.org/predicate"), Literal("Value")))
-    record_graph.add((subject, DCTERMS.conformsTo, URIRef("https://hdl.handle.net/21.T11966/996c38676da9ee56f8ab")))
+    record_graph.add(
+        (subject, URIRef("https://example.org/predicate"), Literal("Value"))
+    )
+    record_graph.add(
+        (
+            subject,
+            DCTERMS.conformsTo,
+            URIRef("https://hdl.handle.net/21.T11966/996c38676da9ee56f8ab"),
+        )
+    )
     fdo_record_nanopub = MagicMock()
     fdo_record_nanopub.assertion = record_graph
 
@@ -143,7 +152,9 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
     profile_graph.add((shape, RDF.type, SH.NodeShape))
     profile_graph.add((shape, SH.targetClass, FDOF.FAIRDigitalObject))
     profile_graph.add((shape, SH.property, property_bnode))
-    profile_graph.add((property_bnode, SH.path, URIRef("https://example.org/predicate")))
+    profile_graph.add(
+        (property_bnode, SH.path, URIRef("https://example.org/predicate"))
+    )
     profile_graph.add((property_bnode, SH.minCount, Literal(1)))
     profile_graph.add((property_bnode, SH.maxCount, Literal(1)))
 
@@ -158,7 +169,7 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
         return None
 
     mock_resolve.side_effect = resolve_side_effect
-    mock_get.return_value = MagicMock(status_code=404)  
+    mock_get.return_value = MagicMock(status_code=404)
 
     record = FdoRecord(assertion=record_graph)
     result = validate_fdo_record(record)
@@ -173,7 +184,13 @@ def test_invalid_fdo_from_nanopub_network(mock_resolve, mock_get):
     record_graph = Graph()
     subject = URIRef("https://example.org/fdo/2")
     record_graph.add((subject, RDF.type, FDOF.FAIRDigitalObject))
-    record_graph.add((subject, DCTERMS.conformsTo, URIRef("https://hdl.handle.net/21.T11966/996c38676da9ee56f8ab")))
+    record_graph.add(
+        (
+            subject,
+            DCTERMS.conformsTo,
+            URIRef("https://hdl.handle.net/21.T11966/996c38676da9ee56f8ab"),
+        )
+    )
     fdo_record_nanopub = MagicMock()
     fdo_record_nanopub.assertion = record_graph
 
@@ -186,7 +203,9 @@ def test_invalid_fdo_from_nanopub_network(mock_resolve, mock_get):
 
     property_bnode = BNode()
     profile_graph.add((shape, SH.property, property_bnode))
-    profile_graph.add((property_bnode, SH.path, URIRef("https://example.org/predicate")))
+    profile_graph.add(
+        (property_bnode, SH.path, URIRef("https://example.org/predicate"))
+    )
     profile_graph.add((property_bnode, SH.minCount, Literal(1)))
     profile_graph.add((property_bnode, SH.maxCount, Literal(1)))
 
@@ -201,7 +220,7 @@ def test_invalid_fdo_from_nanopub_network(mock_resolve, mock_get):
         return None
 
     mock_resolve.side_effect = resolve_side_effect
-    mock_get.return_value = MagicMock(status_code=404) 
+    mock_get.return_value = MagicMock(status_code=404)
 
     record = FdoRecord(assertion=record_graph)
     result = validate_fdo_record(record)

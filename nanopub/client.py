@@ -50,8 +50,9 @@ class NanopubClient:
             self.query_urls = NANOPUB_QUERY_URLS
             self.use_server = use_server
             if use_server not in NANOPUB_REGISTRY_URLS:
-                log.warn(f"{use_server} is not in our list of nanopub servers. {', '.join(NANOPUB_REGISTRY_URLS)}\nMake sure you are using an existing Nanopub server.")
-
+                log.warn(
+                    f"{use_server} is not in our list of nanopub servers. {', '.join(NANOPUB_REGISTRY_URLS)}\nMake sure you are using an existing Nanopub server."
+                )
 
     def find_nanopubs_with_text(
         self, text: str, pubkey: str = None, filter_retracted: bool = True
@@ -84,7 +85,6 @@ class NanopubClient:
             endpoint = "RAWruhiSmyzgZhVRs8QY8YQPAgHzTfl7anxII1de-yaCs/fulltext-search-on-labels"
         return self._search(endpoint=endpoint, params=params)
 
-
     def find_nanopubs_with_pattern(
         self,
         subj: str = None,
@@ -114,7 +114,9 @@ class NanopubClient:
 
         """
         params = {}
-        endpoint = "RAuE9jU8LLwco-iJHiNjzQgEHfx5j-XkbzlutT59cQYiU/find_nanopubs_with_pattern"
+        endpoint = (
+            "RAuE9jU8LLwco-iJHiNjzQgEHfx5j-XkbzlutT59cQYiU/find_nanopubs_with_pattern"
+        )
         if subj:
             params["subj"] = subj
         if pred:
@@ -127,7 +129,6 @@ class NanopubClient:
             endpoint = "RAIDPTdWRrYy-TOcdEVmGi7JHwn8fBriVphmsCy3mn4r0/find_valid_nanopubs_with_pattern"
 
         yield from self._search(endpoint=endpoint, params=params)
-
 
     def find_things(
         self,
@@ -168,7 +169,6 @@ class NanopubClient:
 
         yield from self._search(endpoint=endpoint, params=params)
 
-
     def find_retractions_of(
         self, source: Union[str, Nanopub], valid_only=True
     ) -> List[str]:
@@ -202,12 +202,13 @@ class NanopubClient:
 
         if valid_only:
             source_publication = Nanopub(
-                source_uri=uri,
-                conf=NanopubConf(use_test_server=self.use_test_server)
+                source_uri=uri, conf=NanopubConf(use_test_server=self.use_test_server)
             )
             public_key = source_publication.signed_with_public_key
             if public_key is None:
-                raise ValueError("The source publication is not signed with a public key")
+                raise ValueError(
+                    "The source publication is not signed with a public key"
+                )
         else:
             public_key = None
 
@@ -219,14 +220,12 @@ class NanopubClient:
         )
         return [result["np"] for result in results]
 
-
     @staticmethod
     def _query_api(params: dict, endpoint: str, query_url: str) -> requests.Response:
         """Query a specific Nanopub Query endpoint."""
         headers = {"Accept": "application/json"}
         url = query_url + endpoint
         return requests.get(url, params=params, headers=headers)
-
 
     def _query_api_try_servers(
         self, params: dict, endpoint: str
@@ -257,7 +256,6 @@ class NanopubClient:
             f"Could not get response from any of the Nanopub Query servers "
             f"endpoints.{resp}"
         )
-
 
     def _search(self, endpoint: str, params: dict):
         """
@@ -297,7 +295,6 @@ class NanopubClient:
         for result in bindings:
             yield self._parse_search_result(result)
 
-
     @staticmethod
     def _parse_search_result(result: dict):
         """
@@ -319,7 +316,9 @@ class NanopubClient:
         parsed["date"] = result["date"]["value"]
         return parsed
 
-    def _query_api_csv(self, params: dict, endpoint: str, query_url: str) -> requests.Response:
+    def _query_api_csv(
+        self, params: dict, endpoint: str, query_url: str
+    ) -> requests.Response:
         """Query a Nanopub Query endpoint and request CSV response."""
         headers = {"Accept": "text/csv"}
         url = query_url + endpoint
@@ -335,8 +334,10 @@ class NanopubClient:
         csv_text = self._query_api_csv(params, endpoint=endpoint, query_url=query_url)
         reader = csv.DictReader(StringIO(csv_text))
         return list(reader)
-    
-    def query_sparql(self, query: str, return_format: str = "json") -> Union[List[dict], str]:
+
+    def query_sparql(
+        self, query: str, return_format: str = "json"
+    ) -> Union[List[dict], str]:
         """
         Run a raw SPARQL query against a nanopub server using SPARQLWrapper.
 
@@ -349,7 +350,9 @@ class NanopubClient:
         """
         if return_format not in {"json", "csv"}:
             raise ValueError("return_format must be 'json' or 'csv'")
-        endpoints = ['https://query.knowledgepixels.com/repo/full'] # TODO: Consider adding more endpoints if needed
+        endpoints = [
+            "https://query.knowledgepixels.com/repo/full"
+        ]  # TODO: Consider adding more endpoints if needed
         for endpoint_url in endpoints:
             try:
                 sparql = SPARQLWrapper(endpoint_url)
@@ -361,20 +364,28 @@ class NanopubClient:
                     bindings = response["results"]["bindings"]
                     return [{k: v["value"] for k, v in row.items()} for row in bindings]
                 else:
-                    return response.decode("utf-8") if isinstance(response, bytes) else response
+                    return (
+                        response.decode("utf-8")
+                        if isinstance(response, bytes)
+                        else response
+                    )
 
             except Exception as e:
                 warnings.warn(f"SPARQL query failed on {endpoint_url}: {e}")
 
         raise RuntimeError("SPARQL query failed on all nanopub endpoints.")
 
-    def execute_query_template(self, query_pid: str, params: Dict[str, str]) -> List[dict]:
+    def execute_query_template(
+        self, query_pid: str, params: Dict[str, str]
+    ) -> List[dict]:
         """
         Executes a nanopub query template (CSV-based) and returns rows as a list of dicts.
         """
         for query_url in self.query_urls:
             try:
-                csv_text = self._query_api_csv(params=params, endpoint=query_pid, query_url=query_url)
+                csv_text = self._query_api_csv(
+                    params=params, endpoint=query_pid, query_url=query_url
+                )
                 reader = csv.DictReader(StringIO(csv_text))
                 return list(reader)
             except Exception as e:
