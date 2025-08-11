@@ -46,7 +46,6 @@ test = [
     "pytest-cov >=6.2.1",
     "coveralls",
     "mypy >=1.17.1",
-    "isort >=6.1",
     "flake8 >=7.3",
     "Flake8-pyproject >=1.2.3",
     "flaky",
@@ -95,20 +94,12 @@ post-install-commands = [
 dev = "./scripts/dev.sh"
 test = "./scripts/test.sh {args}"
 docs = "./scripts/docs.sh {args}"
-format = "./scripts/format.sh"
-lint = "./scripts/lint.sh"
+
 
 
 # TOOLS
 [tool.hatch.version]
 path = "nanopub/_version.py"
-
-
-[tool.isort]
-line_length = 120
-skip = ["nanopub/__init__.py"]
-profile = "black"
-
 
 [tool.coverage.run]
 source = ["nanopub"]
