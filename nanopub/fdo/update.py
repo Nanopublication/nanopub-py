@@ -20,7 +20,6 @@ def update_record(
         current_pubkey = conf.profile.public_key if conf.profile else None
 
         if str(existing_pubkey) == str(current_pubkey):
-
             existing_npub.assertion.remove((None, None, None))
             for triple in record.get_graph():
                 existing_npub.assertion.add(triple)

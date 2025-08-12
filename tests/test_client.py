@@ -19,7 +19,6 @@ NANOPUB_SAMPLE_SIGNED = str(TEST_RESOURCES_FILEPATH / "nanopub_sample_signed.tri
 
 
 class TestNanopubClient:
-
     @pytest.mark.flaky(max_runs=10)
     @skip_if_nanopub_server_unavailable
     def test_find_nanopubs_with_text(self):

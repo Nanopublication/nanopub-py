@@ -156,7 +156,6 @@ class FdoNanopub(Nanopub):
         aggregates: list[str],
         conf: Optional[NanopubConf] = None,
     ) -> "FdoNanopub":
-
         record = FdoRecord(profile_uri=profile_uri, label=label)
 
         if record.get_data_ref():
