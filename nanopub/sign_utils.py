@@ -14,38 +14,46 @@ from nanopub.trustyuri.rdf.RdfPreprocessor import transform
 from nanopub.utils import MalformedNanopubError, extract_np_metadata, log
 
 
-def add_signature(g: Dataset, profile: Profile, dummy_namespace: Namespace, pubinfo_g: Graph) -> Dataset:
+def add_signature(
+    g: Dataset, profile: Profile, dummy_namespace: Namespace, pubinfo_g: Graph
+) -> Dataset:
     """Implementation in python of the process to sign a nanopub with a RSA private key"""
-    g.add((
-        dummy_namespace["sig"],
-        NPX["hasPublicKey"],
-        Literal(profile.public_key),
-        pubinfo_g,
-    ))
-    g.add((
-        dummy_namespace["sig"],
-        NPX["hasAlgorithm"],
-        Literal("RSA"),
-        pubinfo_g,
-    ))
-    g.add((
-        dummy_namespace["sig"],
-        NPX["hasSignatureTarget"],
-        dummy_namespace[""],
-        pubinfo_g,
-    ))
-    g.add((
-        dummy_namespace["sig"],
-        NPX["signedBy"],
-        URIRef(profile.orcid_id),
-        pubinfo_g,
-    ))
+    g.add(
+        (
+            dummy_namespace["sig"],
+            NPX["hasPublicKey"],
+            Literal(profile.public_key),
+            pubinfo_g,
+        )
+    )
+    g.add(
+        (
+            dummy_namespace["sig"],
+            NPX["hasAlgorithm"],
+            Literal("RSA"),
+            pubinfo_g,
+        )
+    )
+    g.add(
+        (
+            dummy_namespace["sig"],
+            NPX["hasSignatureTarget"],
+            dummy_namespace[""],
+            pubinfo_g,
+        )
+    )
+    g.add(
+        (
+            dummy_namespace["sig"],
+            NPX["signedBy"],
+            URIRef(profile.orcid_id),
+            pubinfo_g,
+        )
+    )
     # Normalize RDF
     quads = RdfUtils.get_quads(g)
     normed_rdf = RdfHasher.normalize_quads(
-        quads,
-        baseuri=str(dummy_namespace),
-        hashstr=" "
+        quads, baseuri=str(dummy_namespace), hashstr=" "
     )
     # Note: normed_rdf needs to end with a newline
     # print(f"NORMED RDF STARTS\n{normed_rdf}\nNORMED RDF ENDS")
@@ -58,19 +66,19 @@ def add_signature(g: Dataset, profile: Profile, dummy_namespace: Namespace, pubi
     log.debug(f"Nanopub signature: {signature}")
 
     # Add the signature to the graph
-    g.add((
-        dummy_namespace["sig"],
-        NPX["hasSignature"],
-        Literal(signature),
-        pubinfo_g,
-    ))
+    g.add(
+        (
+            dummy_namespace["sig"],
+            NPX["hasSignature"],
+            Literal(signature),
+            pubinfo_g,
+        )
+    )
 
     # Generate the trusty URI
     quads = RdfUtils.get_quads(g)
     trusty_artefact = RdfHasher.make_hash(
-        quads,
-        baseuri=str(dummy_namespace),
-        hashstr=" "
+        quads, baseuri=str(dummy_namespace), hashstr=" "
     )
     log.debug(f"Trusty artefact: {trusty_artefact}")
 
@@ -97,7 +105,9 @@ def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Dataset)
         if c:
             g = c
         else:
-            raise Exception("Found a nquads without graph when replacing dummy URIs with trusty URIs. Something went wrong.")
+            raise Exception(
+                "Found a nquads without graph when replacing dummy URIs with trusty URIs. Something went wrong."
+            )
         # new_g = Graph(identifier=str(transform(g, trusty_artefact, dummy_ns, bnodemap)))
         # Fails and make the nanopub empty
         new_g = URIRef(transform(g, trusty_artefact, dummy_ns, bnodemap))
@@ -114,13 +124,12 @@ def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Dataset)
 
 
 def publish_graph(g: Dataset, use_server: str = NANOPUB_REGISTRY_URLS[0]) -> bool:
-    """Publish a signed nanopub to the given nanopub server.
-    """
+    """Publish a signed nanopub to the given nanopub server."""
     log.info(f"Publishing to the nanopub server {use_server}")
-    headers = {'Content-Type': 'application/trig'}
+    headers = {"Content-Type": "application/trig"}
     # NOTE: nanopub-java uses {'Content-Type': 'application/x-www-form-urlencoded'}
     data = g.serialize(format="trig")
-    r = requests.post(use_server, headers=headers, data=data.encode('utf-8'))
+    r = requests.post(use_server, headers=headers, data=data.encode("utf-8"))
     r.raise_for_status()
     return True
 
@@ -129,15 +138,15 @@ def verify_trusty(g: Dataset, source_uri: str, source_namespace: Namespace) -> b
     """Verify Trusty URI in a nanopub Graph"""
     if not source_uri:
         raise ValueError("source_uri must not be None")
-    source_trusty = source_uri.split('/')[-1]
+    source_trusty = source_uri.split("/")[-1]
     quads = RdfUtils.get_quads(g)
     expected_trusty = RdfHasher.make_hash(
-        quads,
-        baseuri=str(source_namespace),
-        hashstr=" "
+        quads, baseuri=str(source_namespace), hashstr=" "
     )
     if expected_trusty != source_trusty:
-        raise MalformedNanopubError(f"The Trusty artefact of the nanopub {source_trusty} is not valid. It should be {expected_trusty}")
+        raise MalformedNanopubError(
+            f"The Trusty artefact of the nanopub {source_trusty} is not valid. It should be {expected_trusty}"
+        )
     else:
         return True
 
@@ -152,9 +161,7 @@ def verify_signature(g: Dataset, source_namespace: Namespace) -> bool:
     # Normalize RDF
     quads = RdfUtils.get_quads(g)
     normed_rdf = RdfHasher.normalize_quads(
-        quads,
-        baseuri=str(source_namespace),
-        hashstr=" "
+        quads, baseuri=str(source_namespace), hashstr=" "
     )
 
     # Verify signature using the normalized RDF

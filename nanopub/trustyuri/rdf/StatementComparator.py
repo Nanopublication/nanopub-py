@@ -49,22 +49,22 @@ class StatementComparator:
             return self.compare_uri(r1, r2)
 
     def compare_literal(self, l1, l2):
-        x1 = l1.encode('utf-8')
-        x2 = l2.encode('utf-8')
-        if (x1 < x2):
+        x1 = l1.encode("utf-8")
+        x2 = l2.encode("utf-8")
+        if x1 < x2:
             return -1
-        if (x1 > x2):
+        if x1 > x2:
             return 1
         x1 = l1.datatype
-        if (l1.language is not None):
+        if l1.language is not None:
             x1 = None
-        if (l1.language is None and x1 is None):
-            x1 = 'http://www.w3.org/2001/XMLSchema#string'
+        if l1.language is None and x1 is None:
+            x1 = "http://www.w3.org/2001/XMLSchema#string"
         x2 = l2.datatype
-        if (l2.language is not None):
+        if l2.language is not None:
             x2 = None
-        if (l2.language is None and x2 is None):
-            x2 = 'http://www.w3.org/2001/XMLSchema#string'
+        if l2.language is None and x2 is None:
+            x2 = "http://www.w3.org/2001/XMLSchema#string"
         if (x1 is None) and (x2 is not None):
             return -1
         if (x1 is not None) and (x2 is None):
@@ -86,19 +86,19 @@ class StatementComparator:
         return 0
 
     def compare_uri(self, r1, r2):
-        s1 = r1.encode('utf-8')
-        s2 = r2.encode('utf-8')
+        s1 = r1.encode("utf-8")
+        s2 = r2.encode("utf-8")
         p1 = s1
         p2 = s2
         if self.hashstr is not None:
             try:
-                p1 = re.sub(self.hashstr, ' ', s1)
+                p1 = re.sub(self.hashstr, " ", s1)
             except Exception:
-                p1 = re.sub(self.hashstr, ' ', r1)
+                p1 = re.sub(self.hashstr, " ", r1)
             try:
-                p2 = re.sub(self.hashstr, ' ', s2)
+                p2 = re.sub(self.hashstr, " ", s2)
             except Exception:
-                p2 = re.sub(self.hashstr, ' ', r2)
+                p2 = re.sub(self.hashstr, " ", r2)
         if p1 < p2:
             return -1
         if p1 == p2:

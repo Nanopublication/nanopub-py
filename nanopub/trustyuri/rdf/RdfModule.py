@@ -7,6 +7,7 @@ from nanopub.trustyuri.TrustyUriModule import TrustyUriModule
 class RdfModule(TrustyUriModule):
     def module_id(self):
         return "RA"
+
     def has_correct_hash(self, resource):
         f = RdfUtils.get_format(resource.get_filename())
         cg = Dataset()

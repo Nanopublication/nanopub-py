@@ -32,14 +32,18 @@ class NanopubIntroduction(Nanopub):
             conf=conf,
         )
         if not self.profile:
-            raise ProfileError("No profile provided, cannot generate a Nanopub Introduction")
+            raise ProfileError(
+                "No profile provided, cannot generate a Nanopub Introduction"
+            )
 
         key_declaration = self._metadata.namespace.keyDeclaration
         orcid_node = URIRef(self.conf.profile.orcid_id)
 
         self.assertion.add((key_declaration, NPX.declaredBy, orcid_node))
         self.assertion.add((key_declaration, NPX.hasAlgorithm, Literal("RSA")))
-        self.assertion.add((key_declaration, NPX.hasPublicKey, Literal(self.conf.profile.public_key)))
+        self.assertion.add(
+            (key_declaration, NPX.hasPublicKey, Literal(self.conf.profile.public_key))
+        )
         self.assertion.add((orcid_node, FOAF.name, Literal(self.conf.profile.name)))
         if host:
             self.assertion.add((key_declaration, NPX.hasKeyLocation, URIRef(host)))

@@ -1,6 +1,7 @@
 """
 This module holds objects and functions to load a nanopub user profile.
 """
+
 import os
 from base64 import decodebytes
 from pathlib import Path
@@ -12,10 +13,10 @@ from Crypto.PublicKey import RSA
 from nanopub.definitions import DEFAULT_PROFILE_PATH, RSA_KEY_SIZE, USER_CONFIG_DIR
 from nanopub.utils import log
 
-PROFILE_INSTRUCTIONS_MESSAGE = '''
+PROFILE_INSTRUCTIONS_MESSAGE = """
     Follow these instructions to correctly setup your nanopub profile:
     https://nanopublication.github.io/nanopub-py/getting-started/setup/#setup-your-profile
-'''
+"""
 
 
 class ProfileError(RuntimeError):
@@ -36,12 +37,12 @@ class Profile:
     """
 
     def __init__(
-            self,
-            orcid_id: str,
-            name: str,
-            private_key: Optional[Union[Path, str]] = None,
-            public_key: Optional[Union[Path, str]] = None,
-            introduction_nanopub_uri: Optional[str] = None
+        self,
+        orcid_id: str,
+        name: str,
+        private_key: Optional[Union[Path, str]] = None,
+        public_key: Optional[Union[Path, str]] = None,
+        introduction_nanopub_uri: Optional[str] = None,
     ) -> None:
         """Create a Profile."""
         self._orcid_id = orcid_id
@@ -56,26 +57,28 @@ class Profile:
                     self._private_key = f.read().strip()
             except FileNotFoundError:
                 raise ProfileError(
-                    f'Private key file {private_key} for nanopub not found.\n'
-                    f'Maybe your nanopub profile was not set up yet or not set up '
-                    f'correctly. \n{PROFILE_INSTRUCTIONS_MESSAGE}'
+                    f"Private key file {private_key} for nanopub not found.\n"
+                    f"Maybe your nanopub profile was not set up yet or not set up "
+                    f"correctly. \n{PROFILE_INSTRUCTIONS_MESSAGE}"
                 )
         else:
             self._private_key = private_key
 
         if not public_key and private_key:
-            log.info('The public key was not provided when loading the Nanopub profile, generating it from the provided private key')
+            log.info(
+                "The public key was not provided when loading the Nanopub profile, generating it from the provided private key"
+            )
             key = RSA.import_key(decodebytes(self._private_key.encode()))
-            self._public_key = format_key(key.publickey().export_key().decode('utf-8'))
+            self._public_key = format_key(key.publickey().export_key().decode("utf-8"))
         elif isinstance(public_key, Path):
             try:
                 with open(public_key) as f:
                     self._public_key = f.read().strip()
             except FileNotFoundError:
                 raise ProfileError(
-                    f'Private key file {public_key} for nanopub not found.\n'
-                    f'Maybe your nanopub profile was not set up yet or not set up '
-                    f'correctly. \n{PROFILE_INSTRUCTIONS_MESSAGE}'
+                    f"Private key file {public_key} for nanopub not found.\n"
+                    f"Maybe your nanopub profile was not set up yet or not set up "
+                    f"correctly. \n{PROFILE_INSTRUCTIONS_MESSAGE}"
                 )
         elif public_key:
             self._public_key = public_key
@@ -83,14 +86,15 @@ class Profile:
     def generate_keys(self) -> str:
         """Generate private/public RSA key pair at the path specified in the profile.yml, to be used to sign nanopubs"""
         key = RSA.generate(RSA_KEY_SIZE)
-        private_key_str = key.export_key('PEM', pkcs=8).decode('utf-8')
-        public_key_str = key.publickey().export_key().decode('utf-8')
+        private_key_str = key.export_key("PEM", pkcs=8).decode("utf-8")
+        public_key_str = key.publickey().export_key().decode("utf-8")
 
         self._private_key = format_key(private_key_str)
         self._public_key = format_key(public_key_str)
-        log.info(f"Public/private RSA key pair has been generated for {self.orcid_id} ({self.name})")
+        log.info(
+            f"Public/private RSA key pair has been generated for {self.orcid_id} ({self.name})"
+        )
         return public_key_str
-
 
     def store(self, folder: Path = USER_CONFIG_DIR) -> str:
         """Stores the nanopub user profile. By default the profile is stored in `HOME_DIR/.nanopub/profile.yaml`.
@@ -110,12 +114,12 @@ class Profile:
         # Store keys
         if not os.path.exists(private_key_path):
             with open(private_key_path, "w") as f:
-                f.write(self.private_key + '\n')
+                f.write(self.private_key + "\n")
         if not os.path.exists(public_key_path):
             with open(public_key_path, "w") as f:
                 f.write(self.public_key)
 
-        intro_uri = ''
+        intro_uri = ""
         if self.introduction_nanopub_uri:
             intro_uri = f" {self.introduction_nanopub_uri}"
         # Store profile.yml
@@ -129,7 +133,6 @@ introduction_nanopub_uri:{intro_uri}
             f.write(profile_yaml)
 
         return profile_path
-
 
     @property
     def orcid_id(self):
@@ -171,7 +174,6 @@ introduction_nanopub_uri:{intro_uri}
     def introduction_nanopub_uri(self, value):
         self._introduction_nanopub_uri = value
 
-
     def __repr__(self):
         return f"""\033[1mORCID\033[0m: {self._orcid_id}
 \033[1mName\033[0m: {self._name}
@@ -182,13 +184,14 @@ introduction_nanopub_uri:{intro_uri}
 
 class ProfileLoader(Profile):
     """A class to load a user profile from a local YAML file, only used for YAtiML."""
+
     def __init__(
-            self,
-            orcid_id: str,
-            name: str,
-            private_key: Path,
-            public_key: Optional[Path],
-            introduction_nanopub_uri: Optional[str] = None
+        self,
+        orcid_id: str,
+        name: str,
+        private_key: Path,
+        public_key: Optional[Path],
+        introduction_nanopub_uri: Optional[str] = None,
     ) -> None:
         """Create a ProfileLoader."""
         super().__init__(
@@ -218,8 +221,10 @@ def load_profile(profile_path: Union[Path, str] = DEFAULT_PROFILE_PATH) -> Profi
     try:
         return _load_profile(Path(profile_path))
     except (yatiml.RecognitionError, FileNotFoundError) as e:
-        msg = (f'{e}\nYour nanopub profile has not been set up yet, or is not set up correctly.\n'
-               f'{PROFILE_INSTRUCTIONS_MESSAGE}')
+        msg = (
+            f"{e}\nYour nanopub profile has not been set up yet, or is not set up correctly.\n"
+            f"{PROFILE_INSTRUCTIONS_MESSAGE}"
+        )
         raise ProfileError(msg)
 
 
@@ -229,8 +234,8 @@ def generate_keyfiles(path: Path = USER_CONFIG_DIR) -> str:
         Path(path).mkdir()
 
     key = RSA.generate(RSA_KEY_SIZE)
-    private_key_str = key.export_key('PEM', pkcs=8).decode('utf-8')
-    public_key_str = key.publickey().export_key().decode('utf-8')
+    private_key_str = key.export_key("PEM", pkcs=8).decode("utf-8")
+    public_key_str = key.publickey().export_key().decode("utf-8")
 
     private_key_str = format_key(private_key_str)
     public_key_str = format_key(public_key_str)
@@ -245,14 +250,20 @@ def generate_keyfiles(path: Path = USER_CONFIG_DIR) -> str:
     public_key_file = open(public_path, "w")
     public_key_file.write(public_key_str)
     public_key_file.close()
-    log.info(f"Public/private RSA key pair has been generated in {private_path} and {public_path}")
+    log.info(
+        f"Public/private RSA key pair has been generated in {private_path} and {public_path}"
+    )
     return public_key_str
 
 
 def format_key(key: str) -> str:
     """Format private and public keys to remove header/footer and all newlines, as this is required by nanopub-java"""
     if key.startswith("-----BEGIN PRIVATE KEY-----"):
-        key = key.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
+        key = key.replace("-----BEGIN PRIVATE KEY-----", "").replace(
+            "-----END PRIVATE KEY-----", ""
+        )
     if key.startswith("-----BEGIN PUBLIC KEY-----"):
-        key = key.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "")
+        key = key.replace("-----BEGIN PUBLIC KEY-----", "").replace(
+            "-----END PUBLIC KEY-----", ""
+        )
     return key.replace("\n", "").strip()

@@ -96,7 +96,7 @@ def create_nanopub_index(
     """
     pub_list: List[Nanopub] = []
     for i in range(0, len(np_list), MAX_NP_PER_INDEX):
-        np_chunk = np_list[i:i + MAX_NP_PER_INDEX]
+        np_chunk = np_list[i : i + MAX_NP_PER_INDEX]
         pub = NanopubIndex(
             conf,
             np_chunk,
@@ -105,7 +105,7 @@ def create_nanopub_index(
             creation_time,
             creators,
             see_also,
-            top_level=False
+            top_level=False,
         )
         pub.sign()
         log.info(f"Signed Nanopub Index: {pub.source_uri}")
@@ -120,7 +120,7 @@ def create_nanopub_index(
             creation_time,
             creators,
             see_also,
-            top_level=True
+            top_level=True,
         )
         toplevel_pub.sign()
         log.info(f"Signed top level Nanopub Index: {toplevel_pub.source_uri}")

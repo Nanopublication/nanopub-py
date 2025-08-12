@@ -35,7 +35,7 @@ def make_hash(quads, hashstr=None, baseuri=None) -> str:
 
     # Uncomment next line to see what goes into the hash:
     # print("NORMALIZED QUADS IN MAKE_HASH\n" + s + "NORMALIZED QUADS IN MAKE_HASH\n")
-    return "RA" + TrustyUriUtils.get_base64(hashlib.sha256(s.encode('utf-8')).digest())
+    return "RA" + TrustyUriUtils.get_base64(hashlib.sha256(s.encode("utf-8")).digest())
 
 
 def value_to_string(value) -> str:
@@ -53,4 +53,4 @@ def value_to_string(value) -> str:
 
 
 def escape(s) -> str:
-    return re.sub(r'\n', r'\\n', re.sub(r'\\', r'\\\\', str(s)))
+    return re.sub(r"\n", r"\\n", re.sub(r"\\", r"\\\\", str(s)))

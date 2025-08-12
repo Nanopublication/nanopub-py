@@ -8,12 +8,12 @@ TEST_RESOURCES_FILEPATH = TESTS_FILEPATH / "resources"
 USER_CONFIG_DIR = Path.home() / ".nanopub"
 DEFAULT_PROFILE_PATH = USER_CONFIG_DIR / "profile.yml"
 
-TEST_NANOPUB_REGISTRY_URL = 'https://test.registry.knowledgepixels.com/np/'
+TEST_NANOPUB_REGISTRY_URL = "https://test.registry.knowledgepixels.com/np/"
 # List of servers: https://monitor.petapico.org/.csv
 NANOPUB_REGISTRY_URLS = [
-    'https://registry.petapico.org/np/',
-    'https://registry.knowledgepixels.com/np/',
-    'https://registry.np.trustyuri.net/np/',
+    "https://registry.petapico.org/np/",
+    "https://registry.knowledgepixels.com/np/",
+    "https://registry.np.trustyuri.net/np/",
 ]
 NANOPUB_FETCH_FORMAT = "trig"
 
@@ -30,8 +30,10 @@ MAX_TRIPLES_PER_NANOPUB = 1200
 RSA_KEY_SIZE = 2048
 
 NANOPUB_QUERY_URLS = [
-    'https://query.knowledgepixels.com/api/',
-    'https://query.petapico.org/api/',
-    'https://query.np.trustyuri.net/api/',
+    "https://query.knowledgepixels.com/api/",
+    "https://query.petapico.org/api/",
+    "https://query.np.trustyuri.net/api/",
 ]
-TEST_NANOPUB_QUERY_URL = 'https://query.knowledgepixels.com/api/' # we don't yet have a test server for this
+TEST_NANOPUB_QUERY_URL = (
+    "https://query.knowledgepixels.com/api/"  # we don't yet have a test server for this
+)

@@ -85,9 +85,9 @@ WHERE {
         np_meta.algorithm = row.algo
 
     # Check if the nanopub URI has a trusty artefact:
-    separator_char = '/'
+    separator_char = "/"
     # Regex to extract base URI, separator and trusty URI (if any)
-    extract_trusty = re.search(r'^(.*?)(\/|#)?(RA.*)?$', str(np_meta.np_uri))
+    extract_trusty = re.search(r"^(.*?)(\/|#)?(RA.*)?$", str(np_meta.np_uri))
     if extract_trusty:
         base_uri = extract_trusty.group(1)
         if extract_trusty.group(2):
@@ -97,6 +97,6 @@ WHERE {
         if extract_trusty.group(3):
             np_meta.trusty = extract_trusty.group(3)
             # TODO: improve as the signed np namespace might be using / or # or .
-            np_meta.namespace = Namespace(np_meta.np_uri + '#')
+            np_meta.namespace = Namespace(np_meta.np_uri + "#")
 
     return np_meta

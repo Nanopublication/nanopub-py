@@ -69,6 +69,12 @@ def test_resolve_handle_metadata(mock_get):
 def test_get_fdo_uri_from_fdo_record_returns_subject():
     g = Graph()
     uri = "https://example.org/fdo"
-    g.add((URIRef(uri), URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"), URIRef("https://w3id.org/fdo#FAIRDigitalObject")))
+    g.add(
+        (
+            URIRef(uri),
+            URIRef("http://www.w3.org/1999/02/22-rdf-syntax-ns#type"),
+            URIRef("https://w3id.org/fdo#FAIRDigitalObject"),
+        )
+    )
     result = get_fdo_uri_from_fdo_record(g)
     assert str(result) == uri

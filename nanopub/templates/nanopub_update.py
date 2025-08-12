@@ -49,15 +49,14 @@ class NanopubUpdate(Nanopub):
             rdf=rdf,
         )
         if not self.profile:
-            raise ProfileError("No profile provided, cannot generate a Nanopub to retract another nanopub")
+            raise ProfileError(
+                "No profile provided, cannot generate a Nanopub to retract another nanopub"
+            )
 
         if not force:
             self._check_public_keys_match(uri)
 
-        self.pubinfo.add(
-            (self._metadata.namespace[""], NPX.supersedes, URIRef(uri))
-        )
-
+        self.pubinfo.add((self._metadata.namespace[""], NPX.supersedes, URIRef(uri)))
 
     def _check_public_keys_match(self, uri):
         """Check for matching public keys of a nanopublication with the profile.
@@ -71,12 +70,16 @@ class NanopubUpdate(Nanopub):
             conf=NanopubConf(
                 use_test_server=self._conf.use_test_server,
                 use_server=self._conf.use_server,
-            )
+            ),
         )
         if np.metadata.public_key is None:
-            raise MalformedNanopubError(f"Public key not found in the nanopub {np.source_uri}")
+            raise MalformedNanopubError(
+                f"Public key not found in the nanopub {np.source_uri}"
+            )
         if self._conf.profile.public_key is None:
-            raise ValueError(f"Public key not found for profile {self._conf.profile.orcid_id}")
+            raise ValueError(
+                f"Public key not found for profile {self._conf.profile.orcid_id}"
+            )
         if np.metadata.public_key != self._conf.profile.public_key is None:
             raise AssertionError(
                 "The public key in your profile does not match the public key"

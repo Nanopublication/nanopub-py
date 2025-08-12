@@ -38,5 +38,4 @@ class NanopubConf:
 
     derived_from: Optional[str] = None
 
-
     dict = asdict

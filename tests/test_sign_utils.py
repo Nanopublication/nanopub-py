@@ -13,14 +13,15 @@ def test_nanopub_sign():
     expected_np_uri = "http://purl.org/np/RAoXkQkJe_lpMhYW61Y9mqWDHa5MAj1o4pWIiYLmAzY50"
 
     assertion = Graph()
-    assertion.add((
-        URIRef('http://test'), namespaces.HYCL.claims, Literal('This is a test of nanopub-python')
-    ))
-
-    np = Nanopub(
-        conf=default_conf,
-        assertion=assertion
+    assertion.add(
+        (
+            URIRef("http://test"),
+            namespaces.HYCL.claims,
+            Literal("This is a test of nanopub-python"),
+        )
     )
+
+    np = Nanopub(conf=default_conf, assertion=assertion)
     java_np = java_wrap.sign(np)
 
     np.sign()

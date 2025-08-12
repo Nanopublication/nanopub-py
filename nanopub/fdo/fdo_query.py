@@ -39,4 +39,6 @@ class FdoQuery:
         """Get favorite things (cito:likes) of the given creator."""
         if not creator:
             raise ValueError("creator must not be empty")
-        return self.client._search(self._endpoints["get_favorites"], {"creator": creator})
+        return self.client._search(
+            self._endpoints["get_favorites"], {"creator": creator}
+        )

@@ -11,20 +11,26 @@ from tests.java_wrapper import JavaWrapper
 
 
 def pytest_addoption(parser):
-    parser.addoption('--no_rsa_key', action='store_true', default=False,
-                     help="enable no_rsa_key decorated tests")
+    parser.addoption(
+        "--no_rsa_key",
+        action="store_true",
+        default=False,
+        help="enable no_rsa_key decorated tests",
+    )
 
 
 def pytest_configure(config):
     if not config.option.no_rsa_key:
-        setattr(config.option, 'markexpr', 'not no_rsa_key')
+        setattr(config.option, "markexpr", "not no_rsa_key")
 
 
-skip_if_nanopub_server_unavailable = (
-    pytest.mark.skipif(
-        requests.get(TEST_NANOPUB_QUERY_URL + 'RAkYh4UPJryajbtIDbLG-Bfd6A4JD2SbU9bmZdvaEdFRY/fdo-text-search?query=test').status_code != 200,
-        reason='Nanopub server is unavailable'
-    )
+skip_if_nanopub_server_unavailable = pytest.mark.skipif(
+    requests.get(
+        TEST_NANOPUB_QUERY_URL
+        + "RAkYh4UPJryajbtIDbLG-Bfd6A4JD2SbU9bmZdvaEdFRY/fdo-text-search?query=test"
+    ).status_code
+    != 200,
+    reason="Nanopub server is unavailable",
 )
 
 
@@ -50,7 +56,7 @@ default_conf = NanopubConf(
     attribute_publication_to_profile=True,
     assertion_attributed_to=None,
     publication_attributed_to=None,
-    derived_from=None
+    derived_from=None,
 )
 
 testsuite_conf = NanopubConf(

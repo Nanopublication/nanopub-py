@@ -16,13 +16,13 @@ from nanopub.utils import MalformedNanopubError
 
 cli = typer.Typer(help="Nanopub Command Line Interface")
 
-PRIVATE_KEY_FILE = 'id_rsa'
-PUBLIC_KEY_FILE = 'id_rsa.pub'
-DEFAULT_KEYS_PATH_PREFIX = USER_CONFIG_DIR / 'id'
+PRIVATE_KEY_FILE = "id_rsa"
+PUBLIC_KEY_FILE = "id_rsa.pub"
+DEFAULT_KEYS_PATH_PREFIX = USER_CONFIG_DIR / "id"
 DEFAULT_PRIVATE_KEY_PATH = USER_CONFIG_DIR / PRIVATE_KEY_FILE
 DEFAULT_PUBLIC_KEY_PATH = USER_CONFIG_DIR / PUBLIC_KEY_FILE
-RSA = 'RSA'
-ORCID_ID_REGEX = r'^https://orcid.org/(\d{4}-){3}\d{3}(\d|X)$'
+RSA = "RSA"
+ORCID_ID_REGEX = r"^https://orcid.org/(\d{4}-){3}\d{3}(\d|X)$"
 
 
 def validate_orcid_id(ctx, param, orcid_id: str):
@@ -32,60 +32,65 @@ def validate_orcid_id(ctx, param, orcid_id: str):
     if re.match(ORCID_ID_REGEX, orcid_id):
         return orcid_id
     else:
-        raise ValueError('Your ORCID iD is not valid, please provide a valid ORCID iD that '
-                         'looks like: https://orcid.org/0000-0000-0000-0000')
+        raise ValueError(
+            "Your ORCID iD is not valid, please provide a valid ORCID iD that "
+            "looks like: https://orcid.org/0000-0000-0000-0000"
+        )
 
 
-@cli.command(help='Get nanopub library version')
+@cli.command(help="Get nanopub library version")
 def version():
     print(__version__)
 
 
-@cli.command(help='Get the current user profile info')
+@cli.command(help="Get the current user profile info")
 def profile():
     try:
         p = load_profile()
-        print(f' 👤 User profile in \033[1m{DEFAULT_PROFILE_PATH}\033[0m')
+        print(f" 👤 User profile in \033[1m{DEFAULT_PROFILE_PATH}\033[0m")
         print(str(p))
     except ProfileError as e:
         print(e)
         print(f" ⚠️  No profile could be loaded from {DEFAULT_PROFILE_PATH}")
-        print(" ℹ️  Use \033[1mnp setup\033[0m to setup your nanopub profile locally with the interactive CLI")
+        print(
+            " ℹ️  Use \033[1mnp setup\033[0m to setup your nanopub profile locally with the interactive CLI"
+        )
 
 
-
-@cli.command(help='Sign a Nanopublication')
+@cli.command(help="Sign a Nanopublication")
 def sign(
     filepath: Path,
     private_key: Optional[Path] = typer.Option(
-        None, "--private-key", "-k",
-        help="Path to the RSA private key with which the nanopub will be signed."
+        None,
+        "--private-key",
+        "-k",
+        help="Path to the RSA private key with which the nanopub will be signed.",
     ),
 ):
     if private_key:
         config = NanopubConf(
             profile=Profile(
                 # TODO: better handle Profile without name or orcid_id
-                name='', orcid_id='',
-                private_key=private_key
+                name="",
+                orcid_id="",
+                private_key=private_key,
             ),
         )
     else:
         config = NanopubConf(profile=load_profile())
 
     folder_path, filename = os.path.split(filepath)
-    np = Nanopub(
-        conf=config,
-        rdf=filepath
-    )
+    np = Nanopub(conf=config, rdf=filepath)
     np.sign()
     signed_filepath = f"{str(folder_path)}/signed.{str(filename)}"
-    np.rdf.serialize(signed_filepath, format='trig')
-    print(f" ✒️  Nanopub signed in \033[1m{signed_filepath}\033[0m with the trusty URI \033[1m{np.source_uri}\033[0m")
+    np.rdf.serialize(signed_filepath, format="trig")
+    print(
+        f" ✒️  Nanopub signed in \033[1m{signed_filepath}\033[0m with the trusty URI \033[1m{np.source_uri}\033[0m"
+    )
     print(f" 📬️ To publish it run \033[1mnp publish {signed_filepath}\033[0m")
 
 
-@cli.command(help='Publish a Nanopublication')
+@cli.command(help="Publish a Nanopublication")
 def publish(
     filepath: Path,
     test: bool = typer.Option(False, help="Publish to the test server"),
@@ -101,8 +106,7 @@ def publish(
     print(f" 📬️ Nanopub published at \033[1m{np.source_uri}\033[0m")
 
 
-
-@cli.command(help='Check if a signed Nanopublication is valid')
+@cli.command(help="Check if a signed Nanopublication is valid")
 def check(filepath: Path):
     config = NanopubConf(profile=load_profile())
     np = Nanopub(conf=config, rdf=filepath)
@@ -113,21 +117,23 @@ def check(filepath: Path):
         print(f"\033[1m❌ Invalid nanopub\033[0m: {e}")
 
 
-@cli.command(help='Interactive CLI to create a nanopub user profile. '
-                  'A local version of the profile will be stored in the user config dir '
-                  '(by default $HOME/.nanopub/). '
-                  'The profile will also be published to the nanopub servers.')
+@cli.command(
+    help="Interactive CLI to create a nanopub user profile. "
+    "A local version of the profile will be stored in the user config dir "
+    "(by default $HOME/.nanopub/). "
+    "The profile will also be published to the nanopub servers."
+)
 def setup(
     orcid_id: str = typer.Option(
         None,
         help="Your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)",
-        prompt='What is your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)?',
-        callback=validate_orcid_id
+        prompt="What is your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)?",
+        callback=validate_orcid_id,
     ),
     name: str = typer.Option(
         None,
-        help='Your full name',
-        prompt='What is your full name?',
+        help="Your full name",
+        prompt="What is your full name?",
     ),
     newkeys: bool = typer.Option(
         False,
@@ -138,7 +144,8 @@ def setup(
         help="Your RSA public and private keys with which your nanopubs will be signed",
     ),
     publish: Optional[bool] = typer.Option(
-        None, "--publish/--no-publish",
+        None,
+        "--publish/--no-publish",
         help="If true, nanopub will be published to nanopub servers",
     ),
 ):
@@ -154,16 +161,18 @@ def setup(
             nanopubs. If empty, new keys will be generated or the ones in the .nanopub folder
             will be used.
     """
-    print('⚙️ Setting up nanopub profile...')
+    print("⚙️ Setting up nanopub profile...")
     if keypair == (None, None):
         keypair = None
     if not USER_CONFIG_DIR.exists():
         USER_CONFIG_DIR.mkdir()
 
     if publish is None:
-        prompt = ('📬️ Would you like to publish your profile to the nanopub servers? '
-                  'This links your ORCID iD to your RSA key, thereby making all your '
-                  'publications linkable to you')
+        prompt = (
+            "📬️ Would you like to publish your profile to the nanopub servers? "
+            "This links your ORCID iD to your RSA key, thereby making all your "
+            "publications linkable to you"
+        )
         publish_resp = typer.prompt(prompt, type=str, default="")
         if publish_resp and publish_resp.lower().startswith("y"):
             publish = True
@@ -171,28 +180,32 @@ def setup(
             publish = False
 
     if not keypair and not newkeys:
-        prompt = '🔓️ Provide the path to your public RSA key: ' \
-            'Leave empty for using the one in: '
-        public_key = typer.prompt(prompt, type=Path,
-                                  default=DEFAULT_PUBLIC_KEY_PATH)
+        prompt = (
+            "🔓️ Provide the path to your public RSA key: "
+            "Leave empty for using the one in: "
+        )
+        public_key = typer.prompt(prompt, type=Path, default=DEFAULT_PUBLIC_KEY_PATH)
         if not public_key:
             keypair = None
         else:
-            prompt = '🔑 Provide the path to your private RSA key: '
-            private_key = typer.prompt(prompt, type=Path,
-                                       default=DEFAULT_PRIVATE_KEY_PATH)
+            prompt = "🔑 Provide the path to your private RSA key: "
+            private_key = typer.prompt(
+                prompt, type=Path, default=DEFAULT_PRIVATE_KEY_PATH
+            )
             keypair = public_key, private_key
 
     if not keypair:
         if _rsa_keys_exist():
-            print(f'🛑 RSA keys already exist and are stored in {USER_CONFIG_DIR}. '
-                  f'If you want to create new ones then you must manually '
-                  f'delete these keys.')
+            print(
+                f"🛑 RSA keys already exist and are stored in {USER_CONFIG_DIR}. "
+                f"If you want to create new ones then you must manually "
+                f"delete these keys."
+            )
             raise typer.Exit(code=1)
         else:
             # JavaWrapper().make_keys(path_name=DEFAULT_KEYS_PATH_PREFIX)
             generate_keyfiles(USER_CONFIG_DIR)
-            print(f'🔑 Created RSA keys. Your RSA keys are stored in {USER_CONFIG_DIR}')
+            print(f"🔑 Created RSA keys. Your RSA keys are stored in {USER_CONFIG_DIR}")
     else:
         public_key_path, private_key = keypair
 
@@ -202,7 +215,7 @@ def setup(
         if not os.path.exists(DEFAULT_PRIVATE_KEY_PATH):
             shutil.copy(private_key, USER_CONFIG_DIR / PRIVATE_KEY_FILE)
 
-        print(f'🚚 Your RSA keys have been copied to {USER_CONFIG_DIR}')
+        print(f"🚚 Your RSA keys have been copied to {USER_CONFIG_DIR}")
 
     # Public key can always be found at DEFAULT_PUBLIC_KEY_PATH.
     # Either new keys have been generated there or
@@ -236,5 +249,5 @@ def _rsa_keys_exist():
     return DEFAULT_PRIVATE_KEY_PATH.exists() or DEFAULT_PUBLIC_KEY_PATH.exists()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()

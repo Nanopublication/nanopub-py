@@ -21,11 +21,13 @@ class FdoRecord:
     ):
         self.id: Optional[str] = None
         self.tuples: dict[URIRef, Union[Literal, URIRef]] = {}
-        
+
         if assertion:
             # Init from assertion graph
             for s, p, o in assertion:
-                if (p == DCTERMS.conformsTo or p == FDOC.hasFdoProfile) and self.id is None:
+                if (
+                    p == DCTERMS.conformsTo or p == FDOC.hasFdoProfile
+                ) and self.id is None:
                     self.id = self.extract_handle(o)
 
                 if p == FDOF.isMaterializedBy:
@@ -46,7 +48,9 @@ class FdoRecord:
         if assertion is None:
             # Init from explicit params
             if profile_uri is None:
-                raise ValueError("profile_uri is required when nanopub assertion graph not given")
+                raise ValueError(
+                    "profile_uri is required when nanopub assertion graph not given"
+                )
 
             self.set_profile(profile_uri)
             if label:
@@ -82,7 +86,6 @@ class FdoRecord:
             else:
                 triples.append((subject, p, o))
         return triples
-
 
     def get_graph(self) -> Graph:
         g = Graph()
@@ -138,11 +141,17 @@ class FdoRecord:
             if existing != uri_ref:
                 self.tuples[FDOF.isMaterializedBy] = [existing, uri_ref]
 
-    def set_property(self, predicate: Union[str, URIRef], value: Union[str, URIRef, Literal]) -> None:
+    def set_property(
+        self, predicate: Union[str, URIRef], value: Union[str, URIRef, Literal]
+    ) -> None:
         pred = URIRef(predicate)
-        obj = URIRef(value) if isinstance(value, str) and value.startswith("http") else Literal(value)
+        obj = (
+            URIRef(value)
+            if isinstance(value, str) and value.startswith("http")
+            else Literal(value)
+        )
         self.tuples[pred] = obj
-        
+
     def add_aggregate(self, iri: URIRef):
         existing = self.tuples.get(DCTERMS.hasPart)
         if existing:
@@ -174,7 +183,7 @@ class FdoRecord:
         new_record = FdoRecord(
             profile_uri=self.get_profile(),
             label=self.get_label(),
-            dataref=self.get_data_ref()
+            dataref=self.get_data_ref(),
         )
         new_record.id = self.id
         new_record.tuples = self.tuples.copy()
