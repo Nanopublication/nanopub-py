@@ -8,7 +8,7 @@ def fdo_query():
     client = NanopubClient()
     return FdoQuery(client)
 
-
+@pytest.mark.network
 def test_text_search(fdo_query):
     results = list(fdo_query.text_search("test"))
     assert isinstance(results, list)
@@ -24,7 +24,7 @@ def test_find_by_ref(fdo_query):
         assert isinstance(r, dict)
         break
 
-
+@pytest.mark.network
 def test_get_favorite_things(fdo_query):
     results = list(
         fdo_query.get_favorite_things("https://orcid.org/0000-0002-1267-0234")
@@ -34,7 +34,7 @@ def test_get_favorite_things(fdo_query):
         assert isinstance(r, dict)
         break
 
-
+@pytest.mark.network
 def test_get_feed(fdo_query):
     results = list(fdo_query.get_feed("https://orcid.org/0009-0008-3635-347X"))
     assert isinstance(results, list)
