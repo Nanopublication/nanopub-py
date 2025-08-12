@@ -7,7 +7,7 @@ name = "nanopub"
 version = "2.0.1"
 description = "Python client for Nanopublications"
 readme = "README.md"
-requires-python = ">=3.12, <4.0"
+requires-python = ">=3.12, <3.14"
 license = { file = "LICENSE" }
 authors = [
     { name = "Robin Richardson", email = "r.richardson@esciencecenter.nl" },
@@ -26,6 +26,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dynamic = ["version"]
 
@@ -43,9 +44,9 @@ test = [
     "pytest-cov >=6.2.1",
     "coveralls",
     "mypy >=1.17.1",
-    "flake8 >=7.3",
-    "Flake8-pyproject >=1.2.3",
     "flaky",
+    "coveralls; python_version<'3.13'",
+    "flaky"
 ]
 doc = [
     "mkdocs >=1.4.2",
@@ -75,8 +76,19 @@ Tracker = "https://github.com/fair-workflows/nanopub/issues"
 Source = "https://github.com/fair-workflows/nanopub"
 
 
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+flake8 = "^6.1.0"
+coverage = "^7.3.1"
+pytest = "^8.3.5"
+sparqlwrapper = "^2.0.0"
+pyshacl = "^0.30.0"
+
+
+
 
 # ENVIRONMENTS AND SCRIPTS
+pytest-rerunfailures = "^15.1"
 [tool.hatch.envs.default]
 features = [
     "test",
@@ -137,4 +149,6 @@ no_implicit_optional = false
 [tool.pytest.ini_options]
 markers = [
     "no_rsa_key: mark a test as a test only run when there is no nanopub RSA key setup.",
+    "network: mark a test as a network test that requires internet access.",
+    "flaky: mark a test as flaky/unstable (may fail intermittently)",
 ]
