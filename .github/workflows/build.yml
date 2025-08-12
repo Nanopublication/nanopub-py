@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies with Poetry
         run: |
-          poetry install --with test
+          poetry install 
 
       - name: Override rdflib version with ${{ matrix.rdflib-version }}
         env:
@@ -45,9 +45,13 @@ jobs:
         run: |
           poetry run np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --no-publish --name test --newkeys
 
-      - name: Test with pytest
+      - name: Test with pytest (excluding flaky tests)
         run: |
-          poetry run pytest --cov
+          poetry run coverage run -m pytest tests/tests.py -sv --tb=short --disable-warnings -m "not flaky"
+
+      - name: Tests with pytest (including flaky tests)
+        run: |
+          poetry run coverage run -m pytest tests/tests.py -sv --tb=short --disable-warnings 
 
       - name: Publish coverage to Coveralls
         env:
