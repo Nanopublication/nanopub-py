@@ -42,11 +42,9 @@ dependencies = [
 test = [
     "pytest >=8.4.1",
     "pytest-cov >=6.2.1",
-    "coveralls",
-    "mypy >=1.17.1",
-    "flaky",
     "coveralls; python_version<'3.13'",
-    "flaky"
+    "mypy >=1.17.1",
+    "flaky",   
 ]
 doc = [
     "mkdocs >=1.4.2",
