@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies with Poetry
         run: |
-          poetry install 
+          poetry install --extras "test"
 
       - name: Override rdflib version with ${{ matrix.rdflib-version }}
         env:
@@ -54,6 +54,7 @@ jobs:
           poetry run coverage run -m pytest tests/tests.py -sv --tb=short --disable-warnings 
 
       - name: Publish coverage to Coveralls
+        if: matrix.rdflib-version == 'rdflib==7.1.4' # only once
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         if: ${{ env.COVERALLS_REPO_TOKEN }}
