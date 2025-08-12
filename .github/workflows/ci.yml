@@ -30,7 +30,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install --extras "test"
 
       - name: Check formatting
         run: poetry run black --check .
