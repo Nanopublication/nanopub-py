@@ -94,9 +94,53 @@ for s, p, o in publication.assertion:
 See the [development page](https://nanopublication.github.io/nanopub-py/getting-started/development/) on the documentation website.
 
 
+## Tests
+
+To run tests: 
+
+Install dependencies (if not already installed):
+
+```
+pip install pytest
+```
+
+Run tests:
+
+```
+pytest
+```
+
+## Test coverage
+
+To generate a test coverage report for this library:
+
+Install dependencies (if not already installed):
+
+```
+pip install coverage pytest
+```
+
+Run the tests with coverage tracking:
+
+```
+coverage run -m pytest
+```
+
+View a terminal summary:
+
+```
+coverage report
+```
+
+Or generate a detailed HTML report
+
+```
+coverage html
+```
+
 ## License
 
-nanopub-java is free software under the Apache License. See [LICENSE](LICENSE).
+nanopub-py is free software under the Apache License. See [LICENSE](LICENSE).
 
 
 ## Copyright

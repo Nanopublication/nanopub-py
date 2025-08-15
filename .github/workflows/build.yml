@@ -1,10 +1,14 @@
-name: Tests
+name: Tests and Coverage
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
 
-  tests:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,9 +31,6 @@ jobs:
         run: |
           pip install ".[test,dev]" "$RDFLIB_VERSION"
 
-      # - name: Lint with flake8, isort and mypy
-      #   run: bash scripts/lint.sh
-
       - name: Setup nanopub profile (including RSA keys)
         run: |
           np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --no-publish --name test --newkeys
@@ -39,9 +40,22 @@ jobs:
           pytest --cov
 
       - name: Publish coverage to Coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        if: ${{ env.COVERALLS_REPO_TOKEN }}
         run: |
           coverage xml
           coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: ${{ matrix.python-version }} - ${{ matrix.rdflib-version }}
+          COVERALLS_PARALLEL: true
+  coveralls:
+    name: Indicate completion to coveralls.io
+    needs: test
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+      - name: Install coveralls
+        run: pip3 install --upgrade coveralls
+      - name: Finished
+        run: coveralls --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
