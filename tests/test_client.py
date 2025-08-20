@@ -134,43 +134,49 @@ class TestNanopubClient:
 
     # TODO: find retracted in the new nanopub server to fix those tests
 
-    # @pytest.mark.flaky(max_runs=10)
-    # @skip_if_nanopub_server_unavailable
-    # def test_find_things_filter_retracted(self):
-    #     filtered_results = list(client.find_things(type='http://purl.org/net/p-plan#Plan',
-    #                                                filter_retracted=True))
-    #     assert len(filtered_results) > 0
-    #     all_results = list(client.find_things(type='http://purl.org/net/p-plan#Plan',
-    #                                           filter_retracted=False))
-    #     assert len(all_results) > 0
-    #     # The filtered results should be a smaller subset of all the results, assuming that some of
-    #     # the results are retracted nanopublications.
-    #     assert len(all_results) > len(filtered_results)
+    @pytest.mark.flaky(max_runs=10)
+    @skip_if_nanopub_server_unavailable
+    def test_find_things_filter_retracted(self):
+        filtered_results = list(
+            client.find_things(
+                type="http://purl.org/net/p-plan#Plan",
+                filter_retracted=True,
+                searchterm="WF_protocol3",
+            )
+        )
+        assert len(filtered_results) > 0
+        all_results = list(
+            client.find_things(
+                type="http://purl.org/net/p-plan#Plan",
+                filter_retracted=False,
+                searchterm="WF_protocol3",
+            )
+        )
+        assert len(all_results) > 0
+        # The filtered results should be a smaller subset of all the results, assuming that some of
+        # the results are retracted nanopublications.
+        assert len(all_results) > len(filtered_results)
 
-    # @pytest.mark.flaky(max_runs=10)
-    # @skip_if_nanopub_server_unavailable
-    # def test_find_retractions_of(self):
-    #     uri = 'http://purl.org/np/RAnksi2yDP7jpe7F6BwWCpMOmzBEcUImkAKUeKEY_2Yus'
-    #     results = client.find_retractions_of(uri, valid_only=False)
-    #     expected_uris = [
-    #         'http://purl.org/np/RAYhe0XddJhBsJvVt0h_aq16p6f94ymc2wS-q2BAgnPVY',
-    #         'http://purl.org/np/RACdYpR-6DZnT6JkEr1ItoYYXMAILjOhDqDZsMVO8EBZI'
-    #     ]
-    #     for expected_uri in expected_uris:
-    #         assert expected_uri in results
+    @pytest.mark.flaky(max_runs=10)
+    @skip_if_nanopub_server_unavailable
+    def test_find_retractions_of(self):
+        uri = 'https://w3id.org/np/RAjwjgKTAHVVrdP0DCftOEbqi1FL-YPuf0r6xhwNgzDcU'
+        results = client.find_retractions_of(uri, valid_only=False)
+        expected_uri = 'https://w3id.org/np/RAuQdjy3pQhhPyda0hd1XXH4xH-XZ5Df3bW5RYCxxxK_U'
+        assert expected_uri in results
 
-
-    # @pytest.mark.flaky(max_runs=10)
-    # @skip_if_nanopub_server_unavailable
-    # def test_find_retractions_of_valid_only(self):
-    #     uri = 'http://purl.org/np/RAnksi2yDP7jpe7F6BwWCpMOmzBEcUImkAKUeKEY_2Yus'
-    #     results = client.find_retractions_of(uri, valid_only=True)
-    #     expected_uri = 'http://purl.org/np/RAYhe0XddJhBsJvVt0h_aq16p6f94ymc2wS-q2BAgnPVY'
-    #     assert expected_uri in results
-    #     # This is a nanopublication that is signed with a different public key than the nanopub
-    #     # it retracts, so it is not valid and should not be returned.
-    #     unexpected_uri = 'http://purl.org/np/RACdYpR-6DZnT6JkEr1ItoYYXMAILjOhDqDZsMVO8EBZI'
-    #     assert unexpected_uri not in results
+    @pytest.mark.flaky(max_runs=10)
+    @skip_if_nanopub_server_unavailable
+    def test_find_retractions_of_valid_only(self):
+        uri = 'https://w3id.org/np/RAjwjgKTAHVVrdP0DCftOEbqi1FL-YPuf0r6xhwNgzDcU'
+        results = client.find_retractions_of(uri, valid_only=True)
+        expected_uri = 'https://w3id.org/np/RAuQdjy3pQhhPyda0hd1XXH4xH-XZ5Df3bW5RYCxxxK_U'
+        assert expected_uri in results
+        # This is a nanopublication that is signed with a different public key than the nanopub
+        # it retracts, so it is not valid and should not be returned.
+        # TODO: re-enable this test when we have a non-valid retraction to check
+        # unexpected_uri = 'http://purl.org/np/RACdYpR-6DZnT6JkEr1ItoYYXMAILjOhDqDZsMVO8EBZI'
+        # assert unexpected_uri not in results
 
     @pytest.mark.parametrize(
         "test_input,expected",

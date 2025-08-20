@@ -1,6 +1,6 @@
-[![Version](https://img.shields.io/pypi/v/nanopub)](https://pypi.org/project/nanopub) [![Python versions](https://img.shields.io/pypi/pyversions/nanopub)](https://pypi.org/project/nanopub) [![Pull requests welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen)](https://github.com/fair-workflows/nanopub/fork)
+[![Version](https://img.shields.io/pypi/v/nanopub)](https://pypi.org/project/nanopub) [![Python versions](https://img.shields.io/pypi/pyversions/nanopub)](https://pypi.org/project/nanopub) [![Pull requests welcome](https://img.shields.io/badge/pull%20requests-welcome-brightgreen)](https://github.com/Nanopublication/nanopub-py/fork)
 
-[![Python application](https://github.com/fair-workflows/nanopub/actions/workflows/build.yml/badge.svg)](https://github.com/fair-workflows/nanopub/actions/workflows/build.yml){:target="_blank"} [![Publish](https://github.com/fair-workflows/nanopub/actions/workflows/pypi.yml/badge.svg)](https://github.com/fair-workflows/nanopub/actions/workflows/pypi.yml){:target="_blank"} [![cffconvert](https://github.com/fair-workflows/nanopub/actions/workflows/cffconvert.yml/badge.svg)](https://github.com/fair-workflows/nanopub/actions/workflows/cffconvert.yml){:target="_blank"}
+[![Python application](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml){:target="_blank"} [![Publish](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml){:target="_blank"} [![cffconvert](https://github.com/Nanopublication/nanopub-py/actions/workflows/cffconvert.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/cffconvert.yml){:target="_blank"}
 
 
 ## 📥 Install for development
@@ -8,7 +8,7 @@
 Clone the repository and go in the project folder:
 
 ```bash
-git clone https://github.com/fair-workflows/nanopub
+git clone https://github.com/Nanopublication/nanopub-py
 cd nanopub
 ```
 
@@ -103,7 +103,7 @@ To install the project for development you can either use [`venv`](https://docs.
 
 ## ✅ Run the tests
 
-[![Python application](https://github.com/fair-workflows/nanopub/actions/workflows/build.yml/badge.svg)](https://github.com/fair-workflows/nanopub/actions/workflows/build.yml){:target="_blank"}
+[![Python application](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml){:target="_blank"}
 
 Tests are automatically run by a GitHub Actions workflow when new code is pushed to the GitHub repository.
 
@@ -140,7 +140,7 @@ The tests use the [```nanopub-java```](https://github.com/Nanopublication/nanopu
 
 ## 📖 Generate docs
 
-[![Publish docs](https://github.com/fair-workflows/nanopub/actions/workflows/build.yml/badge.svg)](https://github.com/fair-workflows/nanopub/actions/workflows/build.yml){:target="_blank"}
+[![Publish docs](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml){:target="_blank"}
 
 The documentation (this website) is automatically generated from the markdown files in the `docs` folder and python docstring comments, and published by a GitHub Actions workflow.
 
@@ -161,7 +161,7 @@ Serve the docs on [http://localhost:8008](http://localhost:8008){:target="_blank
 
 ## 🏷️ Publish a new release
 
-[![Publish to PyPI](https://github.com/fair-workflows/nanopub/actions/workflows/pypi.yml/badge.svg)](https://github.com/fair-workflows/nanopub/actions/workflows/pypi.yml){:target="_blank"}
+[![Publish to PyPI](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml){:target="_blank"}
 
 1. Increment the `__version__` in `nanopub/_version.py`
 2. Push to GitHub

@@ -12,7 +12,6 @@ def test_validate_fdo_records(identifier):
     assert fdo_record is not None
 
     validation_result = validate_fdo_record(fdo_record)
-    print(f"Validation result for {identifier}: {validation_result}")
 
     assert validation_result.is_valid is True
     assert validation_result.errors == []

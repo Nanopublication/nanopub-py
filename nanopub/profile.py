@@ -14,7 +14,7 @@ from nanopub.utils import log
 
 PROFILE_INSTRUCTIONS_MESSAGE = '''
     Follow these instructions to correctly setup your nanopub profile:
-    https://fair-workflows.github.io/nanopub/getting-started/setup/#setup-your-profile
+    https://nanopublication.github.io/nanopub-py/getting-started/setup/#setup-your-profile
 '''
 
 

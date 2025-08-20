@@ -70,11 +70,11 @@ np = "nanopub.__main__:cli"
 
 
 [project.urls]
-Homepage = "https://fair-workflows.github.io/nanopub"
-Documentation = "https://fair-workflows.github.io/nanopub"
-History = "https://github.com/fair-workflows/nanopub/releases"
-Tracker = "https://github.com/fair-workflows/nanopub/issues"
-Source = "https://github.com/fair-workflows/nanopub"
+Homepage = "https://nanopublication.github.io/nanopub-py/"
+Documentation = "https://nanopublication.github.io/nanopub-py/"
+History = "https://github.com/Nanopublication/nanopub-py/releases"
+Tracker = "https://github.com/Nanopublication/nanopub-py/issues"
+Source = "https://github.com/Nanopublication/nanopub-py"
 
 
 
@@ -147,4 +147,10 @@ no_implicit_optional = false
 [tool.pytest.ini_options]
 markers = [
     "no_rsa_key: mark a test as a test only run when there is no nanopub RSA key setup.",
+    "network: mark a test that requires network access.",
+    "flaky: mark test as flaky to rerun it on failure",
 ]
+filterwarnings = [
+    "ignore:.*ConjunctiveGraph is deprecated.*:DeprecationWarning" # rdflib warning from the parsers, already using Dataset in our own code, see also: https://github.com/RDFLib/rdflib/issues/3064
+]
+

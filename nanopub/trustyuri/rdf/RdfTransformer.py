@@ -9,7 +9,7 @@ def transform_to_file(conjgraph, baseuri, outdir, filename):
     quads = RdfPreprocessor.preprocess(quads, baseuri=baseuri)
     hashstr = RdfHasher.make_hash(quads)
     quads = HashAdder.addhash(quads, hashstr)
-    conjgraph = RdfUtils.get_conjunctivegraph(quads)
+    conjgraph = RdfUtils.get_dataset(quads)
     name = ""
     if (baseuri is not None) and re.match('.*/.*', str(baseuri)):
         name = re.sub(r'^.*[^A-Za-z0-9.\-_]([A-Za-z0-9.\-_]*)$', r'\1', str(baseuri)) + "."
@@ -24,7 +24,7 @@ def transform_to_string(conjgraph, baseuri):
     quads = RdfPreprocessor.preprocess(quads, baseuri=baseuri)
     hashstr = RdfHasher.make_hash(quads)
     quads = HashAdder.addhash(quads, hashstr)
-    conjgraph = RdfUtils.get_conjunctivegraph(quads)
+    conjgraph = RdfUtils.get_dataset(quads)
     return conjgraph.serialize(format='trix')
 
 
@@ -33,4 +33,4 @@ def transform(conjgraph, baseuri):
     quads = RdfPreprocessor.preprocess(quads, baseuri=baseuri)
     hashstr = RdfHasher.make_hash(quads)
     quads = HashAdder.addhash(quads, hashstr)
-    return RdfUtils.get_conjunctivegraph(quads)
+    return RdfUtils.get_dataset(quads)

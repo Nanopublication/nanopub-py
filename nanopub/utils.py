@@ -3,7 +3,7 @@ import re
 from dataclasses import asdict, dataclass
 from typing import Any, Optional
 
-from rdflib import ConjunctiveGraph, Namespace, URIRef
+from rdflib import Dataset, Namespace, URIRef
 
 from nanopub.definitions import DUMMY_NAMESPACE, DUMMY_URI
 
@@ -36,7 +36,7 @@ class NanopubMetadata:
     dict = asdict
 
 
-def extract_np_metadata(g: ConjunctiveGraph) -> NanopubMetadata:
+def extract_np_metadata(g: Dataset) -> NanopubMetadata:
     """Extract a nanopub URI, namespace and head/assertion/prov/pubinfo contexts from a Graph"""
     get_np_query = """prefix np: <http://www.nanopub.org/nschema#>
 

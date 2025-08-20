@@ -2,7 +2,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Union
 
-from rdflib import ConjunctiveGraph, Graph, URIRef
+from rdflib import Dataset, Graph, URIRef
 
 from nanopub.namespaces import NPX
 from nanopub.nanopub import Nanopub
@@ -34,7 +34,7 @@ class NanopubUpdate(Nanopub):
         assertion: Graph = Graph(),
         provenance: Graph = Graph(),
         pubinfo: Graph = Graph(),
-        rdf: Union[ConjunctiveGraph, Path] = None,
+        rdf: Union[Dataset, Path] = None,
     ) -> None:
         conf = deepcopy(conf)
         conf.add_prov_generated_time = True

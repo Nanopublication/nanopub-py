@@ -79,7 +79,6 @@ def test_validate_fdo_record_success(mock_get, mock_resolve, valid_fdo_record):
     mock_resolve.return_value = None
 
     def mock_requests_get(url, *args, **kwargs):
-        print(f"[MOCK REQUEST] GET {url}")
         if "hdl.handle.net/api/handles/21.T11966/996c38676da9ee56f8ab" in url:
             return MagicMock(status_code=200, json=lambda: HANDLE_METADATA)
         elif "example.org/schema/fdo.json" in url:
@@ -90,7 +89,6 @@ def test_validate_fdo_record_success(mock_get, mock_resolve, valid_fdo_record):
     mock_get.side_effect = mock_requests_get
 
     result = validate_fdo_record(valid_fdo_record)
-    print("Validation result:", result)
 
     assert result.is_valid is True
 
@@ -165,7 +163,6 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
     record = FdoRecord(assertion=record_graph)
     result = validate_fdo_record(record)
 
-    print("Validation result (valid nanopub):", result)
     assert result.is_valid is True
     assert result.errors == []
 
@@ -209,6 +206,5 @@ def test_invalid_fdo_from_nanopub_network(mock_resolve, mock_get):
     record = FdoRecord(assertion=record_graph)
     result = validate_fdo_record(record)
 
-    print("Validation result (invalid nanopub):", result)
     assert result.is_valid is False
     assert any("predicate" in e.lower() for e in result.errors)

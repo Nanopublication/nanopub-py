@@ -102,9 +102,6 @@ class FdoRecord:
 
         if isinstance(val, list):
             uris = [URIRef(v) for v in val]
-            print(len(uris))
-            for uri in uris:
-                print("DataRef URI:", uri)
             return uris[0] if len(uris) == 1 else uris
 
         return URIRef(val)
@@ -140,7 +137,6 @@ class FdoRecord:
         else:
             if existing != uri_ref:
                 self.tuples[FDOF.isMaterializedBy] = [existing, uri_ref]
-        print(self.tuples[FDOF.isMaterializedBy])
 
     def set_property(self, predicate: Union[str, URIRef], value: Union[str, URIRef, Literal]) -> None:
         pred = URIRef(predicate)

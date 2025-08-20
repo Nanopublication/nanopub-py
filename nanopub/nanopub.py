@@ -10,7 +10,7 @@ from typing import Optional, Union, Tuple
 
 import rdflib
 import requests
-from rdflib import BNode, ConjunctiveGraph, Graph, URIRef
+from rdflib import BNode, Dataset, Graph, URIRef
 from rdflib.namespace import DC, DCTERMS, FOAF, PROV, RDF, XSD
 
 from nanopub.definitions import MAX_TRIPLES_PER_NANOPUB, NANOPUB_FETCH_FORMAT, TEST_NANOPUB_REGISTRY_URL
@@ -27,7 +27,7 @@ class Nanopub:
 
     Attributes:
         config (NanopubConfig): Config for the nanopub
-        rdf (rdflib.ConjunctiveGraph): The full RDF graph of this nanopublication (quads)
+        rdf (rdflib.Dataset): The full RDF graph of this nanopublication (quads)
         assertion (rdflib.Graph): The part of the graph describing the assertion.
         pubinfo (rdflib.Graph): The part of the graph describing the publication information.
         provenance (rdflib.Graph): The part of the graph describing the provenance.
@@ -41,7 +41,7 @@ class Nanopub:
         assertion: Graph = Graph(),
         provenance: Graph = Graph(),
         pubinfo: Graph = Graph(),
-        rdf: Union[ConjunctiveGraph, Path] = None,
+        rdf: Union[Dataset, Path] = None,
         introduces_concept: BNode = None,
         conf: NanopubConf = NanopubConf(),
     ) -> None:
@@ -67,21 +67,21 @@ class Nanopub:
                 uri_test = TEST_NANOPUB_REGISTRY_URL + nanopub_id
                 r = requests.get(uri_test + "." + NANOPUB_FETCH_FORMAT)
             r.raise_for_status()
-            self._rdf = self._preformat_graph(ConjunctiveGraph())
+            self._rdf = self._preformat_graph(Dataset())
             self._rdf.parse(data=r.text, format=NANOPUB_FETCH_FORMAT)
 
             self._metadata = extract_np_metadata(self._rdf)
         else:
             # if provided as rdflib graph, or file
-            if isinstance(rdf, ConjunctiveGraph):
+            if isinstance(rdf, Dataset):
                 self._rdf = self._preformat_graph(rdf)
                 self._metadata = extract_np_metadata(self._rdf)
             elif isinstance(rdf, Path):
-                self._rdf = self._preformat_graph(ConjunctiveGraph())
+                self._rdf = self._preformat_graph(Dataset())
                 self._rdf.parse(rdf)
                 self._metadata = extract_np_metadata(self._rdf)
             else:
-                self._rdf = self._preformat_graph(ConjunctiveGraph())
+                self._rdf = self._preformat_graph(Dataset())
 
         # Instantiate the different graph from the provided RDF (trig/nquads)
         self._head = Graph(self._rdf.store, self._metadata.head)
@@ -146,7 +146,7 @@ class Nanopub:
         self._handle_derived_from(derived_from=self._conf.derived_from)
 
 
-    def _preformat_graph(self, g: ConjunctiveGraph) -> ConjunctiveGraph:
+    def _preformat_graph(self, g: Dataset) -> Dataset:
         """Add a few default namespaces"""
         g.bind("np", NP)
         g.bind("npx", NPX)
@@ -162,7 +162,7 @@ class Nanopub:
         return g
 
 
-    def update_from_signed(self, signed_g: ConjunctiveGraph) -> None:
+    def update_from_signed(self, signed_g: Dataset) -> None:
         """Update the pub RDF to the signed one"""
         self._metadata = extract_np_metadata(signed_g)
         if self._metadata.trusty:
@@ -295,7 +295,7 @@ class Nanopub:
 
 
     @property
-    def rdf(self) -> ConjunctiveGraph:
+    def rdf(self) -> Dataset:
         return self._rdf
 
     @property
@@ -561,7 +561,7 @@ class Nanopub:
                 )
 
 
-    def _replace_blank_nodes(self, g: ConjunctiveGraph) -> ConjunctiveGraph:
+    def _replace_blank_nodes(self, g: Dataset) -> Dataset:
         """Replace blank nodes.
           Replace any blank nodes in the supplied RDF with a corresponding uri in the
         dummy_namespace.'Blank nodes' here refers specifically to rdflib.term.BNode objects. When
@@ -575,7 +575,7 @@ class Nanopub:
         Furthermore, the URI the nanopub is published to is not known ahead of time.
         """
         bnode_map: dict = {}
-        for s, p, o, c in g.quads():
+        for s, p, o, c in g.quads(None):
             if isinstance(s, BNode):
                 g.remove((s, p, o, c))
                 if str(s) not in bnode_map:

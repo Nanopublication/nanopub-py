@@ -1,6 +1,6 @@
 import re
 
-from rdflib.graph import ConjunctiveGraph, Graph
+from rdflib.graph import Dataset, Graph
 from rdflib.term import BNode, URIRef
 from rdflib.util import guess_format
 
@@ -78,10 +78,9 @@ def expand_baseuri(baseuri):
     return s
 
 
-def get_quads(conjunctivegraph):
+def get_quads(dataset):
     quads = []
-    for s, p, o, c in conjunctivegraph.quads((None, None, None)):
-        g = c.identifier
+    for s, p, o, g in dataset.quads((None, None, None, None)):
         if not isinstance(g, URIRef):
             g = None
         quads.append((g, s, p, o))
@@ -89,8 +88,8 @@ def get_quads(conjunctivegraph):
     return quads
 
 
-def get_conjunctivegraph(quads):
-    cg = ConjunctiveGraph()
+def get_dataset(quads):
+    cg = Dataset()
 #     for (c, s, p, o) in quads:
 #         cg.default_context = Graph(store=cg.store, identifier=c)
 #         cg.add((s, p, o))

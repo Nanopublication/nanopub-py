@@ -155,7 +155,7 @@ def test_nanopub_index():
         description="This is my nanopub index",
         creation_time="2020-09-21T00:00:00",
         creators=["https://orcid.org/0000-0000-0000-0000"],
-        see_also="https://github.com/fair-workflows/nanopub",
+        see_also="https://github.com/Nanopublication/nanopub-py",
     )
     for np in np_list:
         assert np.source_uri is not None

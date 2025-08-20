@@ -94,14 +94,14 @@ sub:pubinfo {
 You can also easily sign and publish a Nanopublication from a file.
 
 ```python
-from rdflib import ConjunctiveGraph
+from rdflib import Dataset
 from nanopub import Nanopub, NanopubConf, load_profile
 
 # 1. Create the config
 np_conf = NanopubConf(profile=load_profile(), use_test_server=True)
 
 # 2. Load the file in a RDFLib graph
-g = ConjunctiveGraph()
+g = Dataset()
 g.parse("nanopub.trig")
 
 # 3. Make a Nanopublication object with this assertion

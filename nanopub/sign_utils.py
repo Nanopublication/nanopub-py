@@ -4,7 +4,7 @@ import requests
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
-from rdflib import BNode, ConjunctiveGraph, Graph, Literal, Namespace, URIRef
+from rdflib import BNode, Dataset, Graph, Literal, Namespace, URIRef
 
 from nanopub.definitions import NANOPUB_REGISTRY_URLS, NP_PREFIX, NP_TEMP_PREFIX
 from nanopub.namespaces import NPX
@@ -14,7 +14,7 @@ from nanopub.trustyuri.rdf.RdfPreprocessor import transform
 from nanopub.utils import MalformedNanopubError, extract_np_metadata, log
 
 
-def add_signature(g: ConjunctiveGraph, profile: Profile, dummy_namespace: Namespace, pubinfo_g: Graph) -> ConjunctiveGraph:
+def add_signature(g: Dataset, profile: Profile, dummy_namespace: Namespace, pubinfo_g: Graph) -> Dataset:
     """Implementation in python of the process to sign a nanopub with a RSA private key"""
     g.add((
         dummy_namespace["sig"],
@@ -78,7 +78,7 @@ def add_signature(g: ConjunctiveGraph, profile: Profile, dummy_namespace: Namesp
     return g
 
 
-def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: ConjunctiveGraph):
+def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Dataset):
     """Replace all references to the dummy namespace by the Trusty artefact in a Graph"""
     if str(dummy_ns).startswith(NP_TEMP_PREFIX):
         # Replace with http://purl.org/np/ if the http://purl.org/nanopub/temp/
@@ -93,9 +93,9 @@ def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Conjunct
 
     # Iterate quads in the graph, and replace by the transformed value
     bnodemap: dict = {}
-    for s, p, o, c in graph.quads():
+    for s, p, o, c in graph.quads(None):
         if c:
-            g = c.identifier
+            g = c
         else:
             raise Exception("Found a nquads without graph when replacing dummy URIs with trusty URIs. Something went wrong.")
         # new_g = Graph(identifier=str(transform(g, trusty_artefact, dummy_ns, bnodemap)))
@@ -113,7 +113,7 @@ def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Conjunct
     return graph
 
 
-def publish_graph(g: ConjunctiveGraph, use_server: str = NANOPUB_REGISTRY_URLS[0]) -> bool:
+def publish_graph(g: Dataset, use_server: str = NANOPUB_REGISTRY_URLS[0]) -> bool:
     """Publish a signed nanopub to the given nanopub server.
     """
     log.info(f"Publishing to the nanopub server {use_server}")
@@ -125,8 +125,10 @@ def publish_graph(g: ConjunctiveGraph, use_server: str = NANOPUB_REGISTRY_URLS[0
     return True
 
 
-def verify_trusty(g: ConjunctiveGraph, source_uri: str, source_namespace: Namespace) -> bool:
+def verify_trusty(g: Dataset, source_uri: str, source_namespace: Namespace) -> bool:
     """Verify Trusty URI in a nanopub Graph"""
+    if not source_uri:
+        raise ValueError("source_uri must not be None")
     source_trusty = source_uri.split('/')[-1]
     quads = RdfUtils.get_quads(g)
     expected_trusty = RdfHasher.make_hash(
@@ -140,7 +142,7 @@ def verify_trusty(g: ConjunctiveGraph, source_uri: str, source_namespace: Namesp
         return True
 
 
-def verify_signature(g: ConjunctiveGraph, source_namespace: Namespace) -> bool:
+def verify_signature(g: Dataset, source_namespace: Namespace) -> bool:
     """Verify RSA signature in a nanopub Graph"""
     # Get signature and public key from the triples
     np_sig = extract_np_metadata(g)
