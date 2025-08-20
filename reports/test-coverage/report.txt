@@ -1,0 +1,30 @@
+Name                                        Stmts   Miss Branch BrPart  Cover
+-----------------------------------------------------------------------------
+nanopub/__init__.py                            10      0      0      0   100%
+nanopub/__main__.py                           117     48     30      9    54%
+nanopub/_version.py                             1      0      0      0   100%
+nanopub/client.py                             153     37     58      7    73%
+nanopub/constants.py                            5      0      0      0   100%
+nanopub/definitions.py                         20      0      0      0   100%
+nanopub/fdo/__init__.py                         7      0      0      0   100%
+nanopub/fdo/fdo_nanopub.py                    128      5     54      7    93%
+nanopub/fdo/fdo_query.py                       22      0      8      0   100%
+nanopub/fdo/fdo_record.py                     117      5     60      7    92%
+nanopub/fdo/retrieve.py                        78      4     32      5    90%
+nanopub/fdo/update.py                          22      0      8      1    97%
+nanopub/fdo/utils.py                           30      0      2      0   100%
+nanopub/fdo/validate.py                       101     13     36     11    82%
+nanopub/namespaces.py                          23      0      0      0   100%
+nanopub/nanopub.py                            319     76    130     31    71%
+nanopub/nanopub_conf.py                        17      0      0      0   100%
+nanopub/profile.py                            129     27     22      3    79%
+nanopub/sign_utils.py                          81     12     14      2    81%
+nanopub/templates/__init__.py                   5      0      0      0   100%
+nanopub/templates/nanopub_claim.py             20      1      2      1    91%
+nanopub/templates/nanopub_index.py             46      6     14      4    83%
+nanopub/templates/nanopub_introduction.py      26      1      4      2    90%
+nanopub/templates/nanopub_retract.py           29      4     10      5    77%
+nanopub/templates/nanopub_update.py            30      4     10      5    78%
+nanopub/utils.py                               54      5     14      4    84%
+-----------------------------------------------------------------------------
+TOTAL                                        1590    248    508    104    80%

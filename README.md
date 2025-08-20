@@ -104,7 +104,9 @@ See the [development page](https://nanopublication.github.io/nanopub-py/getting-
 
 ## Tests
 
-To run tests: 
+You can find the static pages of the last test coverage report in [reports/test-coverage/](reports/test-coverage/).
+
+To run tests:
 
 Install dependencies (if not already installed):
 
@@ -143,7 +145,7 @@ coverage report
 Or generate a detailed HTML report
 
 ```
-coverage html
+coverage html -d reports/test-coverage/
 ```
 
 ## License
