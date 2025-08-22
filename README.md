@@ -142,6 +142,12 @@ View a terminal summary:
 coverage report
 ```
 
+Save it in reports directory:
+
+```
+coverage report > reports/test-coverage/index.txt
+```
+
 Or generate a detailed HTML report
 
 ```
