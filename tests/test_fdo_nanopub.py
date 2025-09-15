@@ -15,10 +15,14 @@ FAKE_STATUS = "active"
 FAKE_ATTR_VALUE = rdflib.Literal("some value")
 FAKE_ATTR_LABEL = "Test Attribute"
 
+def assert_introduces_in_pubinfo(fdo: FdoNanopub):
+    assert (fdo.metadata.np_uri, NPX.introduces, fdo.fdo_uri) in fdo.pubinfo
+
+
 def test_to_hdl_uri_with_uri_ref():
     uri_ref = rdflib.URIRef("hdl:21.T11966/test")
     result = to_hdl_uri(uri_ref)
-    assert result == uri_ref  # should return unchanged
+    assert result == uri_ref
 
 
 def test_to_hdl_uri_with_non_http_str():
@@ -42,14 +46,17 @@ def test_init_with_fdo_profile():
     fdo = FdoNanopub("21.T11966/test", "Label", fdo_profile=profile_handle)
     profile_uri = to_hdl_uri(profile_handle)
     assert (fdo.fdo_uri, rdflib.namespace.DCTERMS.conformsTo, profile_uri) in fdo.assertion
+    assert_introduces_in_pubinfo(fdo)
 
 def test_init_core_fdo_triples_no_profile():
     fdo = FdoNanopub("21.T11966/test", "NoProfile")
     assert isinstance(fdo, FdoNanopub)
+    assert_introduces_in_pubinfo(fdo)
     
 def test_init_core_fdo_triples_with_iri():
     fdo = FdoNanopub("https://example.com/fdo", "WithIri")
     assert isinstance(fdo, FdoNanopub)
+    assert_introduces_in_pubinfo(fdo)
 
 @pytest.mark.parametrize("fdo_id", [FAKE_HANDLE, HDL[FAKE_HANDLE]])
 def test_initial_fdo_triples(fdo_id):
@@ -60,7 +67,7 @@ def test_initial_fdo_triples(fdo_id):
     assert (fdo_uri, RDFS.label, rdflib.Literal(FAKE_LABEL)) in fdo.assertion
     assert (fdo_uri, FDOF.hasMetadata, fdo.metadata.np_uri) in fdo.assertion
     assert (fdo.metadata.np_uri, RDFS.label, rdflib.Literal(f"FAIR Digital Object: {FAKE_LABEL}")) in fdo.pubinfo
-    assert (fdo.metadata.np_uri, NPX.introduces, fdo_uri) in fdo.pubinfo
+    assert_introduces_in_pubinfo(fdo)
 
 @pytest.mark.parametrize("fdo_profile", [FAKE_HANDLE, HDL[FAKE_HANDLE]])
 def test_add_fdo_profile(fdo_profile):
@@ -69,6 +76,7 @@ def test_add_fdo_profile(fdo_profile):
     fdo.add_fdo_profile(fdo_profile)
     assert (fdo.fdo_uri, DCTERMS.conformsTo, uri) in fdo.assertion
     assert (HDL[FDO_PROFILE_HANDLE], RDFS.label, rdflib.Literal("FdoProfile")) in fdo.pubinfo
+    assert_introduces_in_pubinfo(fdo)
 
 @pytest.mark.parametrize("data_ref", [FAKE_HANDLE, HDL[FAKE_HANDLE]])
 def test_add_fdo_data_ref(data_ref):
@@ -77,6 +85,7 @@ def test_add_fdo_data_ref(data_ref):
     fdo.add_fdo_data_ref(data_ref)
     assert (fdo.fdo_uri, FDOF.isMaterializedBy, uri) in fdo.assertion
     assert (HDL[FDO_DATA_REF_HANDLE], RDFS.label, rdflib.Literal("DataRef")) in fdo.pubinfo
+    assert_introduces_in_pubinfo(fdo)
 
 @pytest.mark.parametrize("attr_HANDLE", [FAKE_HANDLE, HDL[FAKE_HANDLE]])
 def test_add_attribute_and_label(attr_HANDLE):
@@ -86,6 +95,7 @@ def test_add_attribute_and_label(attr_HANDLE):
     fdo.add_attribute_label(attr_HANDLE, FAKE_ATTR_LABEL)
     assert (fdo.fdo_uri, uri, FAKE_ATTR_VALUE) in fdo.assertion
     assert (uri, RDFS.label, rdflib.Literal(FAKE_ATTR_LABEL)) in fdo.pubinfo
+    assert_introduces_in_pubinfo(fdo)
     
 @pytest.mark.parametrize("extra_entry", [
     {"type": FDO_DATA_REF_HANDLE, "data": {"value": "21.T11966/dataref"}},
@@ -108,9 +118,9 @@ def test_handle_to_nanopub_branches_minimal(monkeypatch, extra_entry):
 
     np = FdoNanopub.handle_to_nanopub("21.T11966/test")
     assert isinstance(np, FdoNanopub)
-
     profile_uri = to_hdl_uri("21.T11966/profile")
     assert (np.fdo_uri, DCTERMS.conformsTo, profile_uri) in np.assertion
+    assert_introduces_in_pubinfo(np)
 
 def test_handle_to_nanopub_with_missing_value(monkeypatch):
     def fake_resolve_handle_metadata(handle):
@@ -119,6 +129,7 @@ def test_handle_to_nanopub_with_missing_value(monkeypatch):
     monkeypatch.setattr("nanopub.fdo.retrieve.resolve_handle_metadata", fake_resolve_handle_metadata)
     np = FdoNanopub.handle_to_nanopub("21.T11966/test")
     assert isinstance(np, FdoNanopub)
+    assert_introduces_in_pubinfo(np)
 
 def test_handle_to_nanopub_with_invalid_json(monkeypatch):
     extra_entry = {"type": FDO_DATA_REFS_HANDLE, "data": {"value": '{"bad_json": '}} 
@@ -135,6 +146,7 @@ def test_handle_to_nanopub_with_invalid_json(monkeypatch):
     monkeypatch.setattr("nanopub.fdo.retrieve.resolve_handle_metadata", fake_resolve_handle_metadata)
     np = FdoNanopub.handle_to_nanopub("21.T11966/test")
     assert isinstance(np, FdoNanopub)
+    assert_introduces_in_pubinfo(np)
 
 
 def make_minimal_fdo_record(label="Label", profile_uri="21.T11966/profile", dataref=None):
@@ -156,6 +168,7 @@ def test_create_with_fdo_iri_minimal():
 
     assert isinstance(np, FdoNanopub)
     assert (np.fdo_uri, FDOF.isMaterializedBy, data_ref_uri) in np.assertion
+    assert_introduces_in_pubinfo(np)
 
 def test_create_with_fdo_iri_no_label(monkeypatch):
     record = make_minimal_fdo_record(label=None)
@@ -165,6 +178,7 @@ def test_create_with_fdo_iri_no_label(monkeypatch):
         rdflib.URIRef("hdl:21.T11966/test")
     )
     assert str(np.fdo_uri).endswith("21.T11966/test")
+    assert_introduces_in_pubinfo(np)
 
 def test_create_with_fdo_iri_no_dataref():
     record = make_minimal_fdo_record(dataref=None)
@@ -172,6 +186,7 @@ def test_create_with_fdo_iri_no_dataref():
     assert isinstance(np, FdoNanopub)
     triples = list(np.assertion.triples((np.fdo_uri, FDOF.isMaterializedBy, None)))
     assert triples == []
+    assert_introduces_in_pubinfo(np)
     
 def test_create_with_fdo_iri_with_list_values():
     record = make_minimal_fdo_record()
@@ -182,6 +197,7 @@ def test_create_with_fdo_iri_with_list_values():
     np = FdoNanopub.create_with_fdo_iri(record, "21.T11966/test")
     assert (np.fdo_uri, to_hdl_uri("custom_pred"), rdflib.Literal("a")) not in np.assertion 
     assert isinstance(np, FdoNanopub)
+    assert_introduces_in_pubinfo(np)
     
 def test_create_aggregation_fdo_with_handles():
     agg_handles = ["21.T11966/data1", "21.T11966/data2"]
@@ -192,6 +208,7 @@ def test_create_aggregation_fdo_with_handles():
         aggregates=agg_handles
     )
     assert isinstance(np, FdoNanopub)
+    assert_introduces_in_pubinfo(np)
         
 def test_create_derivation_fdo_with_sources():
     sources = ["21.T11966/source1", "http://example.com/source2"]
@@ -202,3 +219,4 @@ def test_create_derivation_fdo_with_sources():
         sources=sources
     )
     assert isinstance(np, FdoNanopub)
+    assert_introduces_in_pubinfo(np)
