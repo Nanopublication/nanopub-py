@@ -34,19 +34,20 @@ class NanopubRetract(Nanopub):
         conf.add_pubinfo_generated_time = True
         conf.attribute_publication_to_profile = True
         conf.attribute_assertion_to_profile = True
-        super().__init__(
-            conf=conf,
-        )
-        if not self.profile:
-            raise ProfileError("No profile provided, cannot generate a Nanopub to retract another nanopub")
+        if not conf.profile:
+            raise ProfileError(
+                "No profile provided, cannot generate a Nanopub to retract another nanopub"
+            )
+
+        super().__init__(conf=conf)
 
         if not force:
             self._check_public_keys_match(uri)
+
         orcid_id = self.profile.orcid_id
         self.assertion.add(
             (URIRef(orcid_id), NPX.retracts, URIRef(uri))
         )
-
 
     def _check_public_keys_match(self, uri):
         """Check for matching public keys of a nanopublication with the profile.
