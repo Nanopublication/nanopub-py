@@ -3,7 +3,8 @@ from nanopub import NanopubClient, Nanopub, NanopubConf
 from nanopub.fdo.utils import looks_like_handle
 from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo import FdoNanopub
-from rdflib import RDF, URIRef, Graph
+from rdflib import RDF, URIRef, Graph, Dataset
+from nanopub.definitions import NANOPUB_FETCH_FORMAT
 from nanopub.namespaces import FDOF
 from typing import Tuple, Optional, Union, List
 
@@ -30,28 +31,54 @@ def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> FdoRec
     raise ValueError(f"FDO not found: {iri_or_handle}")
 
 
-def resolve_in_nanopub_network(iri_or_handle: Union[str, URIRef], conf: Optional[NanopubConf] = None) -> Optional[Nanopub]:
+
+def resolve_in_nanopub_network(
+    iri_or_handle: Union[str, URIRef],
+    conf: Optional[NanopubConf] = None
+) -> Optional[Nanopub]:
+
     query_id = "RAs0HI_KRAds4w_OOEMl-_ed0nZHFWdfePPXsDHf4kQkU"
     endpoint = "get-fdo-by-id"
     query_url = f"https://query.knowledgepixels.com/api/{query_id}/"
-    np = None
-    if conf is not None and conf.use_test_server:
-        fetchConf = NanopubConf(
-            use_test_server=True
-        )
-        np = Nanopub(iri_or_handle, conf=fetchConf)
-    else:
-        data = NanopubClient()._query_api_parsed(
-            params={"fdoid": str(iri_or_handle)},
-            endpoint=endpoint,
-            query_url=query_url,
-        )
-        if not data or len(data) == 0:
-            return None
+
+    if conf and conf.use_test_server:
+        fetchConf = NanopubConf(use_test_server=True)
+        return Nanopub(iri_or_handle, conf=fetchConf)
+
+    data = NanopubClient()._query_api_parsed(
+        params={"fdoid": str(iri_or_handle)},
+        endpoint=endpoint,
+        query_url=query_url,
+    )
+
+    if not data:
+        return None
+
+    np_uri = data[0].get("np")
+    if not np_uri:
+        return None
+
+    try:
+        # fetch .trig RDF
+        r = requests.get(np_uri + ".trig", allow_redirects=True)
+        r.raise_for_status()
+
+        content_type = r.headers.get("Content-Type", "").lower()
+        if "html" in content_type or r.text.lstrip().startswith("<!DOCTYPE html>"):
+            # retry with the effective URL returned by the redirect - this is a dirty workaround for the server somehow returning html when redirecting (strips out the format suffix)
+            redirected_url = r.url
+            r = requests.get(redirected_url + ".trig")
+            r.raise_for_status()
+
+            np = Nanopub(source_uri=redirected_url)
         else:
-            np_uri = data[0].get("np")
-            np = Nanopub(np_uri)
-    return np
+            np = Nanopub(source_uri=np_uri)
+        return np
+
+    except Exception as e:
+        raise ValueError(f"Could not fetch nanopub from URI: {np_uri}") from e
+
+
     
 
 def retrieve_record_from_id(iri_or_handle: str):
