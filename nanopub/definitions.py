@@ -32,6 +32,6 @@ RSA_KEY_SIZE = 2048
 NANOPUB_QUERY_URLS = [
     'https://query.knowledgepixels.com/api/',
     'https://query.petapico.org/api/',
-    'https://query.np.trustyuri.net/api/',
+    # 'https://query.np.trustyuri.net/api/',
 ]
 TEST_NANOPUB_QUERY_URL = 'https://query.knowledgepixels.com/api/' # we don't yet have a test server for this
