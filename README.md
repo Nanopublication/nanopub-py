@@ -96,7 +96,7 @@ See the [development page](https://nanopublication.github.io/nanopub-py/getting-
 
 ## Tests
 
-To run tests: 
+To run tests:
 
 Install dependencies (if not already installed):
 
@@ -148,4 +148,4 @@ nanopub-py is free software under the Apache License. See [LICENSE](LICENSE).
 - Copyright (C) 2020 Robin Richardson, Sven van der Burg
 - Copyright (C) 2020-2025 the nanopub-py contributors (https://github.com/Nanopublication/nanopub-py/graphs/contributors)
 - Copyright (C) 2025 Knowledge Pixels
-- Copyright (C) 2025 Acatech
+- Copyright (c) 2025 acatech - Deutsche Akademie der Technikwissenschaften e.V.
