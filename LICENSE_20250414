@@ -1,7 +1,7 @@
 This license applies to commits since 14 April 2025 (dae4c9c5), as dual
 licensing in addition to the license in LICENSE.
 
-Copyright (c) 2025 by acatech
+Copyright (c) 2025 acatech - Deutsche Akademie der Technikwissenschaften e.V.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,3 +20,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+## Scope of License
+
+This license applies to all components of this repository.
+While this project is licensed under the MIT License, individual dependencies may be licensed under different terms. Users should refer to the respective module documentation for specific dependency license information.
+
+## FAIR Implementation Notice
+
+While this software is MIT licensed, the implementation adheres to FAIR principles:
+- Findable: Through unique and persistent identification
+- Accessible: Via secure access and exchange mechanisms
+- Interoperable: Supporting cross-system compatibility
+- Reusable: Through sustainable data structuring
+
+## Contributing
+
+By contributing to this project, you agree that your contributions will be licensed under the MIT License. Please contact git-mission-ki@acatech.de for any questions regarding contributions or licensing.

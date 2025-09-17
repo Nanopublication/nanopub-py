@@ -166,4 +166,4 @@ The commits since 14 April 2025 (commit `dae4c9c5`) are also available under the
 - Copyright (C) 2020 Robin Richardson, Sven van der Burg
 - Copyright (C) 2020-2025 the nanopub-py contributors (https://github.com/Nanopublication/nanopub-py/graphs/contributors)
 - Copyright (C) 2025 Knowledge Pixels
-- Copyright (C) 2025 Acatech
+- Copyright (c) 2025 acatech - Deutsche Akademie der Technikwissenschaften e.V.
