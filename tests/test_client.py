@@ -64,10 +64,9 @@ class TestNanopubClient:
 
     @pytest.mark.flaky(max_runs=10)
     @skip_if_nanopub_server_unavailable
-    def test_find_nanopubs_with_text_json_not_returned(self, client):
-        results = client.find_nanopubs_with_text("\n abcdefghijklmnopqrs")
-        with pytest.raises(ValueError):
-            list(results)
+    def test_find_nanopubs_with_text_returns_empty_result_for_no_match(self, client):
+        results = list(client.find_nanopubs_with_text("\n abcdefghijklmnopqrs"))
+        assert results == [] 
 
     @pytest.mark.flaky(max_runs=10)
     @skip_if_nanopub_server_unavailable
