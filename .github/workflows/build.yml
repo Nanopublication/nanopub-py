@@ -37,21 +37,18 @@ jobs:
           poetry install --only test,dev
           poetry add ${{ matrix.rdflib-version }}
 
-      - name: Activate virtual environment
-        run: source .venv/bin/activate
-
       - name: Setup nanopub profile (including RSA keys)
         run: |
-          np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --no-publish --name test --newkeys
+          poetry run np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --no-publish --name test --newkeys
 
       - name: Test with pytest
         run: |
-          pytest --cov
+          poetry run pytest --cov
 
       - name: Publish coverage to Coveralls
         run: |
-          coverage xml
-          coveralls
+          poetry run coverage xml
+          poetry run coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.python-version }} - ${{ matrix.rdflib-version }}
