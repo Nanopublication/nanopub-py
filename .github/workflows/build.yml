@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ 3.12.4 ]
+        python-version: [ "3.12.4" ]
         rdflib-version:
           - rdflib==6.0.2
-          - rdflib>6.0.2,<7.0.0
+          - rdflib==7.1.4
 
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -25,11 +25,20 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install Poetry
+        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
+        with:
+          version: 2.2.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
       - name: Install dependencies with ${{ matrix.rdflib-version }}
-        env:
-          RDFLIB_VERSION: ${{ matrix.rdflib-version }}
         run: |
-          pip install ".[test,dev]" "$RDFLIB_VERSION"
+          poetry install --only test,dev
+          poetry add ${{ matrix.rdflib-version }}
+
+      - name: Activate virtual environment
+        run: source .venv/bin/activate
 
       - name: Setup nanopub profile (including RSA keys)
         run: |
