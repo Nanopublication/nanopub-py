@@ -801,25 +801,11 @@ files = [
 
 [[package]]
 name = "fqdn"
-version = "1.4.0"
-description = "Validate fully-qualified domain names compliant to RFC 1035 and the preferred form in RFC 3686 s. 2."
-optional = false
-python-versions = "*"
-groups = ["dev"]
-markers = "python_version >= \"3.14\""
-files = [
-    {file = "fqdn-1.4.0-py3-none-any.whl", hash = "sha256:e935616ae81c9c60a22267593fe8e6af68cecc68549cc71bb9bfbcbbcb383386"},
-    {file = "fqdn-1.4.0.tar.gz", hash = "sha256:30e8f2e685ce87cdace4712fd97c5d09f5e6fa519bbb66e8f188f6a7cb3a5c4e"},
-]
-
-[[package]]
-name = "fqdn"
 version = "1.5.1"
 description = "Validates fully-qualified domain names against RFC 1123, so that they are acceptable to modern bowsers"
 optional = false
 python-versions = ">=2.7, !=3.0, !=3.1, !=3.2, !=3.3, !=3.4, <4"
 groups = ["dev"]
-markers = "python_version < \"3.14\""
 files = [
     {file = "fqdn-1.5.1-py3-none-any.whl", hash = "sha256:3a179af3761e4df6eb2e026ff9e1a3033d3587bf980a0b1b2e1e5d08d7358014"},
     {file = "fqdn-1.5.1.tar.gz", hash = "sha256:105ed3677e767fb5ca086a0c1f4bb66ebc3c100be518f0e0d755d9eae164d89f"},
@@ -877,7 +863,6 @@ description = "HTML parser based on the WHATWG HTML specification"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "python_version < \"3.14\""
 files = [
     {file = "html5rdf-1.2.1-py2.py3-none-any.whl", hash = "sha256:1f519121bc366af3e485310dc8041d2e86e5173c1a320fac3dc9d2604069b83e"},
     {file = "html5rdf-1.2.1.tar.gz", hash = "sha256:ace9b420ce52995bb4f05e7425eedf19e433c981dfe7a831ab391e2fa2e1a195"},
@@ -2112,28 +2097,11 @@ test = ["pytest", "pytest-console-scripts", "pytest-jupyter", "pytest-tornasync"
 
 [[package]]
 name = "owlrl"
-version = "6.0.2"
-description = "OWL-RL and RDFS based RDF Closure inferencing for Python"
-optional = false
-python-versions = "*"
-groups = ["main"]
-markers = "python_version >= \"3.14\""
-files = [
-    {file = "owlrl-6.0.2-py3-none-any.whl", hash = "sha256:57eca06b221edbbc682376c8d42e2ddffc99f61e82c0da02e26735592f08bacc"},
-    {file = "owlrl-6.0.2.tar.gz", hash = "sha256:904e3310ff4df15101475776693d2427d1f8244ee9a6a9f9e13c3c57fae90b74"},
-]
-
-[package.dependencies]
-rdflib = ">=6.0.2"
-
-[[package]]
-name = "owlrl"
 version = "7.1.4"
 description = "A simple implementation of the OWL2 RL Profile, as well as a basic RDFS inference, on top of RDFLib. Based mechanical forward chaining."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
-markers = "python_version < \"3.14\""
 files = [
     {file = "owlrl-7.1.4-py3-none-any.whl", hash = "sha256:e78b46020169783345636da93a467d318f18700c483184dd15e885850cf64775"},
     {file = "owlrl-7.1.4.tar.gz", hash = "sha256:60bd4067e346b9111f0a2924565afe97ac6595b98b2bbe953928b5113971daf7"},
@@ -2153,7 +2121,6 @@ files = [
     {file = "packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484"},
     {file = "packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"},
 ]
-markers = {main = "python_version < \"3.14\""}
 
 [[package]]
 name = "paginate"
@@ -2286,7 +2253,6 @@ description = "A simple Python library for easily displaying tabular data in a v
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "python_version < \"3.14\""
 files = [
     {file = "prettytable-3.16.0-py3-none-any.whl", hash = "sha256:b5eccfabb82222f5aa46b798ff02a8452cf530a352c31bddfa29be41242863aa"},
     {file = "prettytable-3.16.0.tar.gz", hash = "sha256:3c64b31719d961bf69c9a7e03d0c1e477320906a98da63952bc6698d6164ff57"},
@@ -2518,30 +2484,11 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyshacl"
-version = "0.11.4"
-description = "Python SHACL Validator"
-optional = false
-python-versions = "*"
-groups = ["main"]
-markers = "python_version >= \"3.14\""
-files = [
-    {file = "pyshacl-0.11.4-py3-none-any.whl", hash = "sha256:5bc4340b429d0facb67463bf249e3fd248ad80c709d2c52cdbb97a262f3a9b0f"},
-    {file = "pyshacl-0.11.4.tar.gz", hash = "sha256:8ba1a80eff45fdd3488f104a407596e7b77d9471b36f5be9a5ff029258712108"},
-]
-
-[package.dependencies]
-owlrl = ">=5.2.1"
-rdflib = ">=4.2.2"
-rdflib-jsonld = "*"
-
-[[package]]
-name = "pyshacl"
 version = "0.30.1"
 description = "Python SHACL Validator"
 optional = false
 python-versions = "<4,>=3.9"
 groups = ["main"]
-markers = "python_version < \"3.14\""
 files = [
     {file = "pyshacl-0.30.1-py3-none-any.whl", hash = "sha256:d7e0c21b25e948bb643dbc5db6258da64a90a8ac89055c1fe562b469031072aa"},
     {file = "pyshacl-0.30.1.tar.gz", hash = "sha256:df712ac961b1ee7bcf0b27fa71ecab7785a135b2af69783ce30cb05fe41bcaf5"},
@@ -2868,14 +2815,14 @@ files = [
 
 [[package]]
 name = "rdflib"
-version = "7.2.1"
+version = "7.1.4"
 description = "RDFLib is a Python library for working with RDF, a simple yet powerful language for representing information."
 optional = false
-python-versions = ">=3.8.1"
+python-versions = "<4.0.0,>=3.8.1"
 groups = ["main"]
 files = [
-    {file = "rdflib-7.2.1-py3-none-any.whl", hash = "sha256:1a175bc1386a167a42fbfaba003bfa05c164a2a3ca3cb9c0c97f9c9638ca6ac2"},
-    {file = "rdflib-7.2.1.tar.gz", hash = "sha256:cf9b7fa25234e8925da8b1fb09700f8349b5f0f100e785fb4260e737308292ac"},
+    {file = "rdflib-7.1.4-py3-none-any.whl", hash = "sha256:72f4adb1990fa5241abd22ddaf36d7cafa5d91d9ff2ba13f3086d339b213d997"},
+    {file = "rdflib-7.1.4.tar.gz", hash = "sha256:fed46e24f26a788e2ab8e445f7077f00edcf95abb73bcef4b86cefa8b62dd174"},
 ]
 
 [package.dependencies]
@@ -2888,22 +2835,6 @@ html = ["html5rdf (>=1.2,<2)"]
 lxml = ["lxml (>=4.3,<6.0)"]
 networkx = ["networkx (>=2,<4)"]
 orjson = ["orjson (>=3.9.14,<4)"]
-
-[[package]]
-name = "rdflib-jsonld"
-version = "0.6.2"
-description = "rdflib extension adding JSON-LD parser and serializer"
-optional = false
-python-versions = "*"
-groups = ["main"]
-markers = "python_version >= \"3.14\""
-files = [
-    {file = "rdflib-jsonld-0.6.2.tar.gz", hash = "sha256:107cd3019d41354c31687e64af5e3fd3c3e3fa5052ce635f5ce595fd31853a63"},
-    {file = "rdflib_jsonld-0.6.2-py2.py3-none-any.whl", hash = "sha256:011afe67672353ca9978ab9a4bee964dff91f14042f2d8a28c22a573779d2f8b"},
-]
-
-[package.dependencies]
-rdflib = ">=5.0.0"
 
 [[package]]
 name = "referencing"
@@ -3544,7 +3475,6 @@ files = [
     {file = "wcwidth-0.2.14-py2.py3-none-any.whl", hash = "sha256:a7bb560c8aee30f9957e5f9895805edd20602f2d7f720186dfd906e82b4982e1"},
     {file = "wcwidth-0.2.14.tar.gz", hash = "sha256:4d478375d31bc5395a3c55c40ccdf3354688364cd61c4f6adacaa9215d0b3605"},
 ]
-markers = {main = "python_version < \"3.14\""}
 
 [[package]]
 name = "webcolors"
@@ -3617,5 +3547,5 @@ typing-extensions = "*"
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.12.0"
-content-hash = "bd8999917c6d8d0a8363b552abea95542caf42b55c91c5b2ca20afa930dd4661"
+python-versions = ">=3.12.0,<4.0.0"
+content-hash = "198c405bcaafd8c52a277599f6077bbb7c2e51cab79a5b8803b3b8b340ec7952"

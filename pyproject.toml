@@ -2,7 +2,7 @@
 name = "nanopub"
 description = "Python client for Nanopublications"
 readme = "README.md"
-requires-python = ">=3.12.0"
+requires-python = ">=3.12.0,<4.0.0"
 authors = [
     { name = "Robin Richardson", email = "r.richardson@esciencecenter.nl" },
     { name = "Djura Smits" },
@@ -79,3 +79,10 @@ Source = "https://github.com/Nanopublication/nanopub-py"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+markers = [
+    "no_rsa_key: mark a test as a test only run when there is no nanopub RSA key setup.",
+    "network: mark a test that requires network access.",
+    "flaky: mark test as flaky to rerun it on failure",
+]
