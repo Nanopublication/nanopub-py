@@ -8,30 +8,41 @@
 
 # nanopub-py
 
-The ```nanopub-py``` library provides a high-level, user-friendly Python interface for searching, publishing and retracting nanopublications.
+The ```nanopub-py``` library provides a high-level, user-friendly Python interface for searching, publishing and
+retracting nanopublications.
 
-Nanopublications are a formalized and machine-readable way of communicating the smallest possible units of publishable information. See [the documentation](https://nanopublication.github.io/nanopub-py/getting-started/what-are-nanopubs) for more information.
+Nanopublications are a formalized and machine-readable way of communicating the smallest possible units of publishable
+information. See [the documentation](https://nanopublication.github.io/nanopub-py/getting-started/what-are-nanopubs) for
+more information.
 
 # Documentation
 
 Checkout the **[user documentation 📖 ](https://nanopublication.github.io/nanopub-py)**
 
 # Setup
+
 Install using pip:
+
 ```
 pip install nanopub
 ```
 
-To publish to the nanopublication network you need to setup your profile. This allows the nanopublication services to identify you. Run the following command in the terminal:
+To publish to the nanopublication network you need to setup your profile. This allows the nanopublication services to
+identify you. Run the following command in the terminal:
+
 ```
 np setup
 ```
-This will ask you a few questions, then it will use that information to add and store RSA keys to sign your nanopublications with, (optionally) publish a nanopublication with your name and ORCID iD to declare that you are using these RSA keys, and store your ORCID iD to automatically add as author to the provenance of any nanopublication you will publish using this library.
+
+This will ask you a few questions, then it will use that information to add and store RSA keys to sign your
+nanopublications with, (optionally) publish a nanopublication with your name and ORCID iD to declare that you are using
+these RSA keys, and store your ORCID iD to automatically add as author to the provenance of any nanopublication you will
+publish using this library.
 
 ## Quick Start
 
-
 ### Publishing nanopublications
+
 ```python
 from rdflib import Graph
 from nanopub import Nanopub, NanopubConf, load_profile
@@ -39,7 +50,7 @@ from nanopub import Nanopub, NanopubConf, load_profile
 # 1. Create the config
 np_conf = NanopubConf(
     use_test_server=True,
-    profile=load_profile(), # Loads the user profile that was created with `np setup`
+    profile=load_profile(),  # Loads the user profile that was created with `np setup`
     add_prov_generated_time=True,
     attribute_publication_to_profile=True,
 )
@@ -63,8 +74,8 @@ np.publish()
 print(np)
 ```
 
-
 ### Searching for nanopublications
+
 ```python
 from nanopub import NanopubClient
 
@@ -75,6 +86,7 @@ print(results)
 ```
 
 ### Fetching nanopublications and inspecting them
+
 ```python
 # Fetch the nanopublication at the specified URI
 publication = client.fetch('http://purl.org/np/RApJG4fwj0szOMBMiYGmYvd5MCtRle6VbwkMJUb1SxxDM')
@@ -85,14 +97,12 @@ print(publication)
 # Iterate through all triples in the assertion graph
 for s, p, o in publication.assertion:
     print(s, p, o)
-
 ```
-
 
 ## Development
 
-See the [development page](https://nanopublication.github.io/nanopub-py/getting-started/development/) on the documentation website.
-
+See the [development page](https://nanopublication.github.io/nanopub-py/getting-started/development/) on the
+documentation website.
 
 ## Tests
 
@@ -101,51 +111,43 @@ To run tests:
 Install dependencies (if not already installed):
 
 ```
-pip install pytest
+poetry install
 ```
 
 Run tests:
 
 ```
-pytest
+poetry run pytest
 ```
 
 ## Test coverage
 
-To generate a test coverage report for this library:
-
-Install dependencies (if not already installed):
-
-```
-pip install coverage pytest
-```
-
 Run the tests with coverage tracking:
 
 ```
-coverage run -m pytest
+poetry run pytest --cov
 ```
 
 View a terminal summary:
 
 ```
-coverage report
+poetry run coverage report
 ```
 
 Or generate a detailed HTML report
 
 ```
-coverage html
+poetry run coverage html
 ```
 
 ## License
 
-nanopub-py is free software under the Apache License. See [LICENSE](LICENSE).
-
+`nanopub-py` is free software under the Apache License. See [LICENSE](LICENSE).
 
 ## Copyright
 
 - Copyright (C) 2020 Robin Richardson, Sven van der Burg
-- Copyright (C) 2020-2025 the nanopub-py contributors (https://github.com/Nanopublication/nanopub-py/graphs/contributors)
+- Copyright (C) 2020-2025 the nanopub-py
+  contributors (https://github.com/Nanopublication/nanopub-py/graphs/contributors)
 - Copyright (C) 2025 Knowledge Pixels
 - Copyright (c) 2025 acatech - Deutsche Akademie der Technikwissenschaften e.V.
