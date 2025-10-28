@@ -1,9 +1,0 @@
-<http://example.org/nanopub-validator-example/> <http://www.nanopub.org/nschema#hasAssertion> <http://example.org/nanopub-validator-example/assertion> <http://example.org/nanopub-validator-example/Head> .
-<http://example.org/nanopub-validator-example/> <http://www.nanopub.org/nschema#hasProvenance> <http://example.org/nanopub-validator-example/provenance> <http://example.org/nanopub-validator-example/Head> .
-<http://example.org/nanopub-validator-example/> <http://www.nanopub.org/nschema#hasPublicationInfo> <http://example.org/nanopub-validator-example/pubinfo> <http://example.org/nanopub-validator-example/Head> .
-<http://example.org/nanopub-validator-example/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.nanopub.org/nschema#Nanopublication> <http://example.org/nanopub-validator-example/Head> .
-<http://example.org/mosquito> <http://example.org/transmits> <http://example.org/malaria> <http://example.org/nanopub-validator-example/assertion> .
-<http://example.org/nanopub-validator-example/assertion> <http://www.w3.org/ns/prov#hadPrimarySource> <http://dx.doi.org/10.3233/ISU-2010-0613> <http://example.org/nanopub-validator-example/provenance> .
-<http://example.org/nanopub-validator-example/> <http://purl.org/dc/terms/created> "2014-07-24T18:05:11+01:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> <http://example.org/nanopub-validator-example/pubinfo> .
-<http://example.org/nanopub-validator-example/> <http://purl.org/pav/createdBy> <http://orcid.org/0000-0002-1267-0234> <http://example.org/nanopub-validator-example/pubinfo> .
-<http://example.org/nanopub-validator-example/> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://purl.org/nanopub/x/ExampleNanopub> <http://example.org/nanopub-validator-example/pubinfo> .
