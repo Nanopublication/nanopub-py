@@ -1,4 +1,4 @@
-[submodule "nanopub-py/tests/testsuite"]
-	path = nanopub-py/tests/testsuite
+[submodule "tests/testsuite"]
+	path = tests/testsuite
 	url = https://github.com/Nanopublication/nanopub-testsuite.git
 	branch = main
