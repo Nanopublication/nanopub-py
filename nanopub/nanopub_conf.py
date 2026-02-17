@@ -28,7 +28,7 @@ class NanopubConf:
     use_server: str = NANOPUB_REGISTRY_URLS[0]
 
     add_prov_generated_time: bool = False
-    add_pubinfo_generated_time: bool = False
+    add_pubinfo_generated_time: bool = True
 
     attribute_assertion_to_profile: bool = False
     attribute_publication_to_profile: bool = False
