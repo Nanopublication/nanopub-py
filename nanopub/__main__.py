@@ -12,7 +12,7 @@ import rdflib
 import typer
 from typer import Argument, Option
 
-from nanopub import Nanopub, NanopubClaim, NanopubConf, load_profile
+from nanopub import Nanopub, NanopubClaim, NanopubConf, NanopubRetract, load_profile
 from nanopub._version import __version__
 from nanopub.definitions import DEFAULT_PROFILE_PATH, USER_CONFIG_DIR
 from nanopub.profile import Profile, ProfileError, generate_keyfiles
@@ -105,6 +105,31 @@ def publish(
     np = Nanopub(conf=config, rdf=filepath)
     np.publish()
     print(f" 📬️ Nanopub published at \033[1m{np.source_uri}\033[0m")
+
+
+@cli.command(help='Retract  a Nanopublication')
+def retract(
+    uri: Annotated[
+        str,
+        Argument(help='URI of the nanopublication to retract.'),
+    ],
+    test: bool = typer.Option(False, help="Publish to the test server"),
+    force: bool = typer.Option(
+        False,
+        help=(
+            "Force retraction even if the publication was signed with a different public key"
+        ),
+    ),
+):
+    if test:
+        print(" 🧪 Publishing to the test server")
+    config = NanopubConf(
+        profile=load_profile(),
+        use_test_server=test,
+    )
+    np = NanopubRetract(conf=config, uri=uri, force=force)
+    np.publish()
+    print(f" 📬️ Retraction nanopub published at \033[1m{np.source_uri}\033[0m")
 
 
 
