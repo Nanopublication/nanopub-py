@@ -3,11 +3,17 @@ import tempfile
 
 import pytest
 import requests
+from nanopub_testsuite_connector import NanopubTestSuite
 
 from nanopub import NanopubConf, load_profile
 from nanopub.client import TEST_NANOPUB_QUERY_URL
 from nanopub.definitions import TEST_RESOURCES_FILEPATH
 from tests.java_wrapper import JavaWrapper
+
+
+@pytest.fixture(scope="session")
+def testsuite():
+    return NanopubTestSuite.get_latest()
 
 
 def pytest_addoption(parser):
@@ -22,11 +28,11 @@ def pytest_configure(config):
 
 skip_if_nanopub_server_unavailable = (
     pytest.mark.skipif(
-        requests.get(TEST_NANOPUB_QUERY_URL + 'RAkYh4UPJryajbtIDbLG-Bfd6A4JD2SbU9bmZdvaEdFRY/fdo-text-search?query=test').status_code != 200,
+        requests.get(
+            TEST_NANOPUB_QUERY_URL + 'RAkYh4UPJryajbtIDbLG-Bfd6A4JD2SbU9bmZdvaEdFRY/fdo-text-search?query=test').status_code != 200,
         reason='Nanopub server is unavailable'
     )
 )
-
 
 # Create a temporary profile.yml file for testing
 profile_test_path = os.path.join(tempfile.mkdtemp(), "profile.yml")
