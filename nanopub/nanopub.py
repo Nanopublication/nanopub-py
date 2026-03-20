@@ -326,7 +326,6 @@ class Nanopub:
 
     @property
     def source_uri(self):
-        # return self._source_uri
         if self._source_uri:
             return self._source_uri
         else:
@@ -383,8 +382,8 @@ class Nanopub:
 
         This is usually something like: http://purl.org/np/RAnksi2yDP7jpe7F6BwWCpMOmzBEcUImkAKUeKEY_2Yus
         """
-        for s in self._rdf.subjects(rdflib.RDF.type, NP.Nanopublication):
-            extract_trusty = re.search(r'^[a-z0-9+.-]+:\/\/[a-zA-Z0-9\/._-]+\/(RA.*)$', str(s), re.IGNORECASE)
+        for s, _, _, _ in self._rdf.quads((None, RDF.type, NP.Nanopublication, None)):
+            extract_trusty = re.search(r'^[a-z0-9+.-]+:\/\/[^\s]*?(RA[A-Za-z0-9_\-]{40,})$', str(s), re.IGNORECASE)
             if extract_trusty:
                 return str(s)
         return None
