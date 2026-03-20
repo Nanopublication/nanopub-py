@@ -23,9 +23,7 @@ def test_nanopub_sign(tc):
         rdf=Path(tc.signed.path)
     )
 
-    # print("source URI", np.source_uri)
-    # print("exp URI", expected_signed_np.source_uri)
-
-    # print("source NS", np.namespace)
-    # print("exp NS", expected_signed_np.namespace)
     assert np.source_uri == expected_signed_np.source_uri
+    assert np.metadata.trusty == expected_signed_np.metadata.trusty
+    assert np.metadata.public_key == expected_signed_np.metadata.public_key
+    assert set(np.rdf) == set(expected_signed_np.rdf)
