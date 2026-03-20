@@ -1,28 +1,31 @@
-from rdflib import Graph, Literal, URIRef
+from pathlib import Path
 
-from nanopub import Nanopub, namespaces
-from nanopub.client import DUMMY_NAMESPACE
-from nanopub.sign_utils import add_signature
-from tests.conftest import default_conf, java_wrap, profile_test
 import pytest
 
-pytest.skip("Temporary skip: test file under refactor", allow_module_level=True)
+from nanopub import Nanopub
+from tests.conftest import _suite, testsuite_conf
 
 
-def test_nanopub_sign():
-    expected_np_uri = "http://purl.org/np/RAoXkQkJe_lpMhYW61Y9mqWDHa5MAj1o4pWIiYLmAzY50"
-
-    assertion = Graph()
-    assertion.add((
-        URIRef('http://test'), namespaces.HYCL.claims, Literal('This is a test of nanopub-python')
-    ))
-
+@pytest.mark.parametrize(
+    "tc",
+    _suite.get_transform_cases("rsa-key1"),
+    ids=lambda tc: f"{tc.key_name}/{tc.plain.name}",
+)
+def test_nanopub_sign(tc):
     np = Nanopub(
-        conf=default_conf,
-        assertion=assertion
+        conf=testsuite_conf,
+        rdf=Path(tc.plain.path)
     )
-    java_np = java_wrap.sign(np)
-
     np.sign()
-    assert np.source_uri == expected_np_uri
-    assert np.source_uri == java_np
+
+    expected_signed_np = Nanopub(
+        conf=testsuite_conf,
+        rdf=Path(tc.signed.path)
+    )
+
+    # print("source URI", np.source_uri)
+    # print("exp URI", expected_signed_np.source_uri)
+
+    # print("source NS", np.namespace)
+    # print("exp NS", expected_signed_np.namespace)
+    assert np.source_uri == expected_signed_np.source_uri
