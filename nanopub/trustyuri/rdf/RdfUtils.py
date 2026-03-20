@@ -27,6 +27,9 @@ def get_trustyuri(resource, baseuri, hashstr, bnodemap):
             return str(resource)
         if suffix is None or suffix == "":
             return str(f"{prefix}{hashstr}")
+        # External trusty URI or external reference — leave untouched
+        if re.match(r'^RA[A-Za-z0-9_\-]{40,}', suffix):
+            return str(resource)
         return str(f"{prefix}{hashstr}/{suffix}")
     if isinstance(resource, BNode):
         # NOTE: bnodes are replaced in nanopub.py by _replace_blank_nodes() most of the time
@@ -47,9 +50,9 @@ def get_trustyuri(resource, baseuri, hashstr, bnodemap):
 def get_suffix(plainuri, baseuri):
     p = get_str(plainuri)
     b = get_str(baseuri)
-    if (p == b):
+    if p == b:
         return None
-    if (p.startswith(b)):
+    if p.startswith(b):
         return p[len(b):].decode('utf-8')
     return None
 
@@ -90,9 +93,6 @@ def get_quads(dataset):
 
 def get_dataset(quads):
     cg = Dataset()
-#     for (c, s, p, o) in quads:
-#         cg.default_context = Graph(store=cg.store, identifier=c)
-#         cg.add((s, p, o))
     cg.addN([(s, p, o, Graph(store=cg.store, identifier=c)) for (c, s, p, o) in quads])
     return cg
 
