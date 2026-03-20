@@ -1,10 +1,8 @@
 import pytest
-from rdflib import RDF, URIRef
 import requests
-from io import StringIO
+from rdflib import RDF, URIRef
 
 from nanopub import NanopubClient
-from nanopub.definitions import TEST_RESOURCES_FILEPATH
 from tests.conftest import skip_if_nanopub_server_unavailable
 
 PUBKEY = (
@@ -12,8 +10,6 @@ PUBKEY = (
     "VuEu0CqzwyomaSvXmfwIKeHmCGCdIrL7tMes3U3K7qJ6c3m5j9U1SDBA+d6UDGvBKSN4X8vvRHzH+PNZyeg"
     "n3Wu+liXjq+4bnGdTdhPRdRFO9DjSb+rpAfaH21md4qRhCewIDAQAB"
 )
-
-NANOPUB_SAMPLE_SIGNED = str(TEST_RESOURCES_FILEPATH / "nanopub_sample_signed.trig")
 
 
 # ----------------------
@@ -66,7 +62,7 @@ class TestNanopubClient:
     @skip_if_nanopub_server_unavailable
     def test_find_nanopubs_with_text_returns_empty_result_for_no_match(self, client):
         results = list(client.find_nanopubs_with_text("\n abcdefghijklmnopqrs"))
-        assert results == [] 
+        assert results == []
 
     @pytest.mark.flaky(max_runs=10)
     @skip_if_nanopub_server_unavailable
@@ -176,40 +172,40 @@ class TestNanopubClient:
         "test_input,expected",
         [
             (
-                {
-                    "np": {"value": "test_nanopub_uri"},
-                    "v": {"value": "test_description"},
-                    "date": {"value": "01-01-2001"},
-                },
-                {
-                    "np": "test_nanopub_uri",
-                    "description": "test_description",
-                    "date": "01-01-2001",
-                },
+                    {
+                        "np": {"value": "test_nanopub_uri"},
+                        "v": {"value": "test_description"},
+                        "date": {"value": "01-01-2001"},
+                    },
+                    {
+                        "np": "test_nanopub_uri",
+                        "description": "test_description",
+                        "date": "01-01-2001",
+                    },
             ),
             (
-                {
-                    "np": {"value": "test_nanopub_uri"},
-                    "description": {"value": "test_description"},
-                    "date": {"value": "01-01-2001"},
-                },
-                {
-                    "np": "test_nanopub_uri",
-                    "description": "test_description",
-                    "date": "01-01-2001",
-                },
+                    {
+                        "np": {"value": "test_nanopub_uri"},
+                        "description": {"value": "test_description"},
+                        "date": {"value": "01-01-2001"},
+                    },
+                    {
+                        "np": "test_nanopub_uri",
+                        "description": "test_description",
+                        "date": "01-01-2001",
+                    },
             ),
             (
-                {"np": {"value": "test_nanopub_uri"}, "date": {"value": "01-01-2001"}},
-                {"np": "test_nanopub_uri", "description": "", "date": "01-01-2001"},
+                    {"np": {"value": "test_nanopub_uri"}, "date": {"value": "01-01-2001"}},
+                    {"np": "test_nanopub_uri", "description": "", "date": "01-01-2001"},
             ),
             (
-                {
-                    "np": {"value": "test_nanopub_uri"},
-                    "date": {"value": "01-01-2001"},
-                    "irrelevant": {"value": "irrelevant_value"},
-                },
-                {"np": "test_nanopub_uri", "description": "", "date": "01-01-2001"},
+                    {
+                        "np": {"value": "test_nanopub_uri"},
+                        "date": {"value": "01-01-2001"},
+                        "irrelevant": {"value": "irrelevant_value"},
+                    },
+                    {"np": "test_nanopub_uri", "description": "", "date": "01-01-2001"},
             ),
         ],
     )
@@ -293,7 +289,7 @@ def test_query_api_try_servers_502(monkeypatch, client):
     resp, url = client._query_api_try_servers({}, "endpoint")
     assert resp.status_code == 200
     assert url == "server2"
-    
+
 
 def test_query_api_try_servers_all_fail(monkeypatch, client):
     class DummyResp:
@@ -361,8 +357,11 @@ def test_query_sparql_json_csv(monkeypatch, client):
 
     class DummySPARQLWrapper:
         def __init__(self, url): pass
+
         def setQuery(self, q): pass
+
         def setReturnFormat(self, fmt): pass
+
         def query(self):
             return DummyRes()
 
@@ -376,8 +375,11 @@ def test_query_sparql_json_csv(monkeypatch, client):
 
     class DummySPARQLWrapperCSV:
         def __init__(self, url): pass
+
         def setQuery(self, q): pass
+
         def setReturnFormat(self, fmt): pass
+
         def query(self):
             return DummyResCSV()
 

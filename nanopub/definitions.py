@@ -3,8 +3,6 @@ from pathlib import Path
 from rdflib import Namespace
 
 ROOT_FILEPATH = Path(__file__).parent.parent
-TESTS_FILEPATH = ROOT_FILEPATH / "tests"
-TEST_RESOURCES_FILEPATH = TESTS_FILEPATH / "resources"
 USER_CONFIG_DIR = Path.home() / ".nanopub"
 DEFAULT_PROFILE_PATH = USER_CONFIG_DIR / "profile.yml"
 
@@ -34,4 +32,4 @@ NANOPUB_QUERY_URLS = [
     'https://query.petapico.org/api/',
     # 'https://query.np.trustyuri.net/api/',
 ]
-TEST_NANOPUB_QUERY_URL = 'https://query.knowledgepixels.com/api/' # we don't yet have a test server for this
+TEST_NANOPUB_QUERY_URL = 'https://query.knowledgepixels.com/api/'  # we don't yet have a test server for this

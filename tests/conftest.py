@@ -7,13 +7,15 @@ from nanopub_testsuite_connector import NanopubTestSuite
 
 from nanopub import NanopubConf, load_profile
 from nanopub.client import TEST_NANOPUB_QUERY_URL
-from nanopub.definitions import TEST_RESOURCES_FILEPATH
 from tests.java_wrapper import JavaWrapper
+
+_suite = NanopubTestSuite.get_latest()
+_signing_key = _suite.get_signing_key("rsa-key1")
 
 
 @pytest.fixture(scope="session")
-def testsuite():
-    return NanopubTestSuite.get_latest()
+def testsuite() -> NanopubTestSuite:
+    return _suite
 
 
 def pytest_addoption(parser):
@@ -38,8 +40,8 @@ skip_if_nanopub_server_unavailable = (
 profile_test_path = os.path.join(tempfile.mkdtemp(), "profile.yml")
 profile_yaml = f"""orcid_id: https://orcid.org/0000-0000-0000-0000
 name: Python Tests
-public_key: {os.path.join(TEST_RESOURCES_FILEPATH, "id_rsa.pub")}
-private_key: {os.path.join(TEST_RESOURCES_FILEPATH, "id_rsa")}
+public_key: {_signing_key.public_key}
+private_key: {_signing_key.private_key}
 introduction_nanopub_uri:
 """
 with open(profile_test_path, "w") as f:
@@ -68,4 +70,4 @@ testsuite_conf = NanopubConf(
     attribute_publication_to_profile=False,
 )
 
-java_wrap = JavaWrapper(private_key=profile_test.private_key)
+java_wrap = JavaWrapper(private_key=_signing_key.private_key.read_text())
