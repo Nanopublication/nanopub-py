@@ -1,6 +1,7 @@
 import pytest
+from rdflib import URIRef
 
-from nanopub.trustyuri.rdf.RdfUtils import get_format, get_str, normalize, get_suffix
+from nanopub.trustyuri.rdf.RdfUtils import get_format, get_str, normalize, get_suffix, get_trustyuri
 
 
 class TestGetFormat:
@@ -126,3 +127,47 @@ class TestGetSuffix:
 
     def test_reversed_order_returns_none(self):
         assert get_suffix("http://example.org/foo", "http://example.org/foo#bar") is None
+
+
+class TestGetTrustyUri:
+    BASE_URI = "http://purl.org/np/"
+    ARTIFACT_CODE = "RAKzc-oGQp8ZuIijVa34ERWeD3rPzUtqNaLovtT5OgkzU"
+    TRUSTY_URI = f"{BASE_URI}{ARTIFACT_CODE}/"
+
+    def test_none_resource_returns_none(self):
+        assert get_trustyuri(None, self.BASE_URI, self.ARTIFACT_CODE, {}) is None
+
+    def test_uriref_equal_to_base_uri_returns_prefix_hash(self):
+        result = get_trustyuri(URIRef(self.BASE_URI), self.BASE_URI, self.ARTIFACT_CODE, {})
+        assert result == f"{self.BASE_URI}{self.ARTIFACT_CODE}"
+
+    def test_uriref_with_path_suffix(self):
+        result = get_trustyuri(URIRef(self.BASE_URI + "assertion"), self.BASE_URI, self.ARTIFACT_CODE, {})
+        assert result == f"{self.TRUSTY_URI}assertion"
+
+    def test_uriref_unrelated_to_base_uri_returned_unchanged(self):
+        resource = URIRef("http://anotherbase.org/something")
+        result = get_trustyuri(resource, self.BASE_URI, self.ARTIFACT_CODE, {})
+        assert result == str(resource)
+
+    def test_returns_str_not_uriref(self):
+        result = get_trustyuri(URIRef(self.BASE_URI + "Head"), self.BASE_URI, self.ARTIFACT_CODE, {})
+        assert type(result) is str
+
+    def test_plain_string_returns_none(self):
+        assert get_trustyuri("http://example.org/foo", self.BASE_URI, self.ARTIFACT_CODE, {}) is None
+
+    def test_integer_returns_none(self):
+        assert get_trustyuri(42, self.BASE_URI, self.ARTIFACT_CODE, {}) is None
+
+    def test_url_with_hash_char(self):
+        base_uri = "https//example.org/np/"
+        url_with_hash_char = f"{base_uri}{self.ARTIFACT_CODE}#"
+        result = get_trustyuri(URIRef(url_with_hash_char + "Head"), base_uri, self.ARTIFACT_CODE, {})
+        print(result)
+        assert result == f"{base_uri}{self.ARTIFACT_CODE}#Head"
+
+    def test_trusty_uri(self):
+        result = get_trustyuri(URIRef(self.TRUSTY_URI), self.BASE_URI, self.ARTIFACT_CODE, {})
+        print(result)
+        assert result == self.TRUSTY_URI
