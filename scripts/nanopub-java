@@ -11,7 +11,7 @@ function download-nanopub-jar {
   # )
   # NANOPUB_VERSION=${NANOPUB_LATEST_LOCATION##*-}
   # NANOPUB_VERSION="${NANOPUB_VERSION%"${NANOPUB_VERSION##*[![:space:]]}"}"
-  NANOPUB_VERSION=1.47
+  NANOPUB_VERSION=1.86.1
   echo "Downloading nanopub jar file version $NANOPUB_VERSION in $LIBDIR/nanopub-${NANOPUB_VERSION}-jar-with-dependencies.jar"
   curl -L --output "$LIBDIR/nanopub-${NANOPUB_VERSION}-jar-with-dependencies.jar" "https://github.com/Nanopublication/nanopub-java/releases/download/nanopub-${NANOPUB_VERSION}/nanopub-${NANOPUB_VERSION}-jar-with-dependencies.jar"
 }
