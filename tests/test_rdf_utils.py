@@ -164,10 +164,8 @@ class TestGetTrustyUri:
         base_uri = "https//example.org/np/"
         url_with_hash_char = f"{base_uri}{self.ARTIFACT_CODE}#"
         result = get_trustyuri(URIRef(url_with_hash_char + "Head"), base_uri, self.ARTIFACT_CODE, {})
-        print(result)
         assert result == f"{base_uri}{self.ARTIFACT_CODE}#Head"
 
     def test_trusty_uri(self):
         result = get_trustyuri(URIRef(self.TRUSTY_URI), self.BASE_URI, self.ARTIFACT_CODE, {})
-        print(result)
         assert result == self.TRUSTY_URI
