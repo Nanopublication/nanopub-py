@@ -292,6 +292,7 @@ class TestCreationFromTrustyNanopub:
         ds.parse(data=TRIG_FIXTURE_TRUSTY, format="trig")
         np = Nanopub(rdf=ds, conf=NanopubConf())
         assert np.source_uri == TRUSTY_URI
+        assert np.is_valid
 
     def test_source_uri_resolved_from_trusty_file(self, tmp_path):
         """source_uri should be set from the trusty URI when loaded from a file."""
@@ -299,6 +300,7 @@ class TestCreationFromTrustyNanopub:
         trig_file.write_text(TRIG_FIXTURE_TRUSTY)
         np = Nanopub(rdf=trig_file, conf=NanopubConf())
         assert np.source_uri == TRUSTY_URI
+        assert np.is_valid
 
     def test_source_uri_resolved_from_trusty_fetch(self):
         """source_uri should be set from the trusty URI in the fetched graph,
@@ -306,6 +308,7 @@ class TestCreationFromTrustyNanopub:
         with patch("nanopub.nanopub.requests.get", return_value=_make_ok_response(TRIG_FIXTURE_TRUSTY)):
             np = Nanopub(source_uri=TRUSTY_URI, conf=NanopubConf())
         assert np.source_uri == TRUSTY_URI
+        assert np.is_valid
 
     def test_metadata_np_uri_matches_trusty_uri(self):
         """Metadata np_uri should match the trusty URI declared in the graph."""
@@ -313,6 +316,7 @@ class TestCreationFromTrustyNanopub:
         ds.parse(data=TRIG_FIXTURE_TRUSTY, format="trig")
         np = Nanopub(rdf=ds, conf=NanopubConf())
         assert str(np.metadata.np_uri) == TRUSTY_URI
+        assert np.is_valid
 
     def test_all_sub_graphs_non_empty(self):
         """All four sub-graphs should be populated from a trusty trig."""
