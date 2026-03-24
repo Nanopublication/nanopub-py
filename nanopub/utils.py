@@ -84,19 +84,19 @@ WHERE {
         np_meta.public_key = row.pubkey
         np_meta.algorithm = row.algo
 
-    # Check if the nanopub URI has a trusty artefact:
-    separator_char = '/'
-    # Regex to extract base URI, separator and trusty URI (if any)
-    extract_trusty = re.search(r'^(.*?)(\/|#)?(RA.*)?$', str(np_meta.np_uri))
-    if extract_trusty:
-        base_uri = extract_trusty.group(1)
-        if extract_trusty.group(2):
-            separator_char = extract_trusty.group(2)
-        np_meta.namespace = Namespace(base_uri + separator_char)
-
-        if extract_trusty.group(3):
+        # Check if the nanopub URI has a trusty artefact:
+        default_separator_char = '/'
+        # Regex to extract base URI, separator and trusty URI (if any)
+        extract_trusty = re.search(r'^(.*?)([/#])?(RA[A-Za-z0-9_\-]+)([/#])?', str(np_meta.np_uri))
+        if extract_trusty:
+            separator_char = extract_trusty.group(2) or default_separator_char
             np_meta.trusty = extract_trusty.group(3)
-            # TODO: improve as the signed np namespace might be using / or # or .
-            np_meta.namespace = Namespace(np_meta.np_uri + '#')
+            trailing_separator = extract_trusty.group(4) or separator_char
+            np_meta.namespace = Namespace(
+                str(np_meta.np_uri).split(np_meta.trusty)[0] + np_meta.trusty + trailing_separator)
+        else:
+            # No trusty code present (e.g. temp namespace)
+            np_meta.trusty = None
+            np_meta.namespace = Namespace(str(np_meta.np_uri))
 
     return np_meta
