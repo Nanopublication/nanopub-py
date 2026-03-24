@@ -1,12 +1,18 @@
-from rdflib import Graph, Literal, URIRef
+from unittest.mock import MagicMock, patch
+
+import pytest
+from rdflib import Graph, Literal, URIRef, Dataset, Namespace
 
 from nanopub import Nanopub, namespaces
-from nanopub.client import DUMMY_NAMESPACE
-from nanopub.sign_utils import add_signature
-from tests.conftest import default_conf, java_wrap, profile_test
-import pytest
+from nanopub.sign_utils import verify_trusty
+from tests.conftest import default_conf, java_wrap
 
-pytest.skip("Temporary skip: test file under refactor", allow_module_level=True)
+
+class TestVerifyTrusty:
+
+    def test_real_uri_returns_true(self):
+        np = Nanopub(source_uri="https://w3id.org/np/RAYP7TG5JayGG1PvCTmv37Gjcfls2DFzdaXqLvpaCwsec")
+        assert verify_trusty(np.rdf, np.source_uri, np.metadata.namespace)
 
 
 def test_nanopub_sign():
