@@ -16,7 +16,7 @@ def get_trustyuri(resource, baseuri, hashstr, bnodemap):
     if np_uri.endswith('#') or np_uri.endswith('/'):
         np_uri = np_uri[:-1]
     # Extract the trusty artefact if present, or remove the trailing / if trusty not present
-    prefix = "/".join(baseuri.split('/')[:-1]) + '/'
+    prefix = "/".join(np_uri.split('/')[:-1]) + '/'
     if str(baseuri).startswith(NP_TEMP_PREFIX):
         prefix = NP_PREFIX
     if isinstance(resource, URIRef):
@@ -27,6 +27,9 @@ def get_trustyuri(resource, baseuri, hashstr, bnodemap):
             return str(resource)
         if suffix is None or suffix == "":
             return str(f"{prefix}{hashstr}")
+        # External trusty URI or external reference — leave untouched
+        if re.match(r'^RA[A-Za-z0-9_\-]{40,}', suffix):
+            return str(resource)
         return str(f"{prefix}{hashstr}/{suffix}")
     if isinstance(resource, BNode):
         # NOTE: bnodes are replaced in nanopub.py by _replace_blank_nodes() most of the time
