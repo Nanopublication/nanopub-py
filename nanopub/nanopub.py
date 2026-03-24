@@ -36,14 +36,14 @@ class Nanopub:
     """
 
     def __init__(
-        self,
-        source_uri: str = None,
-        assertion: Graph = Graph(),
-        provenance: Graph = Graph(),
-        pubinfo: Graph = Graph(),
-        rdf: Union[Dataset, Path] = None,
-        introduces_concept: BNode = None,
-        conf: NanopubConf = NanopubConf(),
+            self,
+            source_uri: str = None,
+            assertion: Graph = Graph(),
+            provenance: Graph = Graph(),
+            pubinfo: Graph = Graph(),
+            rdf: Union[Dataset, Path] = None,
+            introduces_concept: BNode = None,
+            conf: NanopubConf = NanopubConf(),
     ) -> None:
         self._profile = conf.profile
         self._source_uri = source_uri
@@ -145,7 +145,6 @@ class Nanopub:
         )
         self._handle_derived_from(derived_from=self._conf.derived_from)
 
-
     def _preformat_graph(self, g: Dataset) -> Dataset:
         """Add a few default namespaces"""
         g.bind("np", NP)
@@ -161,7 +160,6 @@ class Nanopub:
         g = self._replace_blank_nodes(g)
         return g
 
-
     def update_from_signed(self, signed_g: Dataset) -> None:
         """Update the pub RDF to the signed one"""
         self._metadata = extract_np_metadata(signed_g)
@@ -174,11 +172,11 @@ class Nanopub:
         self._provenance = Graph(self._rdf.store, self._metadata.provenance)
         self._pubinfo = Graph(self._rdf.store, self._metadata.pubinfo)
 
-
     def sign(self) -> None:
         """Sign a Nanopub object"""
         if len(self.rdf) > MAX_TRIPLES_PER_NANOPUB:
-            raise MalformedNanopubError(f"Nanopublication contains {len(self.rdf)} triples, which is more than the {MAX_TRIPLES_PER_NANOPUB} authorized")
+            raise MalformedNanopubError(
+                f"Nanopublication contains {len(self.rdf)} triples, which is more than the {MAX_TRIPLES_PER_NANOPUB} authorized")
         if not self._conf.profile:
             raise ProfileError("Profile not available, cannot sign the nanopub")
         if self._metadata.signature:
@@ -192,13 +190,12 @@ class Nanopub:
         else:
             raise MalformedNanopubError("The nanopub is not valid, cannot sign it")
 
-
     def publish(self) -> Tuple[str, str, str | None]:
         """Publish a Nanopub object"""
         if not self.source_uri:
             self.sign()
 
-        publish_graph(self.rdf, use_server=self._conf.use_server)    
+        publish_graph(self.rdf, use_server=self._conf.use_server)
         log.info(f'Published {self.source_uri} to {self._conf.use_server}')
         self.published = True
 
@@ -211,7 +208,6 @@ class Nanopub:
             return self.source_uri, self._conf.use_server, self._concept_uri
 
         return self.source_uri, self._conf.use_server
-
 
     def update(self, publish=True) -> None:
         """Re-publish an updated Nanopub object"""
@@ -231,11 +227,9 @@ class Nanopub:
         else:
             self.sign()
 
-
     def store(self, filepath: Path, format: str = 'trig') -> None:
         """Store the Nanopub object at the given path"""
         self._rdf.serialize(filepath, format=format)
-
 
     @property
     def has_valid_signature(self) -> bool:
@@ -269,7 +263,8 @@ class Nanopub:
             if len(list(self._rdf.quads((None, None, None, c)))) > 0:
                 graph_count += 1
         if graph_count != 4:
-            raise MalformedNanopubError(f"\033[1mToo many graphs found\033[0m in the provided RDF: {graph_count}. A Nanopub should have only 4 graphs (Head, assertion, provenance, pubinfo)")
+            raise MalformedNanopubError(
+                f"\033[1mToo many graphs found\033[0m in the provided RDF: {graph_count}. A Nanopub should have only 4 graphs (Head, assertion, provenance, pubinfo)")
 
         found_prov = False
         for s, p, o in self._provenance:
@@ -277,7 +272,8 @@ class Nanopub:
                 found_prov = True
                 break
         if not found_prov:
-            raise MalformedNanopubError(f"The provenance graph should contain at least one triple with the assertion graph URI as subject: \033[1m{np_meta.assertion}\033[0m")
+            raise MalformedNanopubError(
+                f"The provenance graph should contain at least one triple with the assertion graph URI as subject: \033[1m{np_meta.assertion}\033[0m")
 
         found_pubinfo = False
         for s, p, o in self._pubinfo:
@@ -285,14 +281,14 @@ class Nanopub:
                 found_pubinfo = True
                 break
         if not found_pubinfo:
-            raise MalformedNanopubError(f"The pubinfo graph should contain at least one triple that has the nanopub URI as subject: \033[1m{np_uri}\033[0m")
+            raise MalformedNanopubError(
+                f"The pubinfo graph should contain at least one triple that has the nanopub URI as subject: \033[1m{np_uri}\033[0m")
 
         # TODO: add more checks for trusty and signature
         # if self._metadata.signature:
         #     if self.has_valid_signature is False:
         #         raise MalformedNanopubError("The nanopub is not valid")
         return True
-
 
     @property
     def rdf(self) -> Dataset:
@@ -328,7 +324,6 @@ class Nanopub:
 
     @property
     def source_uri(self):
-        # return self._source_uri
         if self._source_uri:
             return self._source_uri
         else:
@@ -366,8 +361,6 @@ class Nanopub:
     def namespace(self):
         return self._metadata.namespace
 
-
-
     @property
     def introduces_concept(self):
         concepts_introduced = list()
@@ -381,19 +374,21 @@ class Nanopub:
         else:
             raise MalformedNanopubError("Nanopub introduces multiple concepts")
 
-
     @property
     def get_source_uri_from_graph(self) -> Optional[str]:
         """Get the source URI of the nanopublication from the header.
 
         This is usually something like: http://purl.org/np/RAnksi2yDP7jpe7F6BwWCpMOmzBEcUImkAKUeKEY_2Yus
         """
-        for s in self._rdf.subjects(rdflib.RDF.type, NP.Nanopublication):
-            extract_trusty = re.search(r'^[a-z0-9+.-]+:\/\/[a-zA-Z0-9\/._-]+\/(RA.*)$', str(s), re.IGNORECASE)
+        for s, _, _, _ in self._rdf.quads((None, rdflib.RDF.type, NP.Nanopublication, None)):
+            extract_trusty = re.search(
+                r'^[a-z0-9+.-]+:\/\/[a-zA-Z0-9\/._-]+\/(RA.*)$',
+                str(s),
+                re.IGNORECASE
+            )
             if extract_trusty:
                 return str(s)
         return None
-
 
     @property
     def signed_with_public_key(self) -> Optional[str]:
@@ -402,11 +397,9 @@ class Nanopub:
             return np_sig.public_key
         return None
 
-
     @property
     def is_test_publication(self) -> bool:
         return self._conf.use_test_server
-
 
     def __str__(self) -> str:
         s = ""
@@ -415,9 +408,8 @@ class Nanopub:
         s += self._rdf.serialize(format='trig')
         return s
 
-
     def _handle_generated_at_time(
-        self, add_pubinfo_generated_time: bool, add_prov_generated_time: bool
+            self, add_pubinfo_generated_time: bool, add_prov_generated_time: bool
     ) -> None:
         """Handler for `Nanopub` constructor."""
         creationtime = rdflib.Literal(datetime.now(), datatype=XSD.dateTime)
@@ -434,7 +426,6 @@ class Nanopub:
                 )
             )
 
-
     def _handle_assertion_attributed_to(self, assertion_attributed_to: Optional[str]) -> None:
         """Handler for `Nanopub` constructor."""
         if assertion_attributed_to:
@@ -447,16 +438,16 @@ class Nanopub:
                 )
             )
 
-
     def _handle_publication_attributed_to(
-        self,
-        attribute_publication_to_profile: bool,
-        publication_attributed_to: Optional[str],
+            self,
+            attribute_publication_to_profile: bool,
+            publication_attributed_to: Optional[str],
     ) -> None:
         """Handler for `Nanopub` constructor."""
         if attribute_publication_to_profile:
             if not self._profile:
-                raise MalformedNanopubError("No nanopub profile provided, but attribute_publication_to_profile is enabled")
+                raise MalformedNanopubError(
+                    "No nanopub profile provided, but attribute_publication_to_profile is enabled")
             if publication_attributed_to is None:
                 publication_attributed_to = rdflib.URIRef(self._profile.orcid_id)
             else:
@@ -468,7 +459,6 @@ class Nanopub:
                     publication_attributed_to,
                 )
             )
-
 
     def _handle_derived_from(self, derived_from: Optional[str]):
         """Handler for `Nanopub` constructor."""
@@ -495,11 +485,11 @@ class Nanopub:
             )
 
     def _validate_nanopub_arguments(
-        self,
-        derived_from: Optional[str],
-        assertion_attributed_to: Optional[str],
-        attribute_assertion_to_profile: bool,
-        introduces_concept: Optional[BNode],
+            self,
+            derived_from: Optional[str],
+            assertion_attributed_to: Optional[str],
+            attribute_assertion_to_profile: bool,
+            introduces_concept: Optional[BNode],
     ) -> None:
         """
         Validate arguments method.
@@ -523,8 +513,8 @@ class Nanopub:
 
         if self._provenance:
             if (
-                derived_from
-                and (None, PROV.wasDerivedFrom, None) in self._provenance
+                    derived_from
+                    and (None, PROV.wasDerivedFrom, None) in self._provenance
             ):
                 raise MalformedNanopubError(
                     "The provenance_rdf that you passed already contains the "
@@ -532,8 +522,8 @@ class Nanopub:
                     "derived_from argument"
                 )
             if (
-                assertion_attributed_to
-                and (None, PROV.wasAttributedTo, None) in self._provenance
+                    assertion_attributed_to
+                    and (None, PROV.wasAttributedTo, None) in self._provenance
             ):
                 raise MalformedNanopubError(
                     "The provenance_rdf that you passed already contains the "
@@ -541,8 +531,8 @@ class Nanopub:
                     "assertion_attributed_to argument"
                 )
             if (
-                attribute_assertion_to_profile
-                and (None, PROV.wasAttributedTo, None) in self._provenance
+                    attribute_assertion_to_profile
+                    and (None, PROV.wasAttributedTo, None) in self._provenance
             ):
                 raise MalformedNanopubError(
                     "The provenance_rdf that you passed already contains the "
@@ -551,15 +541,14 @@ class Nanopub:
                 )
         if self._pubinfo:
             if (
-                introduces_concept
-                and (None, NPX.introduces, None) in self._pubinfo
+                    introduces_concept
+                    and (None, NPX.introduces, None) in self._pubinfo
             ):
                 raise MalformedNanopubError(
                     "The pubinfo_rdf that you passed already contains the "
                     "npx:introduces predicate, so you cannot also use the "
                     "introduces_concept argument"
                 )
-
 
     def _replace_blank_nodes(self, g: Dataset) -> Dataset:
         """Replace blank nodes.
