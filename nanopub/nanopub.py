@@ -288,6 +288,9 @@ class Nanopub:
         # if self._metadata.signature:
         #     if self.has_valid_signature is False:
         #         raise MalformedNanopubError("The nanopub is not valid")
+        if self._metadata.trusty:
+            if not self.has_valid_trusty:
+                raise MalformedNanopubError("The trusty nanopub is not valid")
         return True
 
     @property
