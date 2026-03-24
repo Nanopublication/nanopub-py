@@ -522,12 +522,9 @@ def test_nanopub_fetch():
         assert np.is_valid
 
 
-def test_unvalid_fetch():
-    try:
-        publication = Nanopub(source_uri="http://a-real-server/example")
-        assert publication.is_valid
-    except Exception:
-        assert True
+def test_invalid_fetch():
+    with pytest.raises(Exception):
+        Nanopub(source_uri="http://a-real-server/example")
 
 
 def test_specific_file():
