@@ -123,27 +123,27 @@ class Nanopub:
                 self._pubinfo.identifier,
             ))
 
-        # Add triples to the nanopub depending on the provided NanopuConf (e.g. creator, date)
-        self._validate_nanopub_arguments(
-            introduces_concept=introduces_concept,
-            derived_from=self._conf.derived_from,
-            assertion_attributed_to=self._conf.assertion_attributed_to,
-            attribute_assertion_to_profile=self._conf.attribute_assertion_to_profile,
-            # publication_attributed_to=publication_attributed_to,
-        )
-        self._handle_generated_at_time(
-            self._conf.add_pubinfo_generated_time,
-            self._conf.add_prov_generated_time
-        )
-        assertion_attributed_to = self._conf.assertion_attributed_to
-        if self._conf.attribute_assertion_to_profile:
-            assertion_attributed_to = rdflib.URIRef(self.profile.orcid_id)
-        self._handle_assertion_attributed_to(assertion_attributed_to)
-        self._handle_publication_attributed_to(
-            self._conf.attribute_publication_to_profile,
-            self._conf.publication_attributed_to
-        )
-        self._handle_derived_from(derived_from=self._conf.derived_from)
+            # Add triples to the nanopub depending on the provided NanopuConf (e.g. creator, date)
+            self._validate_nanopub_arguments(
+                introduces_concept=introduces_concept,
+                derived_from=self._conf.derived_from,
+                assertion_attributed_to=self._conf.assertion_attributed_to,
+                attribute_assertion_to_profile=self._conf.attribute_assertion_to_profile,
+                # publication_attributed_to=publication_attributed_to,
+            )
+            self._handle_generated_at_time(
+                self._conf.add_pubinfo_generated_time,
+                self._conf.add_prov_generated_time
+            )
+            assertion_attributed_to = self._conf.assertion_attributed_to
+            if self._conf.attribute_assertion_to_profile:
+                assertion_attributed_to = rdflib.URIRef(self.profile.orcid_id)
+            self._handle_assertion_attributed_to(assertion_attributed_to)
+            self._handle_publication_attributed_to(
+                self._conf.attribute_publication_to_profile,
+                self._conf.publication_attributed_to
+            )
+            self._handle_derived_from(derived_from=self._conf.derived_from)
 
     def _preformat_graph(self, g: Dataset) -> Dataset:
         """Add a few default namespaces"""
