@@ -6,6 +6,14 @@ from rdflib.util import guess_format
 
 from nanopub.definitions import NP_PREFIX, NP_TEMP_PREFIX
 
+TRUSTY_ARTIFACT_RE = re.compile(r"^RA[A-Za-z0-9_-]{40,}$")
+
+
+def is_trusty_uri(uri: str) -> bool:
+    s = str(uri).rstrip("/#")
+    last = s.rsplit("/", 1)[-1]
+    return bool(TRUSTY_ARTIFACT_RE.match(last))
+
 
 def get_trustyuri(resource, baseuri, hashstr, bnodemap):
     """Most of the work done to normalize URIs happens here"""
@@ -15,8 +23,12 @@ def get_trustyuri(resource, baseuri, hashstr, bnodemap):
     # baseuri passed is the np namespace, np_uri is the nanopub URI without trailing # or /
     if np_uri.endswith('#') or np_uri.endswith('/'):
         np_uri = np_uri[:-1]
-    # Extract the trusty artefact if present, or remove the trailing / if trusty not present
-    prefix = "/".join(np_uri.split('/')[:-1]) + '/'
+    # Extract the trusty artifact if present, or remove the trailing / if trusty not present
+    if is_trusty_uri(baseuri):
+        trimmed = str(baseuri).rstrip("/#")
+        prefix = trimmed.rsplit("/", 1)[0] + "/"
+    else:
+        prefix = "/".join(baseuri.split('/')[:-1]) + '/'
     if str(baseuri).startswith(NP_TEMP_PREFIX):
         prefix = NP_PREFIX
     if isinstance(resource, URIRef):
@@ -28,7 +40,7 @@ def get_trustyuri(resource, baseuri, hashstr, bnodemap):
         if suffix is None or suffix == "":
             return str(f"{prefix}{hashstr}")
         # External trusty URI or external reference — leave untouched
-        if re.match(r'^RA[A-Za-z0-9_\-]{40,}', suffix):
+        if TRUSTY_ARTIFACT_RE.match(suffix.split("/", 1)[0].split("#", 1)[0]):
             return str(resource)
         return str(f"{prefix}{hashstr}/{suffix}")
     if isinstance(resource, BNode):
