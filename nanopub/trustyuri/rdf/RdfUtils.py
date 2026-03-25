@@ -5,7 +5,7 @@ from rdflib.term import BNode, URIRef
 from rdflib.util import guess_format
 
 from nanopub.definitions import NP_PREFIX, NP_TEMP_PREFIX
-from nanopub.trustyuri.TrustyUriUtils import is_trusty_uri
+from nanopub.trustyuri.TrustyUriUtils import is_trusty_uri, TRUSTY_ARTIFACT_RE
 
 
 def get_trustyuri(resource, base_uri, hashstr, bnodemap):

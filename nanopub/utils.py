@@ -88,7 +88,7 @@ WHERE {
         if np_uri_str.endswith(("#", "/")):
             default_separator_char = np_uri_str[-1]
         else:
-            default_separator_char = str(np_meta.head).strip("Head")[-1]
+            default_separator_char = str(np_meta.head).rsplit("Head", 1)[0][-1]
 
         # Check if the nanopub URI has a trusty artefact:
         # Regex to extract base URI, and trusty URI (if any)
