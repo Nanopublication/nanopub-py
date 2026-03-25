@@ -84,19 +84,25 @@ WHERE {
         np_meta.public_key = row.pubkey
         np_meta.algorithm = row.algo
 
+        np_uri_str = str(np_meta.np_uri)
+        if np_uri_str.endswith(("#", "/")):
+            default_separator_char = np_uri_str[-1]
+        else:
+            default_separator_char = str(np_meta.head).strip("Head")[-1]
+
         # Check if the nanopub URI has a trusty artefact:
-        default_separator_char = '/'
-        # Regex to extract base URI, separator and trusty URI (if any)
+        # Regex to extract base URI, and trusty URI (if any)
         extract_trusty = re.search(r'^(.*?)([/#])?(RA[A-Za-z0-9_\-]+)([/#])?', str(np_meta.np_uri))
         if extract_trusty:
-            separator_char = extract_trusty.group(2) or default_separator_char
             np_meta.trusty = extract_trusty.group(3)
-            trailing_separator = extract_trusty.group(4) or separator_char
             np_meta.namespace = Namespace(
-                str(np_meta.np_uri).split(np_meta.trusty)[0] + np_meta.trusty + trailing_separator)
+                str(np_meta.np_uri).split(np_meta.trusty)[0] + np_meta.trusty + default_separator_char)
         else:
             # No trusty code present (e.g. temp namespace)
             np_meta.trusty = None
-            np_meta.namespace = Namespace(str(np_meta.np_uri))
+            if np_uri_str.endswith(("#", "/")):
+                np_meta.namespace = Namespace(str(np_meta.np_uri))
+            else:
+                np_meta.namespace = Namespace(str(np_uri_str) + default_separator_char)
 
     return np_meta
