@@ -180,3 +180,10 @@ class TestGetTrustyUri:
         resource = URIRef(self.TRUSTY_URI + "assertion")
         result = get_trustyuri(resource, self.TRUSTY_URI, new_hash, {})
         assert result == f"{self.BASE_URI}{new_hash}/assertion"
+
+    def test_trusty_base_uri_with_suffix_and_hash_separator_strips_existing_artifact(self):
+        new_hash = "RA" + ("B" * 43)
+        TRUSTY_URI_WITH_HASH_SEPARATOR = self.BASE_URI + self.ARTIFACT_CODE + "#"
+        resource = URIRef(TRUSTY_URI_WITH_HASH_SEPARATOR + "assertion")
+        result = get_trustyuri(resource, TRUSTY_URI_WITH_HASH_SEPARATOR, new_hash, {})
+        assert result == f"{self.BASE_URI}{new_hash}#assertion"
