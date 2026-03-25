@@ -1,6 +1,7 @@
 import pytest
 from rdflib import URIRef
 
+from nanopub.definitions import NP_TEMP_PREFIX, NP_PREFIX
 from nanopub.trustyuri.rdf.RdfUtils import get_format, get_str, normalize, get_suffix, get_trustyuri
 
 
@@ -187,3 +188,12 @@ class TestGetTrustyUri:
         resource = URIRef(TRUSTY_URI_WITH_HASH_SEPARATOR + "assertion")
         result = get_trustyuri(resource, TRUSTY_URI_WITH_HASH_SEPARATOR, new_hash, {})
         assert result == f"{self.BASE_URI}{new_hash}#assertion"
+
+    def test_temp_base_uri(self):
+        result = get_trustyuri(URIRef(NP_TEMP_PREFIX), NP_TEMP_PREFIX, self.ARTIFACT_CODE, {})
+        assert result == f"{NP_PREFIX}{self.ARTIFACT_CODE}"
+
+    def test_temp_base_uri_with_suffix(self):
+        temp_base = NP_TEMP_PREFIX + "example"
+        result = get_trustyuri(URIRef(temp_base), NP_TEMP_PREFIX, self.ARTIFACT_CODE, {})
+        assert result == f"{NP_PREFIX}{self.ARTIFACT_CODE}/example"
