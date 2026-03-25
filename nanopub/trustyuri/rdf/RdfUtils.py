@@ -5,39 +5,32 @@ from rdflib.term import BNode, URIRef
 from rdflib.util import guess_format
 
 from nanopub.definitions import NP_PREFIX, NP_TEMP_PREFIX
-
-TRUSTY_ARTIFACT_RE = re.compile(r"^RA[A-Za-z0-9_-]{40,}$")
-
-
-def is_trusty_uri(uri: str) -> bool:
-    s = str(uri).rstrip("/#")
-    last = s.rsplit("/", 1)[-1]
-    return bool(TRUSTY_ARTIFACT_RE.match(last))
+from nanopub.trustyuri.TrustyUriUtils import is_trusty_uri
 
 
-def get_trustyuri(resource, baseuri, hashstr, bnodemap):
+def get_trustyuri(resource, base_uri, hashstr, bnodemap):
     """Most of the work done to normalize URIs happens here"""
     if resource is None:
         return None
-    np_uri = get_str(baseuri).decode('utf-8')
+    np_uri = get_str(base_uri).decode('utf-8')
     separator = "/"
     # baseuri passed is the np namespace, np_uri is the nanopub URI without trailing # or /
     if np_uri.endswith('#') or np_uri.endswith('/'):
         separator = np_uri[-1]
         np_uri = np_uri[:-1]
     # Extract the trusty artifact if present, or remove the trailing / if trusty not present
-    if is_trusty_uri(baseuri):
-        trimmed = str(baseuri).rstrip("/#")
+    if is_trusty_uri(base_uri):
+        trimmed = str(base_uri).rstrip("/#")
         prefix = trimmed.rsplit("/", 1)[0] + "/"
     else:
-        prefix = "/".join(baseuri.split('/')[:-1]) + '/'
-    if str(baseuri).startswith(NP_TEMP_PREFIX):
+        prefix = "/".join(base_uri.split('/')[:-1]) + '/'
+    if str(base_uri).startswith(NP_TEMP_PREFIX):
         prefix = NP_PREFIX
     if isinstance(resource, URIRef):
-        suffix = get_suffix(resource, baseuri)
+        suffix = get_suffix(resource, base_uri)
         if get_str(resource).decode('utf-8') == np_uri:
             return str(f"{prefix}{hashstr}")
-        if suffix is None and not get_str(resource).decode('utf-8') == get_str(baseuri).decode('utf-8'):
+        if suffix is None and not get_str(resource).decode('utf-8') == get_str(base_uri).decode('utf-8'):
             return str(resource)
         if suffix is None or suffix == "":
             return str(f"{prefix}{hashstr}")
@@ -109,9 +102,9 @@ def get_quads(dataset):
 
 def get_dataset(quads):
     cg = Dataset()
-#     for (c, s, p, o) in quads:
-#         cg.default_context = Graph(store=cg.store, identifier=c)
-#         cg.add((s, p, o))
+    #     for (c, s, p, o) in quads:
+    #         cg.default_context = Graph(store=cg.store, identifier=c)
+    #         cg.add((s, p, o))
     cg.addN([(s, p, o, Graph(store=cg.store, identifier=c)) for (c, s, p, o) in quads])
     return cg
 
