@@ -65,6 +65,8 @@ class Nanopub:
         if self._conf.use_server == TEST_NANOPUB_REGISTRY_URL:
             self._conf.use_test_server = True
 
+        self._bnode_count = 0
+
         # Get the nanopub RDF depending on how it is provided:
         # source URI, rdflib graph, or file
         if source_uri:
@@ -82,7 +84,7 @@ class Nanopub:
         else:
             # if provided as rdflib graph, or file
             if isinstance(rdf, Dataset):
-                self._rdf = self._preformat_graph(rdf)
+                self._rdf = self._preformat_graph(deepcopy(rdf))
                 self._metadata = extract_np_metadata(self._rdf)
             elif isinstance(rdf, Path):
                 self._rdf = self._preformat_graph(Dataset())
@@ -103,7 +105,6 @@ class Nanopub:
         self._assertion += assertion
         self._provenance += provenance
         self._pubinfo += pubinfo
-        self._bnode_count = 0
 
         # Concatenate prefixes declarations from all provided graphs in the main graph
         for user_rdf in [assertion, provenance, pubinfo]:
@@ -597,7 +598,7 @@ class Nanopub:
                 g.remove((s, p, o, c))
                 if str(o) not in bnode_map:
                     # if str(o).startswith("N") and len(str(o)) == 33:
-                    if re.match(r'^[Na-zA-Z0-9]{33}$', str(s)):
+                    if re.match(r'^[Na-zA-Z0-9]{33}$', str(o)):
                         self._bnode_count += 1
                         bnode_map[str(o)] = self._bnode_count
                     else:
