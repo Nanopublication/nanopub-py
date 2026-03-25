@@ -169,3 +169,14 @@ class TestGetTrustyUri:
     def test_trusty_uri(self):
         result = get_trustyuri(URIRef(self.TRUSTY_URI), self.BASE_URI, self.ARTIFACT_CODE, {})
         assert result == self.TRUSTY_URI
+
+    def test_trusty_base_uri_exact_resource_strips_existing_artifact(self):
+        new_hash = "RA" + ("A" * 43)
+        result = get_trustyuri(URIRef(self.TRUSTY_URI), self.TRUSTY_URI, new_hash, {})
+        assert result == f"{self.BASE_URI}{new_hash}"
+
+    def test_trusty_base_uri_with_suffix_strips_existing_artifact(self):
+        new_hash = "RA" + ("B" * 43)
+        resource = URIRef(self.TRUSTY_URI + "assertion")
+        result = get_trustyuri(resource, self.TRUSTY_URI, new_hash, {})
+        assert result == f"{self.BASE_URI}{new_hash}/assertion"
