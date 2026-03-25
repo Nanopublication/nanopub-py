@@ -38,13 +38,21 @@ class Nanopub:
     def __init__(
             self,
             source_uri: str = None,
-            assertion: Graph = Graph(),
-            provenance: Graph = Graph(),
-            pubinfo: Graph = Graph(),
+            assertion: Optional[Graph] = None,
+            provenance: Optional[Graph] = None,
+            pubinfo: Optional[Graph] = None,
             rdf: Union[Dataset, Path] = None,
             introduces_concept: BNode = None,
-            conf: NanopubConf = NanopubConf(),
+            conf: Optional[NanopubConf] = None,
     ) -> None:
+        if assertion is None:
+            assertion = Graph()
+        if provenance is None:
+            provenance = Graph()
+        if pubinfo is None:
+            pubinfo = Graph()
+        if conf is None:
+            conf = NanopubConf()
         self._profile = conf.profile
         self._source_uri = source_uri
         self._introduces_concept = introduces_concept

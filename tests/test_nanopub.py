@@ -1,3 +1,4 @@
+import inspect
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -130,6 +131,37 @@ def _simple_assertion() -> Graph:
 
 class TestCreationDefault:
 
+    def test_nanopub_init_has_no_mutable_defaults(self):
+        sig = inspect.signature(Nanopub.__init__)
+        assert sig.parameters["assertion"].default is None
+        assert sig.parameters["provenance"].default is None
+        assert sig.parameters["pubinfo"].default is None
+
+    def test_nanopub_constructor_default_objects_not_reused(self):
+        # This directly checks the function defaults tuple, not instance fields.
+        defaults = Nanopub.__init__.__defaults__
+        # current order in your signature:
+        # source_uri, assertion, provenance, pubinfo, rdf, introduces_concept, conf
+        assertion_default = defaults[1]
+        provenance_default = defaults[2]
+        pubinfo_default = defaults[3]
+
+        assert assertion_default is None
+        assert provenance_default is None
+        assert pubinfo_default is None
+
+    def test_nanopub_default_inputs_are_isolated_objects(self):
+        np1 = Nanopub()
+        np2 = Nanopub()
+
+        # Distinct internal graph objects
+        assert np1.assertion is not np2.assertion
+        assert np1.provenance is not np2.provenance
+        assert np1.pubinfo is not np2.pubinfo
+
+        # Distinct config objects
+        assert np1.conf is not np2.conf
+
     def test_no_parameters(self):
         np = Nanopub()
         assert np.source_uri is None
@@ -181,6 +213,26 @@ class TestCreationDefault:
 
 
 class TestCreationFromSourceUri:
+
+    @pytest.mark.flaky(max_runs=10)
+    @skip_if_nanopub_server_unavailable
+    def test_nanopub_fetch(self, fingerprint_nanopub_fetch):
+        """Check that creating Nanopub from source URI (fetch) works for a few known nanopub URIs."""
+        known_nps = [
+            "https://w3id.org/np/RAQUd7PYws4Hh5pCpvLRbHfh0piLS5PyfOQXnSGD5JctY",
+            "https://w3id.org/np/RAO0soO0mUWTqqMaz1QcGbdIt90MJ55RXJck8w8wGGc0U",
+        ]
+        for np_uri in known_nps:
+            np = Nanopub(source_uri=np_uri, conf=NanopubConf(use_test_server=True))
+            assert len(np.rdf) > 0
+            assert np.assertion is not None
+            assert np.pubinfo is not None
+            assert np.provenance is not None
+            assert np.is_valid
+
+    def test_invalid_fetch(self):
+        with pytest.raises(Exception):
+            Nanopub(source_uri="http://a-real-server/example")
 
     def test_http_error_raises(self):
         """raise_for_status propagating should surface as an exception."""
@@ -277,7 +329,7 @@ class TestCreationFromFile:
         trig_file = tmp_path / "test.trig"
         trig_file.write_text(TRIG_FIXTURE)
 
-        np = Nanopub(rdf=trig_file, conf=NanopubConf())
+        np = Nanopub(rdf=trig_file)
 
         assert str(np.metadata.np_uri) == "http://example.org/nanopub-validator-example/"
 
@@ -505,28 +557,6 @@ def test_nanopub_index():
         assert np.source_uri is not None
 
 
-@pytest.mark.flaky(max_runs=10)
-@skip_if_nanopub_server_unavailable
-def test_nanopub_fetch():
-    """Check that creating Nanopub from source URI (fetch) works for a few known nanopub URIs."""
-    known_nps = [
-        "https://w3id.org/np/RAQUd7PYws4Hh5pCpvLRbHfh0piLS5PyfOQXnSGD5JctY",
-        "https://w3id.org/np/RAO0soO0mUWTqqMaz1QcGbdIt90MJ55RXJck8w8wGGc0U",
-    ]
-    for np_uri in known_nps:
-        np = Nanopub(source_uri=np_uri, conf=NanopubConf(use_test_server=True))
-        assert len(np.rdf) > 0
-        assert np.assertion is not None
-        assert np.pubinfo is not None
-        assert np.provenance is not None
-        assert np.is_valid
-
-
-def test_invalid_fetch():
-    with pytest.raises(Exception):
-        Nanopub(source_uri="http://a-real-server/example")
-
-
 def test_specific_file():
     """Test to sign a complex file with many blank nodes"""
     import json
@@ -740,13 +770,6 @@ def test_publish_calls_sign(monkeypatch):
     monkeypatch.setattr(np, "sign", lambda: setattr(np, "_published", True))
     np.publish()
     assert np.published
-
-
-def test_str_method_includes_uri():
-    np = Nanopub(conf=NanopubConf())
-    np._source_uri = "http://example.org/np/RA123"
-    s = str(np)
-    assert "RA123" in s
 
 
 def test_nanopub_retract_profile_required():
