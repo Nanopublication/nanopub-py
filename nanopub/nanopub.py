@@ -91,6 +91,9 @@ class Nanopub:
             else:
                 self._rdf = self._preformat_graph(Dataset())
 
+        if self._metadata.trusty:
+            self._source_uri = str(self._metadata.np_uri)
+
         # Instantiate the different graph from the provided RDF (trig/nquads)
         self._head = Graph(self._rdf.store, self._metadata.head)
         self._assertion = Graph(self._rdf.store, self._metadata.assertion)
@@ -152,6 +155,10 @@ class Nanopub:
                 self._conf.publication_attributed_to
             )
             self._handle_derived_from(derived_from=self._conf.derived_from)
+
+            # if the newly created nanopub is trusty it means was fetched or read from a file therefore we need to ensure is a valid one and not taking that for granted
+            if self._metadata.trusty:
+                _ = self.is_valid
 
     def _preformat_graph(self, g: Dataset) -> Dataset:
         """Add a few default namespaces"""
@@ -252,9 +259,6 @@ class Nanopub:
     @property
     def is_valid(self) -> bool:
         """Check if a nanopublication is valid"""
-        np_meta = extract_np_metadata(self._rdf)
-        np_uri = np_meta.np_uri
-
         # Check if any of the graph is empty
         if len(self._head) < 1:
             raise MalformedNanopubError("The Head graph is empty")
@@ -276,21 +280,21 @@ class Nanopub:
 
         found_prov = False
         for s, p, o in self._provenance:
-            if str(s) == str(np_meta.assertion):
+            if str(s) == str(self._assertion.identifier):
                 found_prov = True
                 break
         if not found_prov:
             raise MalformedNanopubError(
-                f"The provenance graph should contain at least one triple with the assertion graph URI as subject: \033[1m{np_meta.assertion}\033[0m")
+                f"The provenance graph should contain at least one triple with the assertion graph URI as subject: \033[1m{self._assertion}\033[0m")
 
         found_pubinfo = False
         for s, p, o in self._pubinfo:
-            if str(s) == str(np_uri) or str(s) == str(np_meta.namespace):
+            if str(s) == str(self._source_uri) or str(s) == str(self._metadata.namespace):
                 found_pubinfo = True
                 break
         if not found_pubinfo:
             raise MalformedNanopubError(
-                f"The pubinfo graph should contain at least one triple that has the nanopub URI as subject: \033[1m{np_uri}\033[0m")
+                f"The pubinfo graph should contain at least one triple that has the nanopub URI as subject: \033[1m{self._source_uri}\033[0m")
 
         # TODO: add more checks for trusty and signature
         # if self._metadata.signature:
@@ -403,6 +407,7 @@ class Nanopub:
 
     @property
     def signed_with_public_key(self) -> Optional[str]:
+        # TODO to be changed
         np_sig = extract_np_metadata(self._rdf)
         if np_sig.public_key:
             return np_sig.public_key
