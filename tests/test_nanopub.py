@@ -216,7 +216,7 @@ class TestCreationFromSourceUri:
 
     @pytest.mark.flaky(max_runs=10)
     @skip_if_nanopub_server_unavailable
-    def test_nanopub_fetch(self, fingerprint_nanopub_fetch):
+    def test_nanopub_fetch(self):
         """Check that creating Nanopub from source URI (fetch) works for a few known nanopub URIs."""
         known_nps = [
             "https://w3id.org/np/RAQUd7PYws4Hh5pCpvLRbHfh0piLS5PyfOQXnSGD5JctY",
