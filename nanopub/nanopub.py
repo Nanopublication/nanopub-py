@@ -289,8 +289,9 @@ class Nanopub:
                 f"The provenance graph should contain at least one triple with the assertion graph URI as subject: \033[1m{self._assertion}\033[0m")
 
         found_pubinfo = False
+        np_uri_str = str(self._metadata.np_uri)
         for s, p, o in self._pubinfo:
-            if str(s) == str(self._source_uri) or str(s) == str(self._metadata.namespace):
+            if str(s) in (str(self._source_uri), str(self._metadata.namespace), np_uri_str):
                 found_pubinfo = True
                 break
         if not found_pubinfo:
