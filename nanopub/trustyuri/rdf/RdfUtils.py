@@ -18,10 +18,15 @@ def get_trustyuri(resource, base_uri, hashstr, bnodemap):
     if np_uri.endswith('#') or np_uri.endswith('/'):
         separator = np_uri[-1]
         np_uri = np_uri[:-1]
-    # Extract the trusty artifact if present, or remove the trailing / if trusty not present
-    if is_trusty_uri(base_uri):
-        trimmed = str(base_uri).rstrip("/#")
-        prefix = trimmed.rsplit("/", 1)[0] + "/"
+    # Extract the trusty artifact if present, or remove the trailing / if trusty not present.
+    # Use regex to find the trusty code so non-standard schemes like
+    # "base#id.RAxxxx" (where the code is not the last /-segment) are handled.
+    base_str = str(base_uri).rstrip("/#")
+    m = re.search(r'RA[A-Za-z0-9_\-]{40,}', base_str)
+    if m:
+        prefix = base_str[:m.start()]
+    elif is_trusty_uri(base_uri):
+        prefix = base_str.rsplit("/", 1)[0] + "/"
     else:
         prefix = "/".join(base_uri.split('/')[:-1]) + '/'
     if str(base_uri).startswith(NP_TEMP_PREFIX):
@@ -38,6 +43,16 @@ def get_trustyuri(resource, base_uri, hashstr, bnodemap):
         if TRUSTY_ARTIFACT_RE.match(suffix.split("/", 1)[0].split("#", 1)[0]):
             return str(resource)
 
+        # When base_uri has no trailing separator (e.g. disgenet-style
+        # "RAxxxx130_head"), the suffix is directly appended — use no
+        # separator.  For standard namespaces ending with "/" or "#" the
+        # separator was already captured above from the base_uri itself.
+        base_uri_str = get_str(base_uri).decode('utf-8')
+        if not (base_uri_str.endswith('#') or base_uri_str.endswith('/')):
+            if suffix[0] in ('#', '/'):
+                separator = suffix[0]
+            else:
+                separator = ""
         clean_suffix = suffix.lstrip("/#")
         return str(f"{prefix}{hashstr}{separator}{clean_suffix}")
     if isinstance(resource, BNode):

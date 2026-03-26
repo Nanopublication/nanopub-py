@@ -1,3 +1,4 @@
+import re
 from base64 import decodebytes, encodebytes
 
 import requests
@@ -129,7 +130,8 @@ def verify_trusty(g: Dataset, source_uri: str, source_namespace: Namespace) -> b
     """Verify Trusty URI in a nanopub Graph"""
     if not source_uri:
         raise ValueError("source_uri must not be None")
-    source_trusty = source_uri.split('/')[-1]
+    _m = re.search(r'RA[A-Za-z0-9_\-]{40,}', source_uri)
+    source_trusty = _m.group(0) if _m else source_uri.split('/')[-1]
     quads = RdfUtils.get_quads(g)
     expected_trusty = RdfHasher.make_hash(
         quads,
@@ -148,6 +150,10 @@ def verify_signature(g: Dataset, source_namespace: Namespace) -> bool:
     np_sig = extract_np_metadata(g)
     if not np_sig.signature:
         raise MalformedNanopubError("No Signature found in the nanopublication RDF")
+    if np_sig.algorithm and str(np_sig.algorithm).upper() != "RSA":
+        raise MalformedNanopubError(
+            f"Signature algorithm '{np_sig.algorithm}' is not supported, only RSA is supported"
+        )
 
     # Normalize RDF
     quads = RdfUtils.get_quads(g)

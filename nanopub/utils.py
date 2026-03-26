@@ -88,7 +88,22 @@ WHERE {
         if np_uri_str.endswith(("#", "/")):
             default_separator_char = np_uri_str[-1]
         else:
-            default_separator_char = str(np_meta.head).rsplit("Head", 1)[0][-1]
+            # Determine separator from the character immediately after the trusty
+            # code in the head graph URI (handles non-standard names like _head).
+            # Extract trusty code from np_uri first to avoid greedy regex matching
+            # the local suffix (e.g. "130_head") as part of the trusty code.
+            extract_trusty_pre = re.search(r'^(.*?)([/#])?(RA[A-Za-z0-9_\-]+)([/#])?', np_uri_str)
+            head_str = str(np_meta.head)
+            if extract_trusty_pre:
+                trusty_code_tmp = extract_trusty_pre.group(3)
+                if trusty_code_tmp in head_str:
+                    idx = head_str.index(trusty_code_tmp) + len(trusty_code_tmp)
+                    sep = head_str[idx] if idx < len(head_str) else "/"
+                    default_separator_char = sep if sep in ("#", "/") else ""
+                else:
+                    default_separator_char = head_str.rsplit("Head", 1)[0][-1]
+            else:
+                default_separator_char = head_str.rsplit("Head", 1)[0][-1]
 
         # Check if the nanopub URI has a trusty artefact:
         # Regex to extract base URI, and trusty URI (if any)
