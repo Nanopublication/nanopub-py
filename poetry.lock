@@ -2123,17 +2123,18 @@ files = [
 
 [[package]]
 name = "nanopub-testsuite-connector"
-version = "1.0.3"
+version = "1.0.4"
 description = "Python connector for the Nanopublication Test Suite"
 optional = false
 python-versions = ">=3.10"
 groups = ["test"]
 files = [
-    {file = "nanopub_testsuite_connector-1.0.3-py3-none-any.whl", hash = "sha256:09951678ce9ab464ad75594b279364d8e1082765d261c865b8a72345fb4283b1"},
+    {file = "nanopub_testsuite_connector-1.0.4-py3-none-any.whl", hash = "sha256:ecc05dfecc0dd3af9d68dc2c2c69108a566df609a6f54bed13fe1f36d27fd8e7"},
+    {file = "nanopub_testsuite_connector-1.0.4.tar.gz", hash = "sha256:97f75e7eba0979a8789ca552b18b1b656852a18ab8d32ab1a34d7f8907c3325d"},
 ]
 
 [package.dependencies]
-rdflib = ">=7.6.0"
+rdflib = ">=6.0.2"
 
 [package.source]
 type = "legacy"
@@ -3729,4 +3730,4 @@ typing-extensions = "*"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.0,<4.0.0"
-content-hash = "3be1a0ac4687264e47435353bf20684cca7d9c53065dd6ec9f124ab3851f6f24"
+content-hash = "663c6c2966b5345e3f027bede06b4755ce0bb8ba1368ad1944d79ad3ac6366c8"
