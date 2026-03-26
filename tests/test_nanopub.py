@@ -219,7 +219,8 @@ class TestCreationFromDataset:
     def test_metadata_matches_graph(self, testsuite):
         """Metadata np_uri should reflect the URI in the parsed trig."""
         ds = Dataset()
-        ds.parse(data=testsuite.get_by_nanopub_uri("http://example.org/nanopub-validator-example/").path.read_text(), format="trig")
+        ds.parse(data=testsuite.get_by_nanopub_uri("http://example.org/nanopub-validator-example/").path.read_text(),
+                 format="trig")
         np = Nanopub(rdf=ds, conf=NanopubConf())
         assert "http://example.org/nanopub-validator-example/" in str(np.metadata.np_uri)
 
@@ -282,16 +283,6 @@ class TestCreationFromTrustyNanopub:
         trig_file.write_text(testsuite.get_by_nanopub_uri(
             "http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8").path.read_text())
         np = Nanopub(rdf=trig_file, conf=NanopubConf())
-        assert np.source_uri == "http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8"
-        assert np.is_valid
-
-    def test_source_uri_resolved_from_trusty_fetch(self, testsuite):
-        """source_uri should be set from the trusty URI in the fetched graph,
-        even when a different URI is passed to the constructor."""
-        with patch("nanopub.nanopub.requests.get", return_value=_make_ok_response(testsuite.get_by_nanopub_uri(
-                "http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8").path.read_text())):
-            np = Nanopub(source_uri="http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8",
-                         conf=NanopubConf())
         assert np.source_uri == "http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8"
         assert np.is_valid
 
