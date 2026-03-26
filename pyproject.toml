@@ -36,6 +36,11 @@ dependencies = [
 [tool.poetry]
 version = "2.1.0" # base version
 
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
+
 [dependency-groups]
 test = [
     "pytest >=7.1.3",
@@ -46,7 +51,7 @@ test = [
     "flake8 >=5.0.0",
     "Flake8-pyproject >=1.2.2",
     "flaky",
-    "nanopub-testsuite-connector",
+    "nanopub-testsuite-connector>=1.0.0"
 ]
 
 docs = [
