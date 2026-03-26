@@ -1,6 +1,7 @@
 import json
+import rdflib
 import requests
-from pyshacl import validate
+from pyshacl import validate as _pyshacl_validate
 from rdflib import Graph
 from nanopub.fdo.utils import convert_jsonschema_to_shacl, looks_like_handle, fix_numeric_shacl_constraints
 from nanopub.fdo.retrieve import resolve_in_nanopub_network
@@ -77,15 +78,19 @@ def validate_fdo_record(record: FdoRecord, profile_np: FdoNanopub = None) -> Val
             return ValidationResult(False, ["SHACL shape graph could not be created."], [])
 
         graph = record.get_graph()
-        conforms, results_graph, results_text = validate(
-            graph,
-            shacl_graph=shape_graph,
-            inference="rdfs",
-            abort_on_first=False,
-            meta_shacl=False,
-            advanced=True,
-            debug=False
-        )
+        _prev_normalize = rdflib.NORMALIZE_LITERALS
+        try:
+            conforms, results_graph, results_text = _pyshacl_validate(
+                graph,
+                shacl_graph=shape_graph,
+                inference="rdfs",
+                abort_on_first=False,
+                meta_shacl=False,
+                advanced=True,
+                debug=False
+            )
+        finally:
+            rdflib.NORMALIZE_LITERALS = _prev_normalize
 
         errors = [str(o) for s, p, o in results_graph.triples((None, SH.resultMessage, None))]
         return ValidationResult(conforms, errors, [])
