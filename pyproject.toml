@@ -30,7 +30,8 @@ dependencies = [
     "yatiml",
     "pycryptodome >=3.15.0",
     "SPARQLWrapper",
-    "pyshacl"
+    "pyshacl",
+    "setuptools",
 ]
 
 [tool.poetry]

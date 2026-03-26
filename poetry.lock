@@ -3326,7 +3326,7 @@ version = "82.0.1"
 description = "Most extensible Python build backend with support for C/C++ extension modules"
 optional = false
 python-versions = ">=3.9"
-groups = ["dev"]
+groups = ["main", "dev"]
 files = [
     {file = "setuptools-82.0.1-py3-none-any.whl", hash = "sha256:a59e362652f08dcd477c78bb6e7bd9d80a7995bc73ce773050228a348ce2e5bb"},
     {file = "setuptools-82.0.1.tar.gz", hash = "sha256:7d872682c5d01cfde07da7bccc7b65469d3dca203318515ada1de5eda35efbf9"},
@@ -3730,4 +3730,4 @@ typing-extensions = "*"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.0,<4.0.0"
-content-hash = "663c6c2966b5345e3f027bede06b4755ce0bb8ba1368ad1944d79ad3ac6366c8"
+content-hash = "09e87abd667f817160f56768d76dcaaebb502ecb490c72e410832639f5f7ee60"
