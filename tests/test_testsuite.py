@@ -1,37 +1,58 @@
+from pathlib import Path
+
+import pytest
+from nanopub_testsuite_connector import NanopubTestSuite, TestSuiteSubfolder
 from rdflib import Dataset
 
 from nanopub import Nanopub
 from nanopub.utils import MalformedNanopubError
-from nanopub_testsuite_connector import NanopubTestSuite, TestSuiteSubfolder
-from tests.conftest import java_wrap, testsuite_conf
-import pytest
+from tests.conftest import java_wrap, testsuite_conf, _suite
 
 
-def test_testsuite_valid_plain(testsuite: NanopubTestSuite):
-    for entry in testsuite.get_valid(TestSuiteSubfolder.PLAIN):
-        print(f'☑️ Testing valid plain nanopub: {entry.name}')
-        np_g = Dataset()
-        np_g.parse(entry.path)
-        np = Nanopub(conf=testsuite_conf, rdf=np_g)
-        assert np.is_valid
+@pytest.mark.parametrize(
+    "entry",
+    _suite.get_valid(TestSuiteSubfolder.PLAIN),
+    ids=lambda e: e.name,
+)
+def test_testsuite_valid_plain(entry):
+    print(f"☑️ Testing valid plain nanopub: {entry.path}")
+
+    np = Nanopub(
+        conf=testsuite_conf,
+        rdf=Path(entry.path)
+    )
+    assert np.is_valid
 
 
-def test_testsuite_valid_signed(testsuite: NanopubTestSuite):
-    for entry in testsuite.get_valid(TestSuiteSubfolder.SIGNED):
-        print(f'☑️ Testing valid signed nanopub: {entry.name}')
-        np = Nanopub(conf=testsuite_conf, rdf=entry.path)
-        assert np.is_valid
-        assert np.metadata.trusty is not None
-        assert np.metadata.signature is not None
-        assert java_wrap.check_trusty_with_signature(np)
+@pytest.mark.parametrize(
+    "entry",
+    _suite.get_valid(TestSuiteSubfolder.SIGNED),
+    ids=lambda e: e.name,
+)
+def test_testsuite_valid_signed(entry):
+    print(f"☑️ Testing valid signed nanopub: {entry.path}")
+
+    np = Nanopub(conf=testsuite_conf, rdf=entry.path)
+    assert np.metadata.trusty is not None
+    assert np.metadata.signature is not None
+    assert java_wrap.check_trusty_with_signature(np)
+    assert np.is_valid
+    # TODO: we should be able to validate this signature?
+    # assert np.has_valid_signature
 
 
-def test_testsuite_valid_trusty(testsuite: NanopubTestSuite):
-    for entry in testsuite.get_valid(TestSuiteSubfolder.TRUSTY):
-        print(f'☑️ Testing valid trusty nanopub: {entry.name}')
-        np = Nanopub(conf=testsuite_conf, rdf=entry.path)
-        assert np.is_valid
-        assert np.metadata.trusty is not None
+@pytest.mark.parametrize(
+    "entry",
+    _suite.get_valid(TestSuiteSubfolder.TRUSTY),
+    ids=lambda e: e.name,
+)
+def test_testsuite_valid_trusty(entry):
+    print(f"☑️ Testing valid trusty nanopub: {entry.path}")
+
+    np = Nanopub(conf=testsuite_conf, rdf=entry.path)
+    assert np.metadata.trusty is not None
+    assert np.has_valid_trusty
+    assert np.is_valid
 
 
 def test_testsuite_sign_valid(testsuite: NanopubTestSuite):
@@ -50,22 +71,31 @@ def test_testsuite_sign_valid(testsuite: NanopubTestSuite):
         assert np.source_uri == java_np
 
 
-def test_testsuite_valid_signature(testsuite: NanopubTestSuite):
-    for entry in testsuite.get_valid(TestSuiteSubfolder.SIGNED):
-        print(f'✅ Testing validating signed nanopub: {entry.name}')
-        np = Nanopub(conf=testsuite_conf, rdf=entry.path)
-        assert np.is_valid
-        if np.metadata.algorithm and str(np.metadata.algorithm).upper() != "RSA":
-            print(f'  Skipping signature check: algorithm {np.metadata.algorithm} not supported')
-            continue
-        assert np.has_valid_signature
-        assert np.has_valid_trusty
-        assert java_wrap.check_trusty_with_signature(np)
+@pytest.mark.parametrize(
+    "tc",
+    _suite.get_transform_cases(),
+    ids=lambda tc: f"{tc.key_name}/{tc.plain.name}",
+)
+def test_testsuite_valid_signature(tc):
+    print(f"✅ Testing validating signed nanopub: {tc.signed.path}")
+    np = Nanopub(
+        conf=testsuite_conf,
+        rdf=Path(tc.signed.path)
+    )
+    assert java_wrap.check_trusty_with_signature(np)
+    assert np.has_valid_signature
+    assert np.has_valid_trusty
+    assert np.is_valid
 
 
-def test_testsuite_invalid_plain(testsuite: NanopubTestSuite):
-    for entry in testsuite.get_invalid(TestSuiteSubfolder.PLAIN):
-        print(f'❎ Testing invalid nanopub: {entry.name}')
-        with pytest.raises(MalformedNanopubError):
-            np = Nanopub(conf=testsuite_conf, rdf=entry.path)
-            np.is_valid
+@pytest.mark.parametrize(
+    "entry",
+    _suite.get_invalid(TestSuiteSubfolder.PLAIN),
+    ids=lambda e: e.name,
+)
+def test_testsuite_invalid_plain(entry):
+    print(f"❎ Testing invalid nanopub: {entry.path}")
+
+    with pytest.raises(MalformedNanopubError):
+        np = Nanopub(conf=testsuite_conf, rdf=Path(entry.path))
+        _ = np.is_valid
