@@ -2123,15 +2123,17 @@ files = [
 
 [[package]]
 name = "nanopub-testsuite-connector"
-version = "1.0.2"
+version = "1.0.3"
 description = "Python connector for the Nanopublication Test Suite"
 optional = false
 python-versions = ">=3.10"
 groups = ["test"]
 files = [
-    {file = "nanopub_testsuite_connector-1.0.2-py3-none-any.whl", hash = "sha256:10d36f43cd7b6395210b27c56ce9d6cfd0a15be5cbeb9e6a7507dd0d59d8271a"},
-    {file = "nanopub_testsuite_connector-1.0.2.tar.gz", hash = "sha256:0916c49ac3749b48ce8eb2bd9eb459a1ca3b85b71344e89fd594431c3ec58a27"},
+    {file = "nanopub_testsuite_connector-1.0.3-py3-none-any.whl", hash = "sha256:09951678ce9ab464ad75594b279364d8e1082765d261c865b8a72345fb4283b1"},
 ]
+
+[package.dependencies]
+rdflib = ">=7.6.0"
 
 [package.source]
 type = "legacy"
@@ -2679,7 +2681,7 @@ version = "3.3.2"
 description = "pyparsing - Classes and methods to define and execute parsing grammars"
 optional = false
 python-versions = ">=3.9"
-groups = ["main"]
+groups = ["main", "test"]
 files = [
     {file = "pyparsing-3.3.2-py3-none-any.whl", hash = "sha256:850ba148bd908d7e2411587e247a1e4f0327839c40e2e5e6d05a007ecc69911d"},
     {file = "pyparsing-3.3.2.tar.gz", hash = "sha256:c777f4d763f140633dcb6d8a3eda953bf7a214dc4eff598413c070bcdc117cbc"},
@@ -3053,7 +3055,7 @@ version = "7.6.0"
 description = "RDFLib is a Python library for working with RDF, a simple yet powerful language for representing information."
 optional = false
 python-versions = ">=3.8.1"
-groups = ["main"]
+groups = ["main", "test"]
 files = [
     {file = "rdflib-7.6.0-py3-none-any.whl", hash = "sha256:30c0a3ebf4c0e09215f066be7246794b6492e054e782d7ac2a34c9f70a15e0dd"},
     {file = "rdflib-7.6.0.tar.gz", hash = "sha256:6c831288d5e4a5a7ece85d0ccde9877d512a3d0f02d7c06455d00d6d0ea379df"},
@@ -3727,4 +3729,4 @@ typing-extensions = "*"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.0,<4.0.0"
-content-hash = "baa39a015ec19be6a9b99a0e1f35069dd0a784fb9bf78f4ddf8d7f319e9eed96"
+content-hash = "3be1a0ac4687264e47435353bf20684cca7d9c53065dd6ec9f124ab3851f6f24"
