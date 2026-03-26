@@ -7,6 +7,7 @@ import requests
 from nanopub import NanopubConf, load_profile
 from nanopub.client import TEST_NANOPUB_QUERY_URL
 from nanopub.definitions import TEST_RESOURCES_FILEPATH
+from nanopub_testsuite_connector import NanopubTestSuite
 from tests.java_wrapper import JavaWrapper
 
 
@@ -63,3 +64,8 @@ testsuite_conf = NanopubConf(
 )
 
 java_wrap = JavaWrapper(private_key=profile_test.private_key)
+
+
+@pytest.fixture(scope="session")
+def testsuite():
+    return NanopubTestSuite.get_latest()

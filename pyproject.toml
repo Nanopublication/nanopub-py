@@ -46,6 +46,7 @@ test = [
     "flake8 >=5.0.0",
     "Flake8-pyproject >=1.2.2",
     "flaky",
+    "nanopub-testsuite-connector",
 ]
 
 docs = [
