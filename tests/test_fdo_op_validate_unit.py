@@ -1,11 +1,11 @@
-import json
-import pytest
 from unittest.mock import patch, MagicMock
+
+import pytest
 from rdflib import URIRef, Graph, Literal, BNode
-from rdflib.namespace import DCTERMS, RDFS, RDF, SH, XSD
-from nanopub.fdo.validate import validate_fdo_record
+from rdflib.namespace import DCTERMS, RDF, SH, XSD
+
 from nanopub.fdo.fdo_record import FdoRecord
-from nanopub.fdo.fdo_nanopub import to_hdl_uri
+from nanopub.fdo.validate import validate_fdo_record
 from nanopub.namespaces import FDOF
 
 FDO_HANDLE = "21.T11966/123456789abcdef"
@@ -14,7 +14,7 @@ HDL_PREFIX = "https://hdl.handle.net/"
 
 HANDLE_METADATA = {
     "responseCode": 1,
-    "handle": "21.T11966/996c38676da9ee56f8ab", 
+    "handle": "21.T11966/996c38676da9ee56f8ab",
     "values": [
         {
             "index": 3,
@@ -65,6 +65,7 @@ JSON_SCHEMA = {
     ]
 }
 
+
 @pytest.fixture
 def valid_fdo_record():
     record = FdoRecord(
@@ -72,6 +73,7 @@ def valid_fdo_record():
         label="Example FDO",
     )
     return record
+
 
 @patch("nanopub.fdo.validate.resolve_in_nanopub_network")
 @patch("nanopub.fdo.validate.requests.get")
@@ -94,19 +96,18 @@ def test_validate_fdo_record_success(mock_get, mock_resolve, valid_fdo_record):
         else:
             raise ValueError(f"Unexpected URL: {url}")
 
-
-
     mock_get.side_effect = mock_requests_get
 
     result = validate_fdo_record(valid_fdo_record)
 
     assert result.is_valid is True
 
+
 @patch("nanopub.fdo.validate.resolve_in_nanopub_network")
 @patch("nanopub.fdo.validate.requests.get")
 def test_validate_fdo_record_failure(mock_get, mock_resolve, valid_fdo_record):
     mock_resolve.return_value = None
-    
+
     incomplete_metadata = {
         "responseCode": 1,
         "handle": FDO_HANDLE,
@@ -132,6 +133,7 @@ def test_validate_fdo_record_failure(mock_get, mock_resolve, valid_fdo_record):
     result = validate_fdo_record(valid_fdo_record)
     assert result.is_valid is False
     assert "JSON Schema entry not found in FDO profile." in result.errors
+
 
 @patch("nanopub.fdo.validate.requests.get")
 @patch("nanopub.fdo.validate.resolve_in_nanopub_network")
@@ -168,7 +170,7 @@ def test_valid_fdo_from_nanopub_network(mock_resolve, mock_get):
         return None
 
     mock_resolve.side_effect = resolve_side_effect
-    mock_get.return_value = MagicMock(status_code=200, json=lambda: HANDLE_METADATA)  
+    mock_get.return_value = MagicMock(status_code=200, json=lambda: HANDLE_METADATA)
 
     record = FdoRecord(assertion=record_graph)
     result = validate_fdo_record(record)
@@ -211,7 +213,7 @@ def test_invalid_fdo_from_nanopub_network(mock_resolve, mock_get):
         return None
 
     mock_resolve.side_effect = resolve_side_effect
-    mock_get.return_value = MagicMock(status_code=404) 
+    mock_get.return_value = MagicMock(status_code=404)
 
     record = FdoRecord(assertion=record_graph)
     result = validate_fdo_record(record)
