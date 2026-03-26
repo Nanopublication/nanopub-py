@@ -216,10 +216,11 @@ class TestCreationFromDataset:
         with pytest.raises(MalformedNanopubError):
             Nanopub(rdf=Dataset(), conf=NanopubConf())
 
-    # TODO to fix
-    def a_test_metadata_matches_graph(self, testsuite):
+    def test_metadata_matches_graph(self, testsuite):
         """Metadata np_uri should reflect the URI in the parsed trig."""
-        np = Nanopub(rdf=_make_dataset_from_trig(testsuite), conf=NanopubConf())
+        ds = Dataset()
+        ds.parse(data=testsuite.get_by_nanopub_uri("http://example.org/nanopub-validator-example/").path.read_text(), format="trig")
+        np = Nanopub(rdf=ds, conf=NanopubConf())
         assert "http://example.org/nanopub-validator-example/" in str(np.metadata.np_uri)
 
 
