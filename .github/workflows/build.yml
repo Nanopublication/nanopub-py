@@ -35,7 +35,7 @@ jobs:
 
       - name: Install dependencies with ${{ matrix.rdflib-version }}
         run: |
-          poetry install --only test,dev
+          poetry install --with test,dev
           poetry add ${{ matrix.rdflib-version }}
 
       - name: Setup nanopub profile (including RSA keys)
