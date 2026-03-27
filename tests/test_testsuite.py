@@ -6,7 +6,7 @@ from rdflib import Dataset
 
 from nanopub import Nanopub
 from nanopub.utils import MalformedNanopubError
-from tests.conftest import java_wrap, testsuite_conf, _suite
+from tests.conftest import testsuite_conf, _suite
 
 
 @pytest.mark.parametrize(
@@ -35,9 +35,9 @@ def test_testsuite_valid_signed(entry):
     np = Nanopub(conf=testsuite_conf, rdf=entry.path)
     assert np.metadata.trusty is not None
     assert np.metadata.signature is not None
-    assert java_wrap.check_trusty_with_signature(np)
-    assert np.is_valid
     assert np.has_valid_signature
+    assert np.has_valid_trusty
+    assert np.is_valid
 
 
 @pytest.mark.parametrize(
@@ -88,7 +88,6 @@ def test_testsuite_valid_signature(tc):
         conf=testsuite_conf,
         rdf=Path(tc.signed.path)
     )
-    assert java_wrap.check_trusty_with_signature(np)
     assert np.has_valid_signature
     assert np.has_valid_trusty
     assert np.is_valid
