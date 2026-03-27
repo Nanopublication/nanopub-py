@@ -1,16 +1,17 @@
 from typing import Tuple, Optional
+
+from nanopub import NanopubUpdate
 from nanopub.fdo.fdo_nanopub import FdoNanopub
 from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo.retrieve import resolve_in_nanopub_network
 from nanopub.nanopub_conf import NanopubConf
-from nanopub import NanopubUpdate
 
 
 def update_record(
-    fdo_iri: str,
-    record: FdoRecord,
-    publish: bool,
-    conf: NanopubConf
+        fdo_iri: str,
+        record: FdoRecord,
+        publish: bool,
+        conf: NanopubConf
 ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
     Update or create an FDO nanopub depending on whether a source nanopub URI is resolvable

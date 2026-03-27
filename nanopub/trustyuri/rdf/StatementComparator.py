@@ -51,19 +51,19 @@ class StatementComparator:
     def compare_literal(self, l1, l2):
         x1 = l1.encode('utf-8')
         x2 = l2.encode('utf-8')
-        if (x1 < x2):
+        if x1 < x2:
             return -1
-        if (x1 > x2):
+        if x1 > x2:
             return 1
         x1 = l1.datatype
-        if (l1.language is not None):
+        if l1.language is not None:
             x1 = None
-        if (l1.language is None and x1 is None):
+        if l1.language is None and x1 is None:
             x1 = 'http://www.w3.org/2001/XMLSchema#string'
         x2 = l2.datatype
-        if (l2.language is not None):
+        if l2.language is not None:
             x2 = None
-        if (l2.language is None and x2 is None):
+        if l2.language is None and x2 is None:
             x2 = 'http://www.w3.org/2001/XMLSchema#string'
         if (x1 is None) and (x2 is not None):
             return -1

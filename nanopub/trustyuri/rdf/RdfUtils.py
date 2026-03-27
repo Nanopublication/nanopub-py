@@ -74,9 +74,9 @@ def get_trustyuri(resource, base_uri, hashstr, bnodemap):
 def get_suffix(plainuri, baseuri):
     p = get_str(plainuri)
     b = get_str(baseuri)
-    if (p == b):
+    if p == b:
         return None
-    if (p.startswith(b)):
+    if p.startswith(b):
         return p[len(b):].decode('utf-8')
     return None
 
