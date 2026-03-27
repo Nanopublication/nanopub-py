@@ -26,7 +26,8 @@ class JavaWrapper:
         """Construct JavaWrapper.
 
         Args:
-            use_test_server: Toggle using the test nanopub server.
+            private_key (str, optional): The private key to use for signing. If not provided, it is assumed that
+                the keys are already set up in the environment (e.g. via a .nanopub_profile file).
         """
         if private_key:
             # Put keys in files (needed for nanopub-java)

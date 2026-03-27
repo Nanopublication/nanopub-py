@@ -22,18 +22,6 @@ from nanopub.utils import MalformedNanopubError, NanopubMetadata, extract_np_met
 
 
 class Nanopub:
-    """A Nanopub object, containing: the RDF that defines the nanopublication;
-    configuration for formatting and publishing the nanopub; functions for validating, signing, publishing
-
-    Attributes:
-        config (NanopubConfig): Config for the nanopub
-        rdf (rdflib.Dataset): The full RDF graph of this nanopublication (quads)
-        assertion (rdflib.Graph): The part of the graph describing the assertion.
-        pubinfo (rdflib.Graph): The part of the graph describing the publication information.
-        provenance (rdflib.Graph): The part of the graph describing the provenance.
-        source_uri (str): The URI of the nanopublication that this Publication represents (if applicable)
-        introduces_concept (rdflib.BNode): The concept that is introduced by this Publication (if applicable)
-    """
 
     def __init__(
             self,
@@ -45,6 +33,19 @@ class Nanopub:
             introduces_concept: BNode = None,
             conf: Optional[NanopubConf] = None,
     ) -> None:
+        """A Nanopub object, containing: the RDF that defines the nanopublication;
+            configuration for formatting and publishing the nanopub; functions for validating, signing, publishing
+
+            Attributes:
+                source_uri (str): The URI of the nanopublication that this Publication represents (if applicable)
+                assertion (rdflib.Graph): The part of the graph describing the assertion.
+                provenance (rdflib.Graph): The part of the graph describing the provenance.
+                pubinfo (rdflib.Graph): The part of the graph describing the publication information.
+                rdf (rdflib.Dataset): The full RDF graph of this nanopublication (quads)
+                introduces_concept (rdflib.BNode): The concept that is introduced by this Publication (if applicable)
+                conf (NanopubConfig): Config for the nanopub
+            """
+
         if assertion is None:
             assertion = Graph()
         if provenance is None:

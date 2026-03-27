@@ -25,15 +25,6 @@ class ProfileError(RuntimeError):
 
 
 class Profile:
-    """Represents a user profile.
-
-    Attributes:
-        orcid_id (str): The user's ORCID
-        name (str): The user's name
-        private_key (Optional[Union[Path, str]]): Path to the user's private key, or the key as string
-        public_key (Optional[Union[Path, str]]): Path to the user's public key, or the key as string
-        introduction_nanopub_uri (Optional[str]): URI of the user's profile nanopub
-    """
 
     def __init__(
             self,
@@ -43,7 +34,15 @@ class Profile:
             public_key: Optional[Union[Path, str]] = None,
             introduction_nanopub_uri: Optional[str] = None
     ) -> None:
-        """Create a Profile."""
+        """Represents a user profile.
+
+            Attributes:
+                orcid_id (str): The user's ORCID
+                name (str): The user's name
+                private_key (Optional[Union[Path, str]]): Path to the user's private key, or the key as string
+                public_key (Optional[Union[Path, str]]): Path to the user's public key, or the key as string
+                introduction_nanopub_uri (Optional[str]): URI of the user's profile nanopub
+            """
         self._orcid_id = orcid_id
         self._name = name
         self._introduction_nanopub_uri = introduction_nanopub_uri
@@ -64,7 +63,8 @@ class Profile:
             self._private_key = private_key
 
         if not public_key and private_key:
-            log.info('The public key was not provided when loading the Nanopub profile, generating it from the provided private key')
+            log.info(
+                'The public key was not provided when loading the Nanopub profile, generating it from the provided private key')
             key = RSA.import_key(decodebytes(self._private_key.encode()))
             self._public_key = format_key(key.publickey().export_key().decode('utf-8'))
         elif isinstance(public_key, Path):
@@ -90,7 +90,6 @@ class Profile:
         self._public_key = format_key(public_key_str)
         log.info(f"Public/private RSA key pair has been generated for {self.orcid_id} ({self.name})")
         return public_key_str
-
 
     def store(self, folder: Path = USER_CONFIG_DIR) -> str:
         """Stores the nanopub user profile. By default the profile is stored in `HOME_DIR/.nanopub/profile.yaml`.
@@ -129,7 +128,6 @@ introduction_nanopub_uri:{intro_uri}
             f.write(profile_yaml)
 
         return profile_path
-
 
     @property
     def orcid_id(self):
@@ -171,7 +169,6 @@ introduction_nanopub_uri:{intro_uri}
     def introduction_nanopub_uri(self, value):
         self._introduction_nanopub_uri = value
 
-
     def __repr__(self):
         return f"""\033[1mORCID\033[0m: {self._orcid_id}
 \033[1mName\033[0m: {self._name}
@@ -182,6 +179,7 @@ introduction_nanopub_uri:{intro_uri}
 
 class ProfileLoader(Profile):
     """A class to load a user profile from a local YAML file, only used for YAtiML."""
+
     def __init__(
             self,
             orcid_id: str,

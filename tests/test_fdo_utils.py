@@ -14,6 +14,7 @@ def test_fix_numeric_shacl_constraints():
     g.add((s, SH.minCount, Literal("5")))  # must be URIRef
     g2 = fix_numeric_shacl_constraints(g)
     for s, p, o in g2.triples((None, SH.minCount, None)):
+        assert isinstance(o, Literal)
         assert o.datatype == XSD.integer
         assert int(o) == 5
 
