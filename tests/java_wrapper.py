@@ -4,9 +4,8 @@ import tempfile
 from base64 import decodebytes
 from pathlib import Path
 
-import rdflib
 from Crypto.PublicKey import RSA
-from rdflib import Dataset
+from rdflib import Dataset, RDF
 
 from nanopub.definitions import ROOT_FILEPATH
 from nanopub.namespaces import NP
@@ -39,10 +38,11 @@ class JavaWrapper:
 
             public_key_path = os.path.join(keys_dir, "id_rsa.pub")
             key = RSA.import_key(decodebytes(private_key.encode()))
-            public_key = key.publickey().export_key().decode('utf-8').replace("-----BEGIN PUBLIC KEY-----\n", "").replace("-----END PUBLIC KEY-----", "")
+            public_key = key.publickey().export_key().decode('utf-8').replace("-----BEGIN PUBLIC KEY-----\n",
+                                                                              "").replace("-----END PUBLIC KEY-----",
+                                                                                          "")
             with open(public_key_path, "w") as f:
                 f.write(public_key)
-
 
     def _run_command(self, command):
         result = subprocess.run(command, shell=True, stderr=subprocess.PIPE)
@@ -62,7 +62,6 @@ class JavaWrapper:
         elif result.returncode != 0:
             raise RuntimeError(f'Error in nanopub-java when running {command}: {stderr}')
 
-
     def sign(self, np: Nanopub) -> str:
         tmp_dir = tempfile.mkdtemp()
         unsigned_file = os.path.join(tmp_dir, "unsigned.trig")
@@ -80,12 +79,10 @@ class JavaWrapper:
         g = Dataset()
         g.parse(signed_file, format="trig")
 
-        np_uris = list(g.subjects(predicate=rdflib.RDF.type, object=NP.Nanopublication))
+        np_uris = [s for s, p, o, c in g.quads((None, RDF.type, NP.Nanopublication, None))]
         if not np_uris:
             raise ValueError("No nanopublication found in signed file.")
-
         return str(np_uris[0])
-
 
     def check_trusty_with_signature(self, np: Nanopub) -> str:
         tmp_dir = tempfile.mkdtemp()
@@ -98,8 +95,6 @@ class JavaWrapper:
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         print(str(result.stdout))
         return "1 trusty with signature" in str(result.stdout)
-
-
 
     def _get_signed_file(self, unsigned_file: str):
         unsigned_path = Path(unsigned_file)

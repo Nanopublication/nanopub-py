@@ -1,6 +1,7 @@
 import pytest
 from rdflib import URIRef
 
+from nanopub.definitions import NP_TEMP_PREFIX, NP_PREFIX
 from nanopub.trustyuri.rdf.RdfUtils import get_format, get_str, normalize, get_suffix, get_trustyuri
 
 
@@ -164,10 +165,35 @@ class TestGetTrustyUri:
         base_uri = "https//example.org/np/"
         url_with_hash_char = f"{base_uri}{self.ARTIFACT_CODE}#"
         result = get_trustyuri(URIRef(url_with_hash_char + "Head"), base_uri, self.ARTIFACT_CODE, {})
-        print(result)
         assert result == f"{base_uri}{self.ARTIFACT_CODE}#Head"
 
     def test_trusty_uri(self):
         result = get_trustyuri(URIRef(self.TRUSTY_URI), self.BASE_URI, self.ARTIFACT_CODE, {})
-        print(result)
         assert result == self.TRUSTY_URI
+
+    def test_trusty_base_uri_exact_resource_strips_existing_artifact(self):
+        new_hash = "RA" + ("A" * 43)
+        result = get_trustyuri(URIRef(self.TRUSTY_URI), self.TRUSTY_URI, new_hash, {})
+        assert result == f"{self.BASE_URI}{new_hash}"
+
+    def test_trusty_base_uri_with_suffix_strips_existing_artifact(self):
+        new_hash = "RA" + ("B" * 43)
+        resource = URIRef(self.TRUSTY_URI + "assertion")
+        result = get_trustyuri(resource, self.TRUSTY_URI, new_hash, {})
+        assert result == f"{self.BASE_URI}{new_hash}/assertion"
+
+    def test_trusty_base_uri_with_suffix_and_hash_separator_strips_existing_artifact(self):
+        new_hash = "RA" + ("B" * 43)
+        TRUSTY_URI_WITH_HASH_SEPARATOR = self.BASE_URI + self.ARTIFACT_CODE + "#"
+        resource = URIRef(TRUSTY_URI_WITH_HASH_SEPARATOR + "assertion")
+        result = get_trustyuri(resource, TRUSTY_URI_WITH_HASH_SEPARATOR, new_hash, {})
+        assert result == f"{self.BASE_URI}{new_hash}#assertion"
+
+    def test_temp_base_uri(self):
+        result = get_trustyuri(URIRef(NP_TEMP_PREFIX), NP_TEMP_PREFIX, self.ARTIFACT_CODE, {})
+        assert result == f"{NP_PREFIX}{self.ARTIFACT_CODE}"
+
+    def test_temp_base_uri_with_suffix(self):
+        temp_base = NP_TEMP_PREFIX + "example"
+        result = get_trustyuri(URIRef(temp_base), NP_TEMP_PREFIX, self.ARTIFACT_CODE, {})
+        assert result == f"{NP_PREFIX}{self.ARTIFACT_CODE}/example"
