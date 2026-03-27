@@ -37,8 +37,7 @@ def test_testsuite_valid_signed(entry):
     assert np.metadata.signature is not None
     assert java_wrap.check_trusty_with_signature(np)
     assert np.is_valid
-    # TODO: we should be able to validate this signature?
-    # assert np.has_valid_signature
+    assert np.has_valid_signature
 
 
 @pytest.mark.parametrize(

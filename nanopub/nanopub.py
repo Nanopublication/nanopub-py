@@ -249,7 +249,7 @@ class Nanopub:
 
     @property
     def has_valid_signature(self) -> bool:
-        verify_signature(self._rdf, self._metadata.namespace)
+        verify_signature(self._rdf, self.source_uri, self._metadata.namespace)
         return True
 
     @property
@@ -298,10 +298,9 @@ class Nanopub:
             raise MalformedNanopubError(
                 f"The pubinfo graph should contain at least one triple that has the nanopub URI as subject: \033[1m{self._source_uri}\033[0m")
 
-        # TODO: add more checks for trusty and signature
-        # if self._metadata.signature:
-        #     if self.has_valid_signature is False:
-        #         raise MalformedNanopubError("The nanopub is not valid")
+        if self._metadata.signature:
+            if not self.has_valid_signature:
+                raise MalformedNanopubError("The nanopub is not valid")
         if self._metadata.trusty:
             if not self.has_valid_trusty:
                 raise MalformedNanopubError("The trusty nanopub is not valid")
@@ -409,10 +408,9 @@ class Nanopub:
 
     @property
     def signed_with_public_key(self) -> Optional[str]:
-        # TODO to be changed
-        np_sig = extract_np_metadata(self._rdf)
-        if np_sig.public_key:
-            return np_sig.public_key
+        np_pubkey = [o for _, _, o, _ in self._rdf.quads((self.namespace.sig, NPX.hasPublicKey, None, None))]
+        if np_pubkey:
+            return str(np_pubkey[0])
         return None
 
     @property
