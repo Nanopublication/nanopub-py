@@ -2123,23 +2123,18 @@ files = [
 
 [[package]]
 name = "nanopub-testsuite-connector"
-version = "1.0.4"
+version = "1.0.0"
 description = "Python connector for the Nanopublication Test Suite"
 optional = false
 python-versions = ">=3.10"
 groups = ["test"]
 files = [
-    {file = "nanopub_testsuite_connector-1.0.4-py3-none-any.whl", hash = "sha256:ecc05dfecc0dd3af9d68dc2c2c69108a566df609a6f54bed13fe1f36d27fd8e7"},
-    {file = "nanopub_testsuite_connector-1.0.4.tar.gz", hash = "sha256:97f75e7eba0979a8789ca552b18b1b656852a18ab8d32ab1a34d7f8907c3325d"},
+    {file = "nanopub_testsuite_connector-1.0.0-py3-none-any.whl", hash = "sha256:c71bfdb05bb1ba2d83c4e999bda3a1f4a667fc166135c220ec00c6aa0ca5df27"},
+    {file = "nanopub_testsuite_connector-1.0.0.tar.gz", hash = "sha256:a3e25c75abe79a6323ca8bcebe32abd9f0ef45dbc0e2b228f9189edef61cb674"},
 ]
 
 [package.dependencies]
 rdflib = ">=6.0.2"
-
-[package.source]
-type = "legacy"
-url = "https://test.pypi.org/simple"
-reference = "testpypi"
 
 [[package]]
 name = "nbclient"
@@ -3730,4 +3725,4 @@ typing-extensions = "*"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12.0,<4.0.0"
-content-hash = "c145738d1ef7d91a6a5cf5523abdae9d9cba8f14b568e30bedd1fb269650627b"
+content-hash = "7ea8eb3f0efaf1de84e65b0a564fd904714abf2b8ba1734fd55dfdf18313b8f1"
