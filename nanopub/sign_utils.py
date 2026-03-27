@@ -12,7 +12,7 @@ from nanopub.namespaces import NPX
 from nanopub.profile import Profile
 from nanopub.trustyuri.rdf import RdfHasher, RdfUtils
 from nanopub.trustyuri.rdf.RdfPreprocessor import transform
-from nanopub.utils import MalformedNanopubError, extract_np_metadata, log
+from nanopub.utils import MalformedNanopubError, log
 
 
 def add_signature(g: Dataset, profile: Profile, dummy_namespace: Namespace, pubinfo_g: Graph) -> Dataset:
@@ -144,16 +144,31 @@ def verify_trusty(g: Dataset, source_uri: str, source_namespace: Namespace) -> b
         return True
 
 
-def verify_signature(g: Dataset, source_namespace: Namespace) -> bool:
+def verify_signature(g: Dataset, source_uri: str, source_namespace: Namespace) -> bool:
     """Verify RSA signature in a nanopub Graph"""
     # Get signature and public key from the triples
-    np_sig = extract_np_metadata(g)
-    if not np_sig.signature:
+    np_signature_target = [s for s, _, _, _ in g.quads((None, NPX.hasSignatureTarget, URIRef(source_uri), None))]
+    if not np_signature_target:
+        raise MalformedNanopubError("No Signature targeting the '{source_uri}' nanopublication")
+
+    np_signature_target = np_signature_target[0]
+
+    np_sign = [o for _, _, o, _ in g.quads((np_signature_target, NPX.hasSignature, None, None))]
+    if not np_sign:
         raise MalformedNanopubError("No Signature found in the nanopublication RDF")
-    if np_sig.algorithm and str(np_sig.algorithm).upper() != "RSA":
-        raise MalformedNanopubError(
-            f"Signature algorithm '{np_sig.algorithm}' is not supported, only RSA is supported"
-        )
+
+    np_sign = np_sign[0]
+
+    np_algo = [o for _, _, o, _ in g.quads((np_signature_target, NPX.hasAlgorithm, None, None))][0]
+    if np_algo and str(np_algo).upper() != "RSA":
+        if np_algo and str(np_algo).upper() == "DSA":
+            # TODO implement DSA signature verification
+            log.info("DSA signature algorithm is not supported yet, skipping signature verification")
+            return True
+        else:
+            raise MalformedNanopubError(
+                f"Signature algorithm '{np_algo}' is not supported, only RSA is supported"
+            )
 
     # Normalize RDF
     quads = RdfUtils.get_quads(g)
@@ -162,13 +177,13 @@ def verify_signature(g: Dataset, source_namespace: Namespace) -> bool:
         baseuri=str(source_namespace),
         hashstr=" "
     )
-
+    np_pubkey = [o for _, _, o, _ in g.quads((np_signature_target, NPX.hasPublicKey, None, None))][0]
     # Verify signature using the normalized RDF
-    key = RSA.import_key(decodebytes(str(np_sig.public_key).encode()))
+    key = RSA.import_key(decodebytes(str(np_pubkey).encode()))
     hash_value = SHA256.new(normed_rdf.encode())
     verifier = PKCS1_v1_5.new(key)
     try:
-        verifier.verify(hash_value, decodebytes(np_sig.signature.encode()))
+        verifier.verify(hash_value, decodebytes(str(np_sign).encode()))
         return True
     except Exception as e:
         raise MalformedNanopubError(e)
