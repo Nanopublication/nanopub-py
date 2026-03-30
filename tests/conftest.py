@@ -7,7 +7,6 @@ from nanopub_testsuite_connector import NanopubTestSuite
 
 from nanopub import NanopubConf, load_profile
 from nanopub.client import TEST_NANOPUB_QUERY_URL
-from tests.java_wrapper import JavaWrapper
 
 _suite = NanopubTestSuite.get_latest()
 _signing_key = _suite.get_signing_key("rsa-key1")
@@ -69,5 +68,3 @@ testsuite_conf = NanopubConf(
     attribute_assertion_to_profile=False,
     attribute_publication_to_profile=False,
 )
-
-java_wrap = JavaWrapper(private_key=profile_test.private_key)
