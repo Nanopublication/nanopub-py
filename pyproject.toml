@@ -24,17 +24,22 @@ classifiers = [
 dynamic = ["version"]
 
 dependencies = [
-    "rdflib >=6.0.2",
+    "rdflib >=6.3.2",
     "requests",
     "typer",
     "yatiml",
     "pycryptodome >=3.15.0",
     "SPARQLWrapper",
-    "pyshacl"
+    "pyshacl>=0.28.1",
 ]
 
 [tool.poetry]
 version = "2.1.0" # base version
+
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+priority = "supplemental"
 
 [dependency-groups]
 test = [
@@ -46,6 +51,7 @@ test = [
     "flake8 >=5.0.0",
     "Flake8-pyproject >=1.2.2",
     "flaky",
+    "nanopub-testsuite-connector>=1.0.0",
 ]
 
 docs = [

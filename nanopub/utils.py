@@ -84,19 +84,40 @@ WHERE {
         np_meta.public_key = row.pubkey
         np_meta.algorithm = row.algo
 
-    # Check if the nanopub URI has a trusty artefact:
-    separator_char = '/'
-    # Regex to extract base URI, separator and trusty URI (if any)
-    extract_trusty = re.search(r'^(.*?)(\/|#)?(RA.*)?$', str(np_meta.np_uri))
-    if extract_trusty:
-        base_uri = extract_trusty.group(1)
-        if extract_trusty.group(2):
-            separator_char = extract_trusty.group(2)
-        np_meta.namespace = Namespace(base_uri + separator_char)
+        np_uri_str = str(np_meta.np_uri)
+        if np_uri_str.endswith(("#", "/")):
+            default_separator_char = np_uri_str[-1]
+        else:
+            # Determine separator from the character immediately after the trusty
+            # code in the head graph URI (handles non-standard names like _head).
+            # Extract trusty code from np_uri first to avoid greedy regex matching
+            # the local suffix (e.g. "130_head") as part of the trusty code.
+            extract_trusty_pre = re.search(r'^(.*?)([/#])?(RA[A-Za-z0-9_\-]+)([/#])?', np_uri_str)
+            head_str = str(np_meta.head)
+            if extract_trusty_pre:
+                trusty_code_tmp = extract_trusty_pre.group(3)
+                if trusty_code_tmp in head_str:
+                    idx = head_str.index(trusty_code_tmp) + len(trusty_code_tmp)
+                    sep = head_str[idx] if idx < len(head_str) else "/"
+                    default_separator_char = sep if sep in ("#", "/") else ""
+                else:
+                    default_separator_char = head_str.rsplit("Head", 1)[0][-1]
+            else:
+                default_separator_char = head_str.rsplit("Head", 1)[0][-1]
 
-        if extract_trusty.group(3):
+        # Check if the nanopub URI has a trusty artefact:
+        # Regex to extract base URI, and trusty URI (if any)
+        extract_trusty = re.search(r'^(.*?)([/#])?(RA[A-Za-z0-9_\-]+)([/#])?', str(np_meta.np_uri))
+        if extract_trusty:
             np_meta.trusty = extract_trusty.group(3)
-            # TODO: improve as the signed np namespace might be using / or # or .
-            np_meta.namespace = Namespace(np_meta.np_uri + '#')
+            np_meta.namespace = Namespace(
+                str(np_meta.np_uri).split(np_meta.trusty)[0] + np_meta.trusty + default_separator_char)
+        else:
+            # No trusty code present (e.g. temp namespace)
+            np_meta.trusty = None
+            if np_uri_str.endswith(("#", "/")):
+                np_meta.namespace = Namespace(str(np_meta.np_uri))
+            else:
+                np_meta.namespace = Namespace(str(np_uri_str) + default_separator_char)
 
     return np_meta

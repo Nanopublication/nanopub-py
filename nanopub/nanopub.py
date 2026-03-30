@@ -38,13 +38,21 @@ class Nanopub:
     def __init__(
             self,
             source_uri: str = None,
-            assertion: Graph = Graph(),
-            provenance: Graph = Graph(),
-            pubinfo: Graph = Graph(),
+            assertion: Optional[Graph] = None,
+            provenance: Optional[Graph] = None,
+            pubinfo: Optional[Graph] = None,
             rdf: Union[Dataset, Path] = None,
             introduces_concept: BNode = None,
-            conf: NanopubConf = NanopubConf(),
+            conf: Optional[NanopubConf] = None,
     ) -> None:
+        if assertion is None:
+            assertion = Graph()
+        if provenance is None:
+            provenance = Graph()
+        if pubinfo is None:
+            pubinfo = Graph()
+        if conf is None:
+            conf = NanopubConf()
         self._profile = conf.profile
         self._source_uri = source_uri
         self._introduces_concept = introduces_concept
@@ -56,6 +64,8 @@ class Nanopub:
             self._conf.use_server = TEST_NANOPUB_REGISTRY_URL
         if self._conf.use_server == TEST_NANOPUB_REGISTRY_URL:
             self._conf.use_test_server = True
+
+        self._bnode_count = 0
 
         # Get the nanopub RDF depending on how it is provided:
         # source URI, rdflib graph, or file
@@ -74,7 +84,7 @@ class Nanopub:
         else:
             # if provided as rdflib graph, or file
             if isinstance(rdf, Dataset):
-                self._rdf = self._preformat_graph(rdf)
+                self._rdf = self._preformat_graph(deepcopy(rdf))
                 self._metadata = extract_np_metadata(self._rdf)
             elif isinstance(rdf, Path):
                 self._rdf = self._preformat_graph(Dataset())
@@ -82,6 +92,9 @@ class Nanopub:
                 self._metadata = extract_np_metadata(self._rdf)
             else:
                 self._rdf = self._preformat_graph(Dataset())
+
+        if self._metadata.trusty:
+            self._source_uri = str(self._metadata.np_uri)
 
         # Instantiate the different graph from the provided RDF (trig/nquads)
         self._head = Graph(self._rdf.store, self._metadata.head)
@@ -92,7 +105,6 @@ class Nanopub:
         self._assertion += assertion
         self._provenance += provenance
         self._pubinfo += pubinfo
-        self._bnode_count = 0
 
         # Concatenate prefixes declarations from all provided graphs in the main graph
         for user_rdf in [assertion, provenance, pubinfo]:
@@ -123,27 +135,31 @@ class Nanopub:
                 self._pubinfo.identifier,
             ))
 
-        # Add triples to the nanopub depending on the provided NanopuConf (e.g. creator, date)
-        self._validate_nanopub_arguments(
-            introduces_concept=introduces_concept,
-            derived_from=self._conf.derived_from,
-            assertion_attributed_to=self._conf.assertion_attributed_to,
-            attribute_assertion_to_profile=self._conf.attribute_assertion_to_profile,
-            # publication_attributed_to=publication_attributed_to,
-        )
-        self._handle_generated_at_time(
-            self._conf.add_pubinfo_generated_time,
-            self._conf.add_prov_generated_time
-        )
-        assertion_attributed_to = self._conf.assertion_attributed_to
-        if self._conf.attribute_assertion_to_profile:
-            assertion_attributed_to = rdflib.URIRef(self.profile.orcid_id)
-        self._handle_assertion_attributed_to(assertion_attributed_to)
-        self._handle_publication_attributed_to(
-            self._conf.attribute_publication_to_profile,
-            self._conf.publication_attributed_to
-        )
-        self._handle_derived_from(derived_from=self._conf.derived_from)
+            # Add triples to the nanopub depending on the provided NanopuConf (e.g. creator, date)
+            self._validate_nanopub_arguments(
+                introduces_concept=introduces_concept,
+                derived_from=self._conf.derived_from,
+                assertion_attributed_to=self._conf.assertion_attributed_to,
+                attribute_assertion_to_profile=self._conf.attribute_assertion_to_profile,
+                # publication_attributed_to=publication_attributed_to,
+            )
+            self._handle_generated_at_time(
+                self._conf.add_pubinfo_generated_time,
+                self._conf.add_prov_generated_time
+            )
+            assertion_attributed_to = self._conf.assertion_attributed_to
+            if self._conf.attribute_assertion_to_profile:
+                assertion_attributed_to = rdflib.URIRef(self.profile.orcid_id)
+            self._handle_assertion_attributed_to(assertion_attributed_to)
+            self._handle_publication_attributed_to(
+                self._conf.attribute_publication_to_profile,
+                self._conf.publication_attributed_to
+            )
+            self._handle_derived_from(derived_from=self._conf.derived_from)
+
+            # if the newly created nanopub is trusty it means was fetched or read from a file therefore we need to ensure is a valid one and not taking that for granted
+            if self._metadata.trusty:
+                _ = self.is_valid
 
     def _preformat_graph(self, g: Dataset) -> Dataset:
         """Add a few default namespaces"""
@@ -233,7 +249,7 @@ class Nanopub:
 
     @property
     def has_valid_signature(self) -> bool:
-        verify_signature(self._rdf, self._metadata.namespace)
+        verify_signature(self._rdf, self.source_uri, self._metadata.namespace)
         return True
 
     @property
@@ -244,9 +260,6 @@ class Nanopub:
     @property
     def is_valid(self) -> bool:
         """Check if a nanopublication is valid"""
-        np_meta = extract_np_metadata(self._rdf)
-        np_uri = np_meta.np_uri
-
         # Check if any of the graph is empty
         if len(self._head) < 1:
             raise MalformedNanopubError("The Head graph is empty")
@@ -268,26 +281,26 @@ class Nanopub:
 
         found_prov = False
         for s, p, o in self._provenance:
-            if str(s) == str(np_meta.assertion):
+            if str(s) == str(self._assertion.identifier):
                 found_prov = True
                 break
         if not found_prov:
             raise MalformedNanopubError(
-                f"The provenance graph should contain at least one triple with the assertion graph URI as subject: \033[1m{np_meta.assertion}\033[0m")
+                f"The provenance graph should contain at least one triple with the assertion graph URI as subject: \033[1m{self._assertion}\033[0m")
 
         found_pubinfo = False
+        np_uri_str = str(self._metadata.np_uri)
         for s, p, o in self._pubinfo:
-            if str(s) == str(np_uri) or str(s) == str(np_meta.namespace):
+            if str(s) in (str(self._source_uri), str(self._metadata.namespace), np_uri_str):
                 found_pubinfo = True
                 break
         if not found_pubinfo:
             raise MalformedNanopubError(
-                f"The pubinfo graph should contain at least one triple that has the nanopub URI as subject: \033[1m{np_uri}\033[0m")
+                f"The pubinfo graph should contain at least one triple that has the nanopub URI as subject: \033[1m{self._source_uri}\033[0m")
 
-        # TODO: add more checks for trusty and signature
-        # if self._metadata.signature:
-        #     if self.has_valid_signature is False:
-        #         raise MalformedNanopubError("The nanopub is not valid")
+        if self._metadata.signature:
+            if not self.has_valid_signature:
+                raise MalformedNanopubError("The nanopub is not valid")
         if self._metadata.trusty:
             if not self.has_valid_trusty:
                 raise MalformedNanopubError("The trusty nanopub is not valid")
@@ -395,9 +408,9 @@ class Nanopub:
 
     @property
     def signed_with_public_key(self) -> Optional[str]:
-        np_sig = extract_np_metadata(self._rdf)
-        if np_sig.public_key:
-            return np_sig.public_key
+        np_pubkey = [o for _, _, o, _ in self._rdf.quads((self.namespace.sig, NPX.hasPublicKey, None, None))]
+        if np_pubkey:
+            return str(np_pubkey[0])
         return None
 
     @property
@@ -584,7 +597,7 @@ class Nanopub:
                 g.remove((s, p, o, c))
                 if str(o) not in bnode_map:
                     # if str(o).startswith("N") and len(str(o)) == 33:
-                    if re.match(r'^[Na-zA-Z0-9]{33}$', str(s)):
+                    if re.match(r'^[Na-zA-Z0-9]{33}$', str(o)):
                         self._bnode_count += 1
                         bnode_map[str(o)] = self._bnode_count
                     else:

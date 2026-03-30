@@ -5,29 +5,56 @@ from rdflib.term import BNode, URIRef
 from rdflib.util import guess_format
 
 from nanopub.definitions import NP_PREFIX, NP_TEMP_PREFIX
+from nanopub.trustyuri.TrustyUriUtils import is_trusty_uri, TRUSTY_ARTIFACT_RE
 
 
-def get_trustyuri(resource, baseuri, hashstr, bnodemap):
+def get_trustyuri(resource, base_uri, hashstr, bnodemap):
     """Most of the work done to normalize URIs happens here"""
     if resource is None:
         return None
-    np_uri = get_str(baseuri).decode('utf-8')
+    np_uri = get_str(base_uri).decode('utf-8')
+    separator = "/"
     # baseuri passed is the np namespace, np_uri is the nanopub URI without trailing # or /
     if np_uri.endswith('#') or np_uri.endswith('/'):
+        separator = np_uri[-1]
         np_uri = np_uri[:-1]
-    # Extract the trusty artefact if present, or remove the trailing / if trusty not present
-    prefix = "/".join(baseuri.split('/')[:-1]) + '/'
-    if str(baseuri).startswith(NP_TEMP_PREFIX):
+    # Extract the trusty artifact if present, or remove the trailing / if trusty not present.
+    # Use regex to find the trusty code so non-standard schemes like
+    # "base#id.RAxxxx" (where the code is not the last /-segment) are handled.
+    base_str = str(base_uri).rstrip("/#")
+    m = re.search(r'RA[A-Za-z0-9_\-]{40,}', base_str)
+    if m:
+        prefix = base_str[:m.start()]
+    elif is_trusty_uri(base_uri):
+        prefix = base_str.rsplit("/", 1)[0] + "/"
+    else:
+        prefix = "/".join(base_uri.split('/')[:-1]) + '/'
+    if str(base_uri).startswith(NP_TEMP_PREFIX):
         prefix = NP_PREFIX
     if isinstance(resource, URIRef):
-        suffix = get_suffix(resource, baseuri)
+        suffix = get_suffix(resource, base_uri)
         if get_str(resource).decode('utf-8') == np_uri:
             return str(f"{prefix}{hashstr}")
-        if suffix is None and not get_str(resource).decode('utf-8') == get_str(baseuri).decode('utf-8'):
+        if suffix is None and not get_str(resource).decode('utf-8') == get_str(base_uri).decode('utf-8'):
             return str(resource)
         if suffix is None or suffix == "":
             return str(f"{prefix}{hashstr}")
-        return str(f"{prefix}{hashstr}/{suffix}")
+        # External trusty URI or external reference — leave untouched
+        if TRUSTY_ARTIFACT_RE.match(suffix.split("/", 1)[0].split("#", 1)[0]):
+            return str(resource)
+
+        # When base_uri has no trailing separator (e.g. disgenet-style
+        # "RAxxxx130_head"), the suffix is directly appended — use no
+        # separator.  For standard namespaces ending with "/" or "#" the
+        # separator was already captured above from the base_uri itself.
+        base_uri_str = get_str(base_uri).decode('utf-8')
+        if not (base_uri_str.endswith('#') or base_uri_str.endswith('/')):
+            if suffix[0] in ('#', '/'):
+                separator = suffix[0]
+            else:
+                separator = ""
+        clean_suffix = suffix.lstrip("/#")
+        return str(f"{prefix}{hashstr}{separator}{clean_suffix}")
     if isinstance(resource, BNode):
         # NOTE: bnodes are replaced in nanopub.py by _replace_blank_nodes() most of the time
         bnode_unnamed = re.match(r'^[a-zA-Z0-9]{33}$', str(resource))
@@ -90,9 +117,9 @@ def get_quads(dataset):
 
 def get_dataset(quads):
     cg = Dataset()
-#     for (c, s, p, o) in quads:
-#         cg.default_context = Graph(store=cg.store, identifier=c)
-#         cg.add((s, p, o))
+    #     for (c, s, p, o) in quads:
+    #         cg.default_context = Graph(store=cg.store, identifier=c)
+    #         cg.add((s, p, o))
     cg.addN([(s, p, o, Graph(store=cg.store, identifier=c)) for (c, s, p, o) in quads])
     return cg
 

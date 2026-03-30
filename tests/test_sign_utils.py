@@ -1,34 +1,20 @@
-from unittest.mock import MagicMock, patch
+from rdflib import Dataset, URIRef, Literal
 
-import pytest
-from rdflib import Graph, Literal, URIRef, Dataset, Namespace
-
-from nanopub import Nanopub, namespaces
-from nanopub.sign_utils import verify_trusty
-from tests.conftest import default_conf, java_wrap
+from nanopub import Nanopub
+from nanopub.trustyuri.rdf import RdfUtils
 
 
 class TestVerifyTrusty:
 
     def test_real_uri_returns_true(self):
-        np = Nanopub(source_uri="https://w3id.org/np/RAYP7TG5JayGG1PvCTmv37Gjcfls2DFzdaXqLvpaCwsec")
-        assert verify_trusty(np.rdf, np.source_uri, np.metadata.namespace)
+        np = Nanopub(source_uri="https://w3id.org/np/RAAwn-ONPeKgxxWJNBDtVotYfZcFyppCy_z8ASy2mJLKY")
+        assert np.has_valid_trusty
 
+    def test_get_quads_preserves_named_graph_context_identifier(self):
+        ds = Dataset()
+        graph_uri = URIRef("https://example.org/g")
+        ds.add((URIRef("https://example.org/s"), URIRef("https://example.org/p"), Literal("x"), graph_uri))
 
-def test_nanopub_sign():
-    expected_np_uri = "http://purl.org/np/RAoXkQkJe_lpMhYW61Y9mqWDHa5MAj1o4pWIiYLmAzY50"
-
-    assertion = Graph()
-    assertion.add((
-        URIRef('http://test'), namespaces.HYCL.claims, Literal('This is a test of nanopub-python')
-    ))
-
-    np = Nanopub(
-        conf=default_conf,
-        assertion=assertion
-    )
-    java_np = java_wrap.sign(np)
-
-    np.sign()
-    assert np.source_uri == expected_np_uri
-    assert np.source_uri == java_np
+        quads = RdfUtils.get_quads(ds)
+        assert len(quads) == 1
+        assert quads[0][0] == graph_uri  # context should not collapse to None
