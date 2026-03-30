@@ -75,7 +75,7 @@ np = "nanopub.__main__:cli"
 
 
 [project.urls]
-Homepage = "https://nanopublication.github.io/nanopub-py/"
+Homepage = "https://pypi.org/project/nanopub/"
 Documentation = "https://nanopublication.github.io/nanopub-py/"
 History = "https://github.com/Nanopublication/nanopub-py/releases"
 Tracker = "https://github.com/Nanopublication/nanopub-py/issues"
