@@ -25,7 +25,7 @@ np_list = create_nanopub_index(
     title="My nanopub index",
     description="This is my nanopub index",
     creation_time="2020-09-21T00:00:00",
-    creators=["https://orcid.org/0000-0000-0000-0000"],
+    creators=["https://orcid.org/0000-0000-0000-0001"],
     see_also="https://github.com/Nanopublication/nanopub-py",
 )
 for np in np_list:

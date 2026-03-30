@@ -48,7 +48,7 @@ np = Nanopub(
         add_prov_generated_time=True,
         add_pubinfo_generated_time=True,
         attribute_publication_to_profile=True,
-        assertion_attributed_to=URIRef('https://orcid.org/0000-0000-0000-0000'),
+        assertion_attributed_to=URIRef('https://orcid.org/0000-0000-0000-0001'),
     )
 )
 ```
@@ -59,7 +59,7 @@ The provenance part of the publication will denote:
 @prefix prov: <http://www.w3.org/ns/prov#> .
 
 :provenance {
-    :assertion prov:wasAttributedTo <https://orcid.org/0000-0000-0000-0000> .
+    :assertion prov:wasAttributedTo <https://orcid.org/0000-0000-0000-0001> .
 }
 ```
 Note: Often the assertion should be attributed to yourself.

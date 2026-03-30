@@ -43,6 +43,9 @@ class Profile:
                 public_key (Optional[Union[Path, str]]): Path to the user's public key, or the key as string
                 introduction_nanopub_uri (Optional[str]): URI of the user's profile nanopub
             """
+        # TODO comment this out when we're ready to release this. the nanopub-testsuite must be updated first, as it currently contains nanopubs signed by a test user with ORCID 0000-0000-0000-0000 (not valid)
+        # from nanopub.__main__ import validate_orcid_id
+        # self._orcid_id = validate_orcid_id(None, None, orcid_id)
         self._orcid_id = orcid_id
         self._name = name
         self._introduction_nanopub_uri = introduction_nanopub_uri

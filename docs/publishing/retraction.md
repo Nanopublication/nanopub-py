@@ -19,7 +19,7 @@ The assertion states that the researcher (denoted by the ORCID iD from your prof
 @prefix sub: <http://purl.org/np/RAv75Xhhz5jv--Nnu9RDqIGy2xHr74REGC4vtOSxrwX4c#> .
 
 sub:assertion {
-    <https://orcid.org/0000-0000-0000-0000> npx:retracts <http://purl.org/np/RAfk_zBYDerxd6ipfv8fAcQHEzgZcVylMTEkiLlMzsgwQ> .
+    <https://orcid.org/0000-0000-0000-0001> npx:retracts <http://purl.org/np/RAfk_zBYDerxd6ipfv8fAcQHEzgZcVylMTEkiLlMzsgwQ> .
 }
 ```
 By default nanopublications that have a valid retraction do not show up in search results. A valid retraction is a retraction that is signed with the same public key as the nanopublication that it retracts.

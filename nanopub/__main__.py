@@ -190,7 +190,7 @@ def setup(
 
     Args:
         orcid_id: the users ORCID iD or other form of universal identifier. Example:
-            `https://orcid.org/0000-0000-0000-0000`
+            `https://orcid.org/0000-0000-0000-0001`
         name: the name of the user
         newkeys: True if you want to generate new keys, False if you want to use existing keys. By default, new keys are not generated.
         keypair: a tuple containing the paths to the public and private RSA key to be used to sign

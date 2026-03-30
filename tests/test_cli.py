@@ -14,26 +14,33 @@ runner = CliRunner()
 
 
 def test_validate_orcid_id():
-    valid_ids = ['https://orcid.org/1234-5678-1234-5678',
-                 'https://orcid.org/1234-5678-1234-567X']
+    valid_ids = [
+        'https://orcid.org/0000-0000-0000-0001',
+        'https://orcid.org/1234-5678-1234-5673',
+        'https://orcid.org/0000-0000-0000-001X'
+    ]
     for orcid_id in valid_ids:
         assert validate_orcid_id(ctx=None, param=None, orcid_id=orcid_id) == orcid_id
 
-    invalid_ids = ['https://orcid.org/abcd-efgh-abcd-efgh',
-                   'https://orcid.org/1234-5678-1234-567',
-                   'https://orcid.org/1234-5678-1234-56789',
-                   'https://other-url.org/1234-5678-1234-5678',
-                   '0000-0000-0000-0000']
+    invalid_ids = [
+        'https://orcid.org/abcd-efgh-abcd-efgh',  # invalid format
+        'https://orcid.org/0000-0003-4112-6826',  # invalid checksum
+        'https://orcid.org/',  # invalid checksum
+        'https://orcid.org/1234-5678-1234-5678',  # invalid checksum
+        'https://orcid.org/1234-5678-1234-56789',  # too long
+        'https://other-url.org/1234-5678-1234-5678',  # wrong domain
+        '0000-0000-0000-0000'  # missing prefix
+    ]
     for orcid_id in invalid_ids:
         with pytest.raises(ValueError):
             validate_orcid_id(ctx=None, param=None, orcid_id=orcid_id)
 
 
 def test_setup():
-    # np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --name "Python test" --newkeys --no-publish
+    # np setup --orcid-id https://orcid.org/0000-0000-0000-0001 --name "Python test" --newkeys --no-publish
     result = runner.invoke(cli, [
         "setup",
-        "--orcid-id", "https://orcid.org/0000-0000-0000-0000",
+        "--orcid-id", "https://orcid.org/0000-0000-0000-0001",
         "--name", "Python test",
         "--newkeys", "--no-publish"
     ])
@@ -89,7 +96,7 @@ def test_setup_with_keypair(monkeypatch, tmp_path):
 
     result = runner.invoke(cli, [
         "setup",
-        "--orcid-id", "https://orcid.org/0000-0000-0000-0000",
+        "--orcid-id", "https://orcid.org/0000-0000-0000-0001",
         "--name", "Python test",
         "--keypair", str(pub_key), str(priv_key),
         "--no-publish"
@@ -110,7 +117,7 @@ def test_setup_publish_yes(monkeypatch):
 
     result = runner.invoke(cli, [
         "setup",
-        "--orcid-id", "https://orcid.org/0000-0000-0000-0000",
+        "--orcid-id", "https://orcid.org/0000-0000-0000-0001",
         "--name", "Python test",
         "--newkeys"
     ])
@@ -130,7 +137,7 @@ def test_setup_publish_no(monkeypatch):
 
     result = runner.invoke(cli, [
         "setup",
-        "--orcid-id", "https://orcid.org/0000-0000-0000-0000",
+        "--orcid-id", "https://orcid.org/0000-0000-0000-0001",
         "--name", "Python test",
         "--newkeys"
     ])

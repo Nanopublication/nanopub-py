@@ -85,7 +85,7 @@ sub:pubinfo {
         npx:hasSignatureTarget this: .
 
     this: prov:generatedAtTime "2020-12-01T10:44:32.367084"^^xsd:dateTime ;
-        prov:wasAttributedTo <https://orcid.org/0000-0000-0000-0000> .
+        prov:wasAttributedTo <https://orcid.org/0000-0000-0000-0001> .
 }
 ```
 
@@ -205,7 +205,7 @@ You can also directly provide an ORCID to attribute the publication to, instead 
 ```python
 from nanopub import NanopubConf, load_profile
 
-creator_orcid = "https://orcid.org/0000-0000-0000-0000"
+creator_orcid = "https://orcid.org/0000-0000-0000-0001"
 
 np_conf = NanopubConf(
     profile=load_profile(),

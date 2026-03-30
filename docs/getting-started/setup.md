@@ -34,7 +34,7 @@ A local version of the profile will be stored in the nanopub user config dir (by
 It will add and store RSA keys to sign your nanopublications. By default they are stored under `HOMEDIR/.nanopub/id_rsa` and `HOMEDIR/.nanopub/id_rsa.pub`.
 
 ### ORCID iD
-This includes your [ORCID iD](https://orcid.org/) (i.e. https://orcid.org/0000-0000-0000-0000).
+This includes your [ORCID iD](https://orcid.org/) (i.e. https://orcid.org/0000-0000-0000-0001).
 
 If you don't have an ORCID iD yet, you need to [register](https://orcid.org/register). We use the ORCID iD to automatically add as author to the provenance of any nanopublication you will publish using this library.
 

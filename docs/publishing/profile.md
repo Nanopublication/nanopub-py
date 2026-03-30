@@ -38,7 +38,7 @@ from nanopub import Profile
 
 p1 = Profile(
     name='Your Name',
-    orcid_id='https://orcid.org/0000-0000-0000-0000',
+    orcid_id='https://orcid.org/0000-0000-0000-0001',
     private_key=Path.home() / "id_rsa",
     public_key=Path.home() / "id_rsa.pub"
 )
@@ -53,7 +53,7 @@ from nanopub import Profile
 
 p = Profile(
     name='Your Name',
-    orcid_id='https://orcid.org/0000-0000-0000-0000',
+    orcid_id='https://orcid.org/0000-0000-0000-0001',
     private_key="YOUR_PRIVATE_KEY",
     public_key="YOUR_PUBLIC_KEY"
 )
@@ -68,7 +68,7 @@ from nanopub import Profile
 
 p = Profile(
     name='Your Name',
-    orcid_id='https://orcid.org/0000-0000-0000-0000',
+    orcid_id='https://orcid.org/0000-0000-0000-0001',
 )
 # By default the profile and keys will be stored in $HOME/.nanopub
 p.store()
