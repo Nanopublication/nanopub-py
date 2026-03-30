@@ -27,18 +27,32 @@ DEFAULT_KEYS_PATH_PREFIX = USER_CONFIG_DIR / 'id'
 DEFAULT_PRIVATE_KEY_PATH = USER_CONFIG_DIR / PRIVATE_KEY_FILE
 DEFAULT_PUBLIC_KEY_PATH = USER_CONFIG_DIR / PUBLIC_KEY_FILE
 RSA = 'RSA'
-ORCID_ID_REGEX = r'^https://orcid.org/(\d{4}-){3}\d{3}(\d|X)$'
+ORCID_ID_REGEX = r"^https://orcid\.org/\d{4}-\d{4}-\d{4}-\d{3}[\dX]$"
+
+
+def generate_check_digit(base_digits: str) -> str:
+    """Generates check digit as per ISO 7064 11,2."""
+    total = 0
+    for char in base_digits:
+        total = (total + int(char)) * 2
+    remainder = total % 11
+    result = (12 - remainder) % 11
+    return "X" if result == 10 else str(result)
 
 
 def validate_orcid_id(ctx, param, orcid_id: str):
     """Check if valid ORCID iD, should be https://orcid.org/ + 16 digit in form:
-    https://orcid.org/0000-0000-0000-0000. ctx and param are necessary `click` callback args
+    https://orcid.org/0000-0000-0000-0001. ctx and param are necessary `click` callback args
     """
     if re.match(ORCID_ID_REGEX, orcid_id):
+        digits = orcid_id.removeprefix("https://orcid.org/").replace("-", "")
+        base = digits[:-1]
+        check = digits[-1].upper()
+        if not generate_check_digit(base) == check:
+            raise ValueError(f'The ORCID {orcid_id} is not valid, please provide a valid ORCID.')
         return orcid_id
     else:
-        raise ValueError('Your ORCID iD is not valid, please provide a valid ORCID iD that '
-                         'looks like: https://orcid.org/0000-0000-0000-0000')
+        raise ValueError(f'The ORCID {orcid_id} is not valid, please provide a valid ORCID.')
 
 
 @cli.command(help='Get nanopub library version')
@@ -149,8 +163,8 @@ def check(filepath: Path):
 def setup(
         orcid_id: str = typer.Option(
             None,
-            help="Your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)",
-            prompt='What is your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)?',
+            help="Your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0001)",
+            prompt='What is your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0001)?',
             callback=validate_orcid_id
         ),
         name: str = typer.Option(
