@@ -6,9 +6,9 @@
 [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu)
 [![DOI](https://zenodo.org/badge/302247101.svg)](https://zenodo.org/badge/latestdoi/302247101)
 
-# nanopub-py
+# nanopub
 
-The ```nanopub-py``` library provides a high-level, user-friendly Python interface for searching, publishing and
+The ```nanopub``` library provides a high-level, user-friendly Python interface for searching, publishing and
 retracting nanopublications.
 
 Nanopublications are a formalized and machine-readable way of communicating the smallest possible units of publishable
@@ -142,12 +142,12 @@ poetry run coverage html
 
 ## License
 
-`nanopub-py` is free software under the Apache License. See [LICENSE](LICENSE).
+`nanopub` is free software under the Apache License. See [LICENSE](https://github.com/Nanopublication/nanopub-py/blob/main/LICENSE).
 
 ## Copyright
 
 - Copyright (C) 2020 Robin Richardson, Sven van der Burg
-- Copyright (C) 2020-2025 the nanopub-py
+- Copyright (C) 2020-2025 the nanopub
   contributors (https://github.com/Nanopublication/nanopub-py/graphs/contributors)
 - Copyright (C) 2025 Knowledge Pixels
 - Copyright (c) 2025 acatech - Deutsche Akademie der Technikwissenschaften e.V.
