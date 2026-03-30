@@ -25,15 +25,15 @@ class NanopubIndex(Nanopub):
     """
 
     def __init__(
-        self,
-        conf: NanopubConf,
-        np_list: Union[List[str], List[Nanopub]],
-        title: str,
-        description: str,
-        creation_time: str,
-        creators: List[str],
-        see_also: str = None,
-        top_level: bool = False,
+            self,
+            conf: NanopubConf,
+            np_list: Union[List[str], List[Nanopub]],
+            title: str,
+            description: str,
+            creation_time: str,
+            creators: List[str],
+            see_also: str = None,
+            top_level: bool = False,
     ) -> None:
         conf = deepcopy(conf)
         conf.add_prov_generated_time = False
@@ -74,19 +74,20 @@ class NanopubIndex(Nanopub):
 
 
 def create_nanopub_index(
-    conf: NanopubConf,
-    np_list: Union[List[str], List[Nanopub]],
-    title: str,
-    description: str,
-    creation_time: str,
-    creators: List[str],
-    see_also: str = None,
+        conf: NanopubConf,
+        np_list: Union[List[str], List[Nanopub]],
+        title: str,
+        description: str,
+        creation_time: str,
+        creators: List[str],
+        see_also: str = None,
 ) -> List[Nanopub]:
     """Create a Nanopub index.
 
     Publish a list of nanopub URIs in a Nanopub Index
 
     Args:
+        conf: Configuration for the nanopub
         np_list: List of nanopub URIs
         title: Title of the Nanopub Index
         description: Description of the Nanopub Index

@@ -1,12 +1,14 @@
+from typing import Optional, Union, List
+
 import requests
+from rdflib import RDF, URIRef, Graph
+
 from nanopub import NanopubClient, Nanopub, NanopubConf
-from nanopub.fdo.utils import looks_like_handle
-from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo import FdoNanopub
-from rdflib import RDF, URIRef, Graph, Dataset
-from nanopub.definitions import NANOPUB_FETCH_FORMAT
+from nanopub.fdo.fdo_record import FdoRecord
+from nanopub.fdo.utils import looks_like_handle
 from nanopub.namespaces import FDOF
-from typing import Tuple, Optional, Union, List
+
 
 def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> FdoRecord:
     try:
@@ -31,12 +33,10 @@ def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> FdoRec
     raise ValueError(f"FDO not found: {iri_or_handle}")
 
 
-
 def resolve_in_nanopub_network(
-    iri_or_handle: Union[str, URIRef],
-    conf: Optional[NanopubConf] = None
+        iri_or_handle: Union[str, URIRef],
+        conf: Optional[NanopubConf] = None
 ) -> Optional[Nanopub]:
-
     query_id = "RAs0HI_KRAds4w_OOEMl-_ed0nZHFWdfePPXsDHf4kQkU"
     endpoint = "get-fdo-by-id"
     query_url = f"https://query.knowledgepixels.com/api/{query_id}/"
@@ -79,8 +79,6 @@ def resolve_in_nanopub_network(
         raise ValueError(f"Could not fetch nanopub from URI: {np_uri}") from e
 
 
-    
-
 def retrieve_record_from_id(iri_or_handle: str):
     if looks_like_handle(iri_or_handle):
         np = FdoNanopub.handle_to_nanopub(iri_or_handle)
@@ -121,6 +119,7 @@ def resolve_handle_metadata(handle: str) -> dict:
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
+
 
 def get_fdo_uri_from_fdo_record(assertion_graph: Graph) -> URIRef | None:
     for s, p, o in assertion_graph.triples((None, RDF.type, FDOF.FAIRDigitalObject)):

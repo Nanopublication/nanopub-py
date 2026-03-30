@@ -1,7 +1,9 @@
-from rdflib import Graph, URIRef, Literal
 from typing import Optional, Union, List
+
+from rdflib import Graph, URIRef, Literal
 from rdflib.namespace import RDFS, DCTERMS, PROV
-from nanopub.namespaces import HDL, FDOF, FDOC
+
+from nanopub.namespaces import FDOF, FDOC
 
 
 class FdoRecord:
@@ -12,17 +14,17 @@ class FdoRecord:
     """
 
     def __init__(
-        self,
-        assertion: Optional[Graph] = None,
-        *,
-        profile_uri: Optional[Union[str, URIRef]] = None,
-        label: Optional[str] = None,
-        dataref: Optional[Union[str, URIRef]] = None,
+            self,
+            assertion: Optional[Graph] = None,
+            *,
+            profile_uri: Optional[Union[str, URIRef]] = None,
+            label: Optional[str] = None,
+            dataref: Optional[Union[str, URIRef]] = None,
     ):
         self.id: Optional[str] = None
         self.tuples: dict[URIRef, Union[Literal, URIRef]] = {}
         self.profile_uri: Optional[Union[str, URIRef]] = None
-        
+
         if assertion:
             # Init from assertion graph
             for s, p, o in assertion:
@@ -30,7 +32,7 @@ class FdoRecord:
                     self.id = s
                 if str(p) == str(FDOC.profile):
                     self.set_profile(str(o))
-                    
+
                 if str(p) == str(DCTERMS.conformsTo) or str(p) == str(FDOC.hasFdoProfile):
                     self.profile_uri = o
 
@@ -62,9 +64,9 @@ class FdoRecord:
 
             # Extract handle from profile_uri if possible
             self.id = self.extract_handle(profile_uri) if self.id is None else self.id
-        
+
         if profile_uri:
-            self.set_profile(profile_uri) # override if given explicitly
+            self.set_profile(profile_uri)  # override if given explicitly
 
     def __str__(self) -> str:
         label = self.get_label() or "No label"
@@ -91,7 +93,6 @@ class FdoRecord:
             else:
                 triples.append((subject, p, o))
         return triples
-
 
     def get_graph(self) -> Graph:
         g = Graph()
@@ -156,7 +157,7 @@ class FdoRecord:
         pred = URIRef(predicate)
         obj = URIRef(value) if isinstance(value, str) and value.startswith("http") else Literal(value)
         self.tuples[pred] = obj
-        
+
     def add_aggregate(self, iri: URIRef):
         existing = self.tuples.get(DCTERMS.hasPart)
         if existing:

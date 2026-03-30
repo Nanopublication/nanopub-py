@@ -58,14 +58,13 @@ def profile():
         print(" ℹ️  Use \033[1mnp setup\033[0m to setup your nanopub profile locally with the interactive CLI")
 
 
-
 @cli.command(help='Sign a Nanopublication')
 def sign(
-    filepath: Path,
-    private_key: Optional[Path] = typer.Option(
-        None, "--private-key", "-k",
-        help="Path to the RSA private key with which the nanopub will be signed."
-    ),
+        filepath: Path,
+        private_key: Optional[Path] = typer.Option(
+            None, "--private-key", "-k",
+            help="Path to the RSA private key with which the nanopub will be signed."
+        ),
 ):
     if private_key:
         config = NanopubConf(
@@ -93,8 +92,8 @@ def sign(
 
 @cli.command(help='Publish a Nanopublication')
 def publish(
-    filepath: Path,
-    test: bool = typer.Option(False, help="Publish to the test server"),
+        filepath: Path,
+        test: bool = typer.Option(False, help="Publish to the test server"),
 ):
     if test:
         print(" 🧪 Publishing to the test server")
@@ -109,17 +108,17 @@ def publish(
 
 @cli.command(help='Retract  a Nanopublication')
 def retract(
-    uri: Annotated[
-        str,
-        Argument(help='URI of the nanopublication to retract.'),
-    ],
-    test: bool = typer.Option(False, help="Publish to the test server"),
-    force: bool = typer.Option(
-        False,
-        help=(
-            "Force retraction even if the publication was signed with a different public key"
+        uri: Annotated[
+            str,
+            Argument(help='URI of the nanopublication to retract.'),
+        ],
+        test: bool = typer.Option(False, help="Publish to the test server"),
+        force: bool = typer.Option(
+            False,
+            help=(
+                    "Force retraction even if the publication was signed with a different public key"
+            ),
         ),
-    ),
 ):
     if test:
         print(" 🧪 Publishing to the test server")
@@ -130,7 +129,6 @@ def retract(
     np = NanopubRetract(conf=config, uri=uri, force=force)
     np.publish()
     print(f" 📬️ Retraction nanopub published at \033[1m{np.source_uri}\033[0m")
-
 
 
 @cli.command(help='Check if a signed Nanopublication is valid')
@@ -149,29 +147,29 @@ def check(filepath: Path):
                   '(by default $HOME/.nanopub/). '
                   'The profile will also be published to the nanopub servers.')
 def setup(
-    orcid_id: str = typer.Option(
-        None,
-        help="Your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)",
-        prompt='What is your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)?',
-        callback=validate_orcid_id
-    ),
-    name: str = typer.Option(
-        None,
-        help='Your full name',
-        prompt='What is your full name?',
-    ),
-    newkeys: bool = typer.Option(
-        False,
-        help="Generate new RSA public and private keys with which your nanopubs will be signed",
-    ),
-    keypair: Optional[Tuple[Path, Path]] = typer.Option(
-        (None, None),
-        help="Your RSA public and private keys with which your nanopubs will be signed",
-    ),
-    publish: Optional[bool] = typer.Option(
-        None, "--publish/--no-publish",
-        help="If true, nanopub will be published to nanopub servers",
-    ),
+        orcid_id: str = typer.Option(
+            None,
+            help="Your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)",
+            prompt='What is your ORCID iD (i.e. https://orcid.org/0000-0000-0000-0000)?',
+            callback=validate_orcid_id
+        ),
+        name: str = typer.Option(
+            None,
+            help='Your full name',
+            prompt='What is your full name?',
+        ),
+        newkeys: bool = typer.Option(
+            False,
+            help="Generate new RSA public and private keys with which your nanopubs will be signed",
+        ),
+        keypair: Optional[Tuple[Path, Path]] = typer.Option(
+            (None, None),
+            help="Your RSA public and private keys with which your nanopubs will be signed",
+        ),
+        publish: Optional[bool] = typer.Option(
+            None, "--publish/--no-publish",
+            help="If true, nanopub will be published to nanopub servers",
+        ),
 ):
     """
     Interactive CLI to create a user profile.
@@ -179,11 +177,12 @@ def setup(
     Args:
         orcid_id: the users ORCID iD or other form of universal identifier. Example:
             `https://orcid.org/0000-0000-0000-0000`
-        publish: if True, profile will be published to nanopub servers
         name: the name of the user
+        newkeys: True if you want to generate new keys, False if you want to use existing keys. By default, new keys are not generated.
         keypair: a tuple containing the paths to the public and private RSA key to be used to sign
             nanopubs. If empty, new keys will be generated or the ones in the .nanopub folder
             will be used.
+        publish: if True, profile will be published to nanopub servers
     """
     print('⚙️ Setting up nanopub profile...')
     if keypair == (None, None):
@@ -203,7 +202,7 @@ def setup(
 
     if not keypair and not newkeys:
         prompt = '🔓️ Provide the path to your public RSA key: ' \
-            'Leave empty for using the one in: '
+                 'Leave empty for using the one in: '
         public_key = typer.prompt(prompt, type=Path,
                                   default=DEFAULT_PUBLIC_KEY_PATH)
         if not public_key:
@@ -307,32 +306,32 @@ cli.add_typer(create, name='create')
 
 @create.command(help='Create a nanopub from an assertion graph')
 def from_assertion(
-    ctx: CreateNanopubContext,
-    filepath: Annotated[
-        Path | None,
-        Argument(
-            exists=True,
-            dir_okay=False,
-            help='Path to the assertion graph file, or standard input.',
-        )
-    ] = None,
-    input_format: Annotated[
-        DataFormat | None,
-        Option(
-            help=(
-                'Format of the assertion graph file. '
-                'If not provided, the format will be inferred.'
+        ctx: CreateNanopubContext,
+        filepath: Annotated[
+            Path | None,
+            Argument(
+                exists=True,
+                dir_okay=False,
+                help='Path to the assertion graph file, or standard input.',
             )
-        )
-    ] = None,
-    was_derived_from: Annotated[
-        str | None,
-        Option(
-            help=(
-                'URI of a statement which this nanopublication is derived from.'
+        ] = None,
+        input_format: Annotated[
+            DataFormat | None,
+            Option(
+                help=(
+                        'Format of the assertion graph file. '
+                        'If not provided, the format will be inferred.'
+                )
             )
-        )
-    ] = None,
+        ] = None,
+        was_derived_from: Annotated[
+            str | None,
+            Option(
+                help=(
+                        'URI of a statement which this nanopublication is derived from.'
+                )
+            )
+        ] = None,
 ):
     """Create a nanopublication based on assertion."""
     if filepath is None:
@@ -359,8 +358,8 @@ def from_assertion(
 
 @create.command()
 def claim(
-    ctx: CreateNanopubContext,
-    text: Annotated[list[str], typer.Argument()],
+        ctx: CreateNanopubContext,
+        text: Annotated[list[str], typer.Argument()],
 ):
     """
     Create a nanopublication based on a free-form textual claim.

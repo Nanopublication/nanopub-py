@@ -1,23 +1,25 @@
 import json
+from dataclasses import dataclass
+from typing import List
+
 import rdflib
 import requests
 from pyshacl import validate as _pyshacl_validate
-from rdflib import Graph
-from nanopub.fdo.utils import convert_jsonschema_to_shacl, looks_like_handle, fix_numeric_shacl_constraints
-from nanopub.fdo.retrieve import resolve_in_nanopub_network
-from nanopub.fdo.fdo_record import FdoRecord 
-from nanopub.fdo.fdo_nanopub import FdoNanopub
-from nanopub.namespaces import FDOC
 from rdflib.namespace import SH
-from typing import List
-from dataclasses import dataclass
+
+from nanopub.fdo.fdo_nanopub import FdoNanopub
+from nanopub.fdo.fdo_record import FdoRecord
+from nanopub.fdo.retrieve import resolve_in_nanopub_network
+from nanopub.fdo.utils import convert_jsonschema_to_shacl, looks_like_handle, fix_numeric_shacl_constraints
+
 
 @dataclass
 class ValidationResult:
     is_valid: bool
     errors: List[str]
     warnings: List[str]
-    
+
+
 def _profile_landing_page_uri_to_api_url(uri: str) -> str:
     """
     Convert an FdoProfile landing page URI into a handle API URI unless it is already an API URI.
@@ -38,6 +40,7 @@ def _profile_landing_page_uri_to_api_url(uri: str) -> str:
     handle = "/".join(parts[-2:])
     api_url = f"https://hdl.handle.net/api/handles/{handle}"
     return api_url
+
 
 def validate_fdo_record(record: FdoRecord, profile_np: FdoNanopub = None) -> ValidationResult:
     try:
