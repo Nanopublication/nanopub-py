@@ -98,7 +98,8 @@ def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Dataset)
         if c:
             g = c
         else:
-            raise Exception("Found a nquads without graph when replacing dummy URIs with trusty URIs. Something went wrong.")
+            raise Exception(
+                "Found a nquads without graph when replacing dummy URIs with trusty URIs. Something went wrong.")
         # new_g = Graph(identifier=str(transform(g, trusty_artefact, dummy_ns, bnodemap)))
         # Fails and make the nanopub empty
         new_g = URIRef(transform(g, trusty_artefact, dummy_ns, bnodemap))
@@ -139,7 +140,8 @@ def verify_trusty(g: Dataset, source_uri: str, source_namespace: Namespace) -> b
         hashstr=" "
     )
     if expected_trusty != source_trusty:
-        raise MalformedNanopubError(f"The Trusty artefact of the nanopub {source_trusty} is not valid. It should be {expected_trusty}")
+        raise MalformedNanopubError(
+            f"The Trusty artefact of the nanopub {source_trusty} is not valid. It should be {expected_trusty}")
     else:
         return True
 
@@ -184,6 +186,15 @@ def verify_signature(g: Dataset, source_uri: str, source_namespace: Namespace) -
     verifier = PKCS1_v1_5.new(key)
     try:
         verifier.verify(hash_value, decodebytes(str(np_sign).encode()))
-        return True
     except Exception as e:
         raise MalformedNanopubError(e)
+
+    np_signedBy = [o for _, _, o, _ in g.quads((np_signature_target, NPX.signedBy, None, None))]
+    if not np_signedBy:
+        raise MalformedNanopubError("No signedBy found in the nanopublication RDF")
+    np_signedBy = np_signedBy[0]
+    # TODO improve this by checking that the ORCID is a valid one
+    if not str(np_signedBy).startswith("https://orcid.org/"):
+        raise MalformedNanopubError(
+            f"Invalid signedBy value '{np_signedBy}' in the nanopublication RDF, it should be an ORCID iD starting with 'https://orcid.org/'")
+    return True
