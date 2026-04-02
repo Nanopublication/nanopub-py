@@ -189,12 +189,12 @@ def verify_signature(g: Dataset, source_uri: str, source_namespace: Namespace) -
     except Exception as e:
         raise MalformedNanopubError(e)
 
-    np_signedBy = [o for _, _, o, _ in g.quads((np_signature_target, NPX.signedBy, None, None))]
-    if not np_signedBy:
-        raise MalformedNanopubError("No signedBy found in the nanopublication RDF")
-    np_signedBy = np_signedBy[0]
-    # TODO improve this by checking that the ORCID is a valid one
-    if not str(np_signedBy).startswith("https://orcid.org/"):
-        raise MalformedNanopubError(
-            f"Invalid signedBy value '{np_signedBy}' in the nanopublication RDF, it should be an ORCID iD starting with 'https://orcid.org/'")
+    # np_signedBy = [o for _, _, o, _ in g.quads((np_signature_target, NPX.signedBy, None, None))]
+    # if not np_signedBy:
+    #     raise MalformedNanopubError("No signedBy found in the nanopublication RDF")
+    # np_signedBy = np_signedBy[0]
+    # # TODO improve this by checking that the ORCID is a valid one
+    # if not str(np_signedBy).startswith("https://orcid.org/"):
+    #     raise MalformedNanopubError(
+    #         f"Invalid signedBy value '{np_signedBy}' in the nanopublication RDF, it should be an ORCID iD starting with 'https://orcid.org/'")
     return True
