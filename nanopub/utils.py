@@ -103,21 +103,23 @@ WHERE {
                 else:
                     default_separator_char = head_str.rsplit("Head", 1)[0][-1]
             else:
-                default_separator_char = head_str.rsplit("Head", 1)[0][-1]
+                if head_str.startswith(np_uri_str):
+                    suffix = head_str[len(np_uri_str):]
+                    default_separator_char = suffix[0]
 
-        # Check if the nanopub URI has a trusty artefact:
+        # Check if the nanopub URI has a trusty artifact:
         # Regex to extract base URI, and trusty URI (if any)
-        extract_trusty = re.search(r'^(.*?)([/#])?(RA[A-Za-z0-9_\-]+)([/#])?', str(np_meta.np_uri))
+        extract_trusty = re.search(r'^(.*?)([/#])?(RA[A-Za-z0-9_\-]+)([/#])?', np_uri_str)
         if extract_trusty:
             np_meta.trusty = extract_trusty.group(3)
             np_meta.namespace = Namespace(
-                str(np_meta.np_uri).split(np_meta.trusty)[0] + np_meta.trusty + default_separator_char)
+                np_uri_str.split(np_meta.trusty)[0] + np_meta.trusty + default_separator_char)
         else:
             # No trusty code present (e.g. temp namespace)
             np_meta.trusty = None
             if np_uri_str.endswith(("#", "/")):
-                np_meta.namespace = Namespace(str(np_meta.np_uri))
+                np_meta.namespace = Namespace(np_uri_str)
             else:
-                np_meta.namespace = Namespace(str(np_uri_str) + default_separator_char)
+                np_meta.namespace = Namespace(np_uri_str + default_separator_char)
 
     return np_meta

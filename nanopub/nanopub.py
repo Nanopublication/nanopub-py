@@ -103,6 +103,8 @@ class Nanopub:
         self._provenance = Graph(self._rdf.store, self._metadata.provenance)
         self._pubinfo = Graph(self._rdf.store, self._metadata.pubinfo)
 
+        self._check_named_graphs()
+
         self._assertion += assertion
         self._provenance += provenance
         self._pubinfo += pubinfo
@@ -607,3 +609,29 @@ class Nanopub:
 
                 g.add((s, p, o, c))
         return g
+
+    def _check_named_graphs(self) -> None:
+        """Ensures that names graphs are not using the same URI, and that they have the nanopub namespace as base URI"""
+        identifiers = [str(g.identifier) for g in (
+            self._head,
+            self._assertion,
+            self._provenance,
+            self._pubinfo,
+        )]
+
+        if len(identifiers) != len(set(identifiers)):
+            raise MalformedNanopubError(
+                f"All four nanopub graphs must have distinct identifiers; found {identifiers}"
+            )
+
+        for g in (
+                self._head,
+                self._assertion,
+                self._provenance,
+                self._pubinfo,
+        ):
+            gid = str(g.identifier)
+            if not gid.startswith(self.namespace):
+                raise MalformedNanopubError(
+                    f"The graph identifier must start with '{self.namespace}'; found {gid}"
+                )
