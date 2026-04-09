@@ -1,9 +1,10 @@
 import inspect
+import json
 from unittest.mock import MagicMock, patch
 
 import pytest
 from nanopub_testsuite_connector import TestSuiteSubfolder
-from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF
+from rdflib import BNode, Graph, Literal, URIRef, Dataset, DC, RDF, Namespace, DCTERMS, PROV
 
 from nanopub import (
     Nanopub,
@@ -315,76 +316,124 @@ class TestCreationFromTrustyNanopub:
         assert np.get_source_uri_from_graph == "http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8"
 
 
-def test_nanopub_sign_uri():
-    expected_trusty = "RAIh8Oq-29dIVTZDhETpJ6f8oxxrILbZ3gSxkyAQY4220"
-    assertion = Graph()
-    assertion.add(
-        (
-            URIRef("http://test"),
-            namespaces.HYCL.claims,
-            Literal("This is a test of nanopub-python"),
+class TestSign:
+
+    def test_nanopub_sign_uri(self):
+        expected_trusty = "RAIh8Oq-29dIVTZDhETpJ6f8oxxrILbZ3gSxkyAQY4220"
+        assertion = Graph()
+        assertion.add(
+            (
+                URIRef("http://test"),
+                namespaces.HYCL.claims,
+                Literal("This is a test of nanopub-python"),
+            )
         )
-    )
-    np = Nanopub(conf=default_conf, assertion=assertion)
-    np.sign()
-    assert np.has_valid_signature
-    assert expected_trusty in np.source_uri
+        np = Nanopub(conf=default_conf, assertion=assertion)
+        np.sign()
+        assert np.has_valid_signature
+        assert expected_trusty in np.source_uri
 
-
-def test_nanopub_sign_uri2():
-    expected_trusty = "RAIh8Oq-29dIVTZDhETpJ6f8oxxrILbZ3gSxkyAQY4220"
-    np = Nanopub(
-        conf=default_conf,
-    )
-    np.assertion.add(
-        (
-            URIRef("http://test"),
-            namespaces.HYCL.claims,
-            Literal("This is a test of nanopub-python"),
+    def test_nanopub_sign_uri2(self):
+        expected_trusty = "RAIh8Oq-29dIVTZDhETpJ6f8oxxrILbZ3gSxkyAQY4220"
+        np = Nanopub(
+            conf=default_conf,
         )
-    )
-    np.sign()
-    assert np.has_valid_signature
-    assert expected_trusty in np.source_uri
-
-
-def test_nanopub_sign_bnode():
-    expected_trusty = "RAcU1AR3dS0ricV5G_ENcpUCk40XuCvFW3tVFqxNEQzT4"
-    assertion = Graph()
-    assertion.add(
-        (
-            BNode("test"),
-            namespaces.HYCL.claims,
-            Literal("This is a test of nanopub-python"),
+        np.assertion.add(
+            (
+                URIRef("http://test"),
+                namespaces.HYCL.claims,
+                Literal("This is a test of nanopub-python"),
+            )
         )
-    )
-    np = Nanopub(conf=default_conf, assertion=assertion)
-    np.sign()
-    assert np.has_valid_signature
-    assert expected_trusty in np.source_uri
+        np.sign()
+        assert np.has_valid_signature
+        assert expected_trusty in np.source_uri
 
+    def test_nanopub_sign_bnode(self):
+        expected_trusty = "RAcU1AR3dS0ricV5G_ENcpUCk40XuCvFW3tVFqxNEQzT4"
+        assertion = Graph()
+        assertion.add(
+            (
+                BNode("test"),
+                namespaces.HYCL.claims,
+                Literal("This is a test of nanopub-python"),
+            )
+        )
+        np = Nanopub(conf=default_conf, assertion=assertion)
+        np.sign()
+        assert np.has_valid_signature
+        assert expected_trusty in np.source_uri
 
-def test_nanopub_sign_bnode2():
-    expected_trusty = "RA-1eE8scfVaiK7vP4CZueTyEyRmn1g2PpPf-j69WQAgM"
-    assertion = Graph()
-    assertion.add(
-        (
-            BNode("test"),
-            namespaces.HYCL.claims,
-            Literal("This is a test of nanopub-python"),
+    def test_nanopub_sign_bnode2(self):
+        expected_trusty = "RA-1eE8scfVaiK7vP4CZueTyEyRmn1g2PpPf-j69WQAgM"
+        assertion = Graph()
+        assertion.add(
+            (
+                BNode("test"),
+                namespaces.HYCL.claims,
+                Literal("This is a test of nanopub-python"),
+            )
         )
-    )
-    assertion.add(
-        (
-            BNode("test2"),
-            namespaces.HYCL.claims,
-            Literal("This is another test of nanopub-python"),
+        assertion.add(
+            (
+                BNode("test2"),
+                namespaces.HYCL.claims,
+                Literal("This is another test of nanopub-python"),
+            )
         )
-    )
-    np = Nanopub(conf=default_conf, assertion=assertion)
-    np.sign()
-    assert expected_trusty in np.source_uri
-    assert np.has_valid_signature
+        np = Nanopub(conf=default_conf, assertion=assertion)
+        np.sign()
+        assert expected_trusty in np.source_uri
+        assert np.has_valid_signature
+
+    def test_specific_file(self):
+        """Test to sign a complex file with many blank nodes"""
+
+        np_conf = NanopubConf(profile=profile_test, use_test_server=True)
+        np_conf.add_prov_generated_time = (True,)
+        np_conf.add_pubinfo_generated_time = (True,)
+        np_conf.attribute_assertion_to_profile = (True,)
+        np_conf.attribute_publication_to_profile = (True,)
+
+        with open("./tests/resources/many_bnodes_with_annotations.json") as f:
+            nanopub_rdf = json.loads(f.read())
+
+        annotations_rdf = nanopub_rdf["@annotations"]
+        del nanopub_rdf["@annotations"]
+        nanopub_rdf = str(json.dumps(nanopub_rdf))
+
+        g = Graph()
+        g.parse(data=nanopub_rdf, format="json-ld")
+
+        np = Nanopub(
+            assertion=g,
+            conf=np_conf,
+        )
+        source = "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f9641190-9151-4f7e-89ff-1e7a818c30ee"
+        if annotations_rdf:
+            np.provenance.parse(data=str(json.dumps(annotations_rdf)), format="json-ld")
+        if source:
+            np.provenance.add(
+                (np.assertion.identifier, PROV.hadPrimarySource, URIRef(source))
+            )
+
+        PAV = Namespace("http://purl.org/pav/")
+        if True:
+            np.pubinfo.add(
+                (
+                    np.metadata.np_uri,
+                    DCTERMS.conformsTo,
+                    URIRef("https://w3id.org/biolink/vocab/"),
+                )
+            )
+            np.pubinfo.add(
+                (
+                    URIRef("https://w3id.org/biolink/vocab/"),
+                    PAV.version,
+                    Literal("3.1.0"),
+                )
+            )
+        np.sign()
 
 
 def test_nanopub_publish():
@@ -482,60 +531,6 @@ def test_nanopub_index():
     )
     for np in np_list:
         assert np.source_uri is not None
-
-
-def test_specific_file():
-    """Test to sign a complex file with many blank nodes"""
-    import json
-
-    from rdflib import Namespace
-    from rdflib.namespace import DCTERMS, PROV
-
-    np_conf = NanopubConf(profile=profile_test, use_test_server=True)
-    np_conf.add_prov_generated_time = (True,)
-    np_conf.add_pubinfo_generated_time = (True,)
-    np_conf.attribute_assertion_to_profile = (True,)
-    np_conf.attribute_publication_to_profile = (True,)
-
-    with open("./tests/resources/many_bnodes_with_annotations.json") as f:
-        nanopub_rdf = json.loads(f.read())
-
-    annotations_rdf = nanopub_rdf["@annotations"]
-    del nanopub_rdf["@annotations"]
-    nanopub_rdf = str(json.dumps(nanopub_rdf))
-
-    g = Graph()
-    g.parse(data=nanopub_rdf, format="json-ld")
-
-    np = Nanopub(
-        assertion=g,
-        conf=np_conf,
-    )
-    source = "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=f9641190-9151-4f7e-89ff-1e7a818c30ee"
-    if annotations_rdf:
-        np.provenance.parse(data=str(json.dumps(annotations_rdf)), format="json-ld")
-    if source:
-        np.provenance.add(
-            (np.assertion.identifier, PROV.hadPrimarySource, URIRef(source))
-        )
-
-    PAV = Namespace("http://purl.org/pav/")
-    if True:
-        np.pubinfo.add(
-            (
-                np.metadata.np_uri,
-                DCTERMS.conformsTo,
-                URIRef("https://w3id.org/biolink/vocab/"),
-            )
-        )
-        np.pubinfo.add(
-            (
-                URIRef("https://w3id.org/biolink/vocab/"),
-                PAV.version,
-                Literal("3.1.0"),
-            )
-        )
-    np.sign()
 
 
 def test_replace_blank_nodes_unnamed_bnode():
@@ -657,7 +652,7 @@ def test_sign_errors(monkeypatch):
     np._provenance.add(
         (
             np._assertion.identifier,
-            namespaces.PROV.wasAttributedTo,
+            PROV.wasAttributedTo,
             URIRef("http://someone"),
         )
     )
@@ -674,7 +669,7 @@ def test_sign_errors(monkeypatch):
     np2._provenance.add(
         (
             np2._assertion.identifier,
-            namespaces.PROV.wasAttributedTo,
+            PROV.wasAttributedTo,
             URIRef("http://someone"),
         )
     )
