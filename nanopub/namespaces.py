@@ -12,9 +12,6 @@ NPX = Namespace("http://purl.org/nanopub/x/")
 NTEMPLATE = Namespace("https://w3id.org/np/o/ntemplate/")
 """Nanopub template namespace"""
 
-PROV = Namespace("http://www.w3.org/ns/prov#")
-"""Provenance Ontogoly (PROV-O) namespace"""
-
 HYCL = Namespace("http://purl.org/petapico/o/hycl#")
 """HYCL namespace for claims and hypothesis"""
 
