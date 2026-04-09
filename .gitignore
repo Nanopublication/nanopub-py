@@ -142,3 +142,4 @@ dmypy.json
 
 # Eclipse
 *.project
+node_modules/
