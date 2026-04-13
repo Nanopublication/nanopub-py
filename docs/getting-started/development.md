@@ -16,15 +16,15 @@ git clone https://github.com/Nanopublication/nanopub-py
 cd nanopub
 ```
 
-To install the project for development you can use [`poetry`](https://python-poetry.org/).
+To install the project for development you can use [`uv`](https://docs.astral.sh/uv/).
 
 If you don't have it installed, first install it following the
-official [installation guide](https://python-poetry.org/docs/#installation).
+official [installation guide](https://docs.astral.sh/uv/getting-started/installation/).
 
-Once poetry is installed, you can install all the project dependencies by running:
+Once `uv` is installed, you can install all the project dependencies by running:
 
 ```bash
-poetry install
+uv sync
 ```
 
 Optionally, install `pre-commit` to enable automated formatting and linting of the code at each commit:
@@ -75,18 +75,18 @@ Tests are automatically run by a GitHub Actions workflow when new code is pushed
 	./scripts/test.sh tests/test_nanopub.py::test_nanopub_sign_uri
 	```
 
-=== "poetry"
+=== "uv"
 
 	Run the tests locally:
 
 	```bash
-	poetry run pytest
+	uv run pytest
 	```
 
 	You can also run only a specific test:
 
 	```bash
-	poetry run pytest tests/test_nanopub.py::test_nanopub_sign_uri
+	uv run pytest tests/test_nanopub.py::test_nanopub_sign_uri
 	```
 
 ## 📖 Generate docs
@@ -105,10 +105,10 @@ Serve the docs on [http://localhost:8008](http://localhost:8008){:target="_blank
     ./scripts/docs.sh
     ```
 
-=== "poetry"
+=== "uv"
 
     ```bash
-    poetry run mkdocs serve
+    uv run mkdocs serve
     ```
 
 ## 🏷️ Publish a new release

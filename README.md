@@ -111,13 +111,13 @@ To run tests:
 Install dependencies (if not already installed):
 
 ```
-poetry install
+uv sync
 ```
 
 Run tests:
 
 ```
-poetry run pytest
+uv run pytest
 ```
 
 ## Test coverage
@@ -125,19 +125,19 @@ poetry run pytest
 Run the tests with coverage tracking:
 
 ```
-poetry run pytest --cov
+uv run pytest --cov
 ```
 
 View a terminal summary:
 
 ```
-poetry run coverage report
+uv run coverage report
 ```
 
 Or generate a detailed HTML report
 
 ```
-poetry run coverage html
+uv run coverage html
 ```
 
 ## License
