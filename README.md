@@ -5,6 +5,7 @@
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4491/badge)](https://bestpractices.coreinfrastructure.org/projects/4491)
 [![fair-software.eu](https://img.shields.io/badge/fair--software.eu-%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F%20%20%E2%97%8F-green)](https://fair-software.eu)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4336538.svg)](https://doi.org/10.5281/zenodo.4336538)
+[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
 # nanopub
 
@@ -27,7 +28,7 @@ Install using pip:
 pip install nanopub
 ```
 
-To publish to the nanopublication network you need to setup your profile. This allows the nanopublication services to
+To publish to the nanopublication network you need to set up your profile. This allows the nanopublication services to
 identify you. Run the following command in the terminal:
 
 ```
@@ -142,12 +143,13 @@ poetry run coverage html
 
 ## License
 
-`nanopub` is free software under the Apache License. See [LICENSE](https://github.com/Nanopublication/nanopub-py/blob/main/LICENSE).
+`nanopub` is free software under the Apache License.
+See [LICENSE](https://github.com/Nanopublication/nanopub-py/blob/main/LICENSE).
 
 ## Copyright
 
-- Copyright (C) 2020 Robin Richardson, Sven van der Burg
-- Copyright (C) 2020-2025 the nanopub
+- Copyright © 2020 Robin Richardson, Sven van der Burg
+- Copyright © 2020-2025 the nanopub
   contributors (https://github.com/Nanopublication/nanopub-py/graphs/contributors)
-- Copyright (C) 2025 Knowledge Pixels
-- Copyright (c) 2025 acatech - Deutsche Akademie der Technikwissenschaften e.V.
+- Copyright © 2025 Knowledge Pixels
+- Copyright © 2025 acatech - Deutsche Akademie der Technikwissenschaften e.V.
