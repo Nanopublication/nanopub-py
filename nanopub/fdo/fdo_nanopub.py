@@ -17,6 +17,8 @@ def to_hdl_uri(value):
         return value
     elif isinstance(value, str) and not value.startswith('http'):
         return HDL[value]
+    elif isinstance(value, str):
+        return rdflib.URIRef(value)
     else:
         raise ValueError(f"Invalid value: {value}")
 
@@ -66,9 +68,9 @@ class FdoNanopub(Nanopub):
 
             if entry_type == "HS_ADMIN":
                 continue
-            elif entry_type == "name":
+            elif entry_type in ("name", "referentName"):
                 label = entry_value
-            elif entry_type == FDO_PROFILE_HANDLE:
+            elif entry_type in (FDO_PROFILE_HANDLE, "fdoProfile"):
                 fdo_profile = entry_value
             elif entry_type == FDO_DATA_REF_HANDLE:
                 data_ref = entry_value
