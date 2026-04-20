@@ -35,9 +35,10 @@ def test_to_hdl_uri_with_non_http_str():
     assert str(result).endswith(handle_str)
 
 
-def test_to_hdl_uri_with_http_str_raises():
-    with pytest.raises(ValueError):
-        to_hdl_uri("http://example.com")
+def test_to_hdl_uri_with_http_str_returns_uriref():
+    result = to_hdl_uri("http://example.com")
+    assert isinstance(result, rdflib.URIRef)
+    assert str(result) == "http://example.com"
 
 
 def test_to_hdl_uri_with_invalid_type_raises():
