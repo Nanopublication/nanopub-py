@@ -34,6 +34,10 @@ def _profile_landing_page_uri_to_api_url(uri: str) -> str:
     if uri.startswith("https://hdl.handle.net/api/handles/"):
         return uri  # Already API URL
 
+    if uri.startswith("https://doi.org/"):
+        handle = uri.replace("https://doi.org/", "")
+        return f"https://hdl.handle.net/api/handles/{handle}"
+
     parts = uri.rstrip("/").split("/")
     if len(parts) < 2:
         raise ValueError(f"Invalid handle URI: {uri}")
@@ -53,7 +57,22 @@ def validate_fdo_record(record: FdoRecord, profile_np: FdoNanopub = None) -> Val
             if not profile_uri:
                 return ValidationResult(False, ["FDO profile URI not found in record."], [])
 
-            if looks_like_handle(profile_uri) or str(profile_uri).startswith("https://hdl.handle.net/"):
+            if str(profile_uri).startswith("https://doi.org/"):
+                # DTR-style profile: follow DOI to get DTR JSON, then fetch schema.url
+                resp = requests.get(str(profile_uri), headers={"Accept": "application/json"})
+                if resp.status_code != 200:
+                    return ValidationResult(False, [f"Could not fetch DTR profile for {profile_uri}"], [])
+                dtr_json = resp.json()
+                schema_url = dtr_json.get("schema", {}).get("url")
+                if not schema_url:
+                    return ValidationResult(False, [f"No schema URL found in DTR profile for {profile_uri}"], [])
+                schema_resp = requests.get(schema_url)
+                if schema_resp.status_code != 200:
+                    return ValidationResult(False, [f"Could not fetch JSON schema from {schema_url}"], [])
+                schema_json = schema_resp.json()
+                shape_graph = convert_jsonschema_to_shacl(schema_json)
+
+            elif looks_like_handle(profile_uri) or str(profile_uri).startswith("https://hdl.handle.net/"):
                 api_url = _profile_landing_page_uri_to_api_url(str(profile_uri))
                 resp = requests.get(api_url)
                 if resp.status_code != 200:
