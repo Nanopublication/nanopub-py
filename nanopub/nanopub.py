@@ -4,7 +4,7 @@ sign, publish, and make handling RDF easier.
 """
 import re
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Union, Tuple
 
@@ -431,17 +431,17 @@ class Nanopub:
             self, add_pubinfo_generated_time: bool, add_prov_generated_time: bool
     ) -> None:
         """Handler for `Nanopub` constructor."""
-        creationtime = rdflib.Literal(datetime.now(), datatype=XSD.dateTime)
+        creation_time = rdflib.Literal(datetime.now(tz=timezone.utc), datatype=XSD.dateTime)
         if add_pubinfo_generated_time:
             self._pubinfo.add(
-                (self._metadata.namespace[""], PROV.generatedAtTime, creationtime)
+                (self._metadata.namespace[""], PROV.generatedAtTime, creation_time)
             )
         if add_prov_generated_time:
             self._provenance.add(
                 (
                     self._assertion.identifier,
                     PROV.generatedAtTime,
-                    creationtime,
+                    creation_time,
                 )
             )
 
