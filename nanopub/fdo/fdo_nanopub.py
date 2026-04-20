@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Optional
 
 import rdflib
@@ -10,6 +11,25 @@ from nanopub.fdo.fdo_record import FdoRecord
 from nanopub.fdo.utils import looks_like_handle, looks_like_url, handle_to_iri
 from nanopub.namespaces import HDL, FDOF, NPX, FDOC
 from nanopub.nanopub_conf import NanopubConf
+
+# Stricter than fdo.utils.looks_like_handle / looks_like_url: these mirror the
+# regexes used by nanopub-java's FdoUtils when deciding whether an imported
+# handle-record value is an IRI or a plain literal. Kept local so the loose
+# public helpers keep their current semantics for other callers.
+_IMPORT_URL_RE = re.compile(r"https?://\S+\.[a-z]{2,}.*")
+_IMPORT_HANDLE_RE = re.compile(r"\d\d\S*/+\S*")
+
+
+def _handle_value_to_rdf_object(value):
+    """Map a handle-record attribute value to an IRI if it looks like a URL or
+    bare handle, otherwise to a Literal. Mirrors nanopub-java's behavior in
+    ``FdoNanopubCreator.createFdoRecordFromHandleSystem``."""
+    if isinstance(value, str):
+        if _IMPORT_URL_RE.fullmatch(value):
+            return rdflib.URIRef(value)
+        if _IMPORT_HANDLE_RE.fullmatch(value):
+            return handle_to_iri(value)
+    return rdflib.Literal(value)
 
 
 def to_hdl_uri(value):
@@ -91,7 +111,8 @@ class FdoNanopub(Nanopub):
                 np.add_fdo_data_ref(ref)
 
         for attr_type, val in other_attributes:
-            np.add_attribute(attr_type, val)
+            predicate = to_hdl_uri(attr_type)
+            np.assertion.add((np.fdo_uri, predicate, _handle_value_to_rdf_object(val)))
 
         return np
 
