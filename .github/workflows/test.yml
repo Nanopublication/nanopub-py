@@ -21,35 +21,28 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - name: Install UV
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
         with:
+          enable-cache: true
           python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: snok/install-poetry@76e04a911780d5b312d89783f7b1cd627778900a # v1.4.1
-        with:
-          version: 2.3.2
-          virtualenvs-create: true
-          virtualenvs-in-project: true
 
       - name: Install dependencies with ${{ matrix.rdflib-version }}
         run: |
-          poetry install --with test,dev
-          poetry add ${{ matrix.rdflib-version }}
+          uv sync --group test --group dev
+          uv add ${{ matrix.rdflib-version }}
 
       - name: Setup nanopub profile (including RSA keys)
         run: |
-          poetry run np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --no-publish --name test --newkeys
+          uv run np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --no-publish --name test --newkeys
 
       - name: Test with pytest
-        run: |
-          poetry run pytest -v --cov
+        run: uv run pytest -v --cov
 
       - name: Publish coverage to Coveralls
         run: |
-          poetry run coverage xml
-          poetry run coveralls
+          uv run coverage xml
+          uv run coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.python-version }} - ${{ matrix.rdflib-version }}
