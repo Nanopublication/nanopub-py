@@ -27,6 +27,11 @@ def resolve_id(iri_or_handle: str, conf: Optional[NanopubConf] = None) -> FdoRec
             np = FdoNanopub.handle_to_nanopub(handle)
             return FdoRecord(assertion=np.assertion)
 
+        if iri_or_handle.startswith("https://doi.org/"):
+            handle = iri_or_handle.replace("https://doi.org/", "")
+            np = FdoNanopub.handle_to_nanopub(handle)
+            return FdoRecord(assertion=np.assertion)
+
     except Exception as e:
         raise ValueError(f"Could not resolve FDO: {iri_or_handle}") from e
 
