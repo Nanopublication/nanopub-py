@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Optional
 
 import rdflib
@@ -11,12 +12,33 @@ from nanopub.fdo.utils import looks_like_handle, looks_like_url, handle_to_iri
 from nanopub.namespaces import HDL, FDOF, NPX, FDOC
 from nanopub.nanopub_conf import NanopubConf
 
+# Stricter than fdo.utils.looks_like_handle / looks_like_url: these mirror the
+# regexes used by nanopub-java's FdoUtils when deciding whether an imported
+# handle-record value is an IRI or a plain literal. Kept local so the loose
+# public helpers keep their current semantics for other callers.
+_IMPORT_URL_RE = re.compile(r"https?://\S+\.[a-z]{2,}.*")
+_IMPORT_HANDLE_RE = re.compile(r"\d\d\S*/+\S*")
+
+
+def _handle_value_to_rdf_object(value):
+    """Map a handle-record attribute value to an IRI if it looks like a URL or
+    bare handle, otherwise to a Literal. Mirrors nanopub-java's behavior in
+    ``FdoNanopubCreator.createFdoRecordFromHandleSystem``."""
+    if isinstance(value, str):
+        if _IMPORT_URL_RE.fullmatch(value):
+            return rdflib.URIRef(value)
+        if _IMPORT_HANDLE_RE.fullmatch(value):
+            return handle_to_iri(value)
+    return rdflib.Literal(value)
+
 
 def to_hdl_uri(value):
     if isinstance(value, rdflib.URIRef):
         return value
     elif isinstance(value, str) and not value.startswith('http'):
         return HDL[value]
+    elif isinstance(value, str):
+        return rdflib.URIRef(value)
     else:
         raise ValueError(f"Invalid value: {value}")
 
@@ -66,9 +88,9 @@ class FdoNanopub(Nanopub):
 
             if entry_type == "HS_ADMIN":
                 continue
-            elif entry_type == "name":
+            elif entry_type in ("name", "referentName"):
                 label = entry_value
-            elif entry_type == FDO_PROFILE_HANDLE:
+            elif entry_type in (FDO_PROFILE_HANDLE, "fdoProfile"):
                 fdo_profile = entry_value
             elif entry_type == FDO_DATA_REF_HANDLE:
                 data_ref = entry_value
@@ -91,7 +113,8 @@ class FdoNanopub(Nanopub):
                 np.add_fdo_data_ref(ref)
 
         for attr_type, val in other_attributes:
-            np.add_attribute(attr_type, val)
+            predicate = to_hdl_uri(attr_type)
+            np.assertion.add((np.fdo_uri, predicate, _handle_value_to_rdf_object(val)))
 
         return np
 

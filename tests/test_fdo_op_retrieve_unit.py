@@ -85,6 +85,16 @@ def test_resolve_id_with_hdl_prefix(mock_handle):
     assert isinstance(record, FdoRecord)
 
 
+@patch("nanopub.fdo.retrieve.FdoNanopub.handle_to_nanopub")
+def test_resolve_id_with_doi_prefix(mock_handle):
+    fake_np = MagicMock()
+    fake_np.assertion = Graph()
+    mock_handle.return_value = fake_np
+    record = resolve_id("https://doi.org/10.3535/ZJX-6N5-A5C")
+    assert isinstance(record, FdoRecord)
+    mock_handle.assert_called_with("10.3535/ZJX-6N5-A5C")
+
+
 @patch("nanopub.fdo.retrieve.resolve_in_nanopub_network", return_value=None)
 @patch("nanopub.fdo.retrieve.looks_like_handle", return_value=False)
 def test_resolve_id_not_found(mock_looks_like_handle, mock_resolve):

@@ -7,6 +7,7 @@ from rdflib import RDF, RDFS, DCTERMS
 from nanopub.constants import FDO_DATA_REF_HANDLE, FDO_PROFILE_HANDLE, FDO_DATA_REFS_HANDLE
 from nanopub.fdo.fdo_nanopub import FdoNanopub, to_hdl_uri
 from nanopub.fdo.fdo_record import FdoRecord
+from nanopub.fdo.utils import handle_to_iri
 from nanopub.namespaces import HDL, FDOF, NPX
 
 FAKE_HANDLE = "21.T11966/test"
@@ -35,9 +36,10 @@ def test_to_hdl_uri_with_non_http_str():
     assert str(result).endswith(handle_str)
 
 
-def test_to_hdl_uri_with_http_str_raises():
-    with pytest.raises(ValueError):
-        to_hdl_uri("http://example.com")
+def test_to_hdl_uri_with_http_str_returns_uriref():
+    result = to_hdl_uri("http://example.com")
+    assert isinstance(result, rdflib.URIRef)
+    assert str(result) == "http://example.com"
 
 
 def test_to_hdl_uri_with_invalid_type_raises():
@@ -132,6 +134,32 @@ def test_handle_to_nanopub_branches_minimal(monkeypatch, extra_entry):
     profile_uri = to_hdl_uri("21.T11966/profile")
     assert (np.fdo_uri, DCTERMS.conformsTo, profile_uri) in np.assertion
     assert_introduces_in_pubinfo(np)
+
+
+def test_handle_to_nanopub_imports_values_by_type(monkeypatch):
+    """URL-shaped and handle-shaped values become IRIs; plain strings stay literals."""
+    def fake_resolve_handle_metadata(handle):
+        return {
+            "values": [
+                {"type": "name", "data": {"value": "TestLabel"}},
+                {"type": "pid", "data": {"value": "https://doi.org/10.1234/abc"}},
+                {"type": "digitalObjectType", "data": {"value": "21.T11148/894b1e6cad57e921764e"}},
+                {"type": "catalogNumber", "data": {"value": "1983-0000001"}},
+                {"type": "topicCategory", "data": {"value": ""}},
+            ]
+        }
+
+    monkeypatch.setattr("nanopub.fdo.retrieve.resolve_handle_metadata", fake_resolve_handle_metadata)
+    np = FdoNanopub.handle_to_nanopub("21.T11966/test")
+
+    assert (np.fdo_uri, to_hdl_uri("pid"),
+            rdflib.URIRef("https://doi.org/10.1234/abc")) in np.assertion
+    assert (np.fdo_uri, to_hdl_uri("digitalObjectType"),
+            handle_to_iri("21.T11148/894b1e6cad57e921764e")) in np.assertion
+    assert (np.fdo_uri, to_hdl_uri("catalogNumber"),
+            rdflib.Literal("1983-0000001")) in np.assertion
+    assert (np.fdo_uri, to_hdl_uri("topicCategory"),
+            rdflib.Literal("")) in np.assertion
 
 
 def test_handle_to_nanopub_with_missing_value(monkeypatch):
