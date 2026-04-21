@@ -11,7 +11,8 @@ from typing import Optional, Union, Tuple
 import rdflib
 import requests
 from rdflib import BNode, Dataset, Graph, URIRef
-from rdflib.namespace import DC, DCTERMS, FOAF, PROV, RDF, XSD
+from rdflib import RDF, Literal
+from rdflib.namespace import DC, DCTERMS, FOAF, PROV, XSD
 
 from nanopub.definitions import MAX_TRIPLES_PER_NANOPUB, NANOPUB_FETCH_FORMAT, TEST_NANOPUB_REGISTRY_URL
 from nanopub.namespaces import HYCL, NP, NPX, NTEMPLATE, ORCID, PAV
@@ -152,7 +153,7 @@ class Nanopub:
             )
             assertion_attributed_to = self._conf.assertion_attributed_to
             if self._conf.attribute_assertion_to_profile:
-                assertion_attributed_to = rdflib.URIRef(self.profile.orcid_id)
+                assertion_attributed_to = URIRef(self.profile.orcid_id)
             self._handle_assertion_attributed_to(assertion_attributed_to)
             self._handle_publication_attributed_to(
                 self._conf.attribute_publication_to_profile,
@@ -399,7 +400,7 @@ class Nanopub:
 
         This is usually something like: http://purl.org/np/RAnksi2yDP7jpe7F6BwWCpMOmzBEcUImkAKUeKEY_2Yus
         """
-        for s, _, _, _ in self._rdf.quads((None, rdflib.RDF.type, NP.Nanopublication, None)):
+        for s, _, _, _ in self._rdf.quads((None, RDF.type, NP.Nanopublication, None)):
             extract_trusty = re.search(
                 r'^[a-z0-9+.-]+:\/\/[a-zA-Z0-9\/._-]+\/(RA.*)$',
                 str(s),
@@ -431,7 +432,7 @@ class Nanopub:
             self, add_pubinfo_generated_time: bool, add_prov_generated_time: bool
     ) -> None:
         """Handler for `Nanopub` constructor."""
-        creation_time = rdflib.Literal(datetime.now(tz=timezone.utc), datatype=XSD.dateTime)
+        creation_time = Literal(datetime.now().astimezone(), datatype=XSD.dateTime)
         if add_pubinfo_generated_time:
             self._pubinfo.add(
                 (self._metadata.namespace[""], PROV.generatedAtTime, creation_time)
@@ -468,9 +469,9 @@ class Nanopub:
                 raise MalformedNanopubError(
                     "No nanopub profile provided, but attribute_publication_to_profile is enabled")
             if publication_attributed_to is None:
-                publication_attributed_to = rdflib.URIRef(self._profile.orcid_id)
+                publication_attributed_to = URIRef(self._profile.orcid_id)
             else:
-                publication_attributed_to = rdflib.URIRef(publication_attributed_to)
+                publication_attributed_to = URIRef(publication_attributed_to)
             self._pubinfo.add(
                 (
                     self._metadata.namespace[""],
@@ -488,7 +489,7 @@ class Nanopub:
                 list_of_uris = [derived_from]
 
             for derived_from_uri in list_of_uris:
-                derived_from_uri = rdflib.URIRef(derived_from_uri)
+                derived_from_uri = URIRef(derived_from_uri)
                 self._provenance.add((
                     self._assertion.identifier,
                     PROV.wasDerivedFrom,
