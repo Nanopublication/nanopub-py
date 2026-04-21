@@ -1,5 +1,5 @@
 [![nanopub](https://img.shields.io/badge/rsd-nanopub-00a3e3.svg)](https://www.research-software.nl/software/nanopub)
-[![Tests and update docs](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/build.yml) [![Publish to PyPI](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/pypi.yml)
+[![Tests](https://github.com/Nanopublication/nanopub-py/actions/workflows/test.yml/badge.svg)](https://github.com/Nanopublication/nanopub-py/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/Nanopublication/nanopub-py/badge.svg)](https://coveralls.io/github/Nanopublication/nanopub-py)
 [![PyPI version](https://badge.fury.io/py/nanopub.svg)](https://badge.fury.io/py/nanopub)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4491/badge)](https://bestpractices.coreinfrastructure.org/projects/4491)
