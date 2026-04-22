@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import re
 from functools import cmp_to_key
 
@@ -7,7 +8,8 @@ from rdflib.term import Literal
 from nanopub.trustyuri import TrustyUriUtils
 from nanopub.trustyuri.rdf.RdfPreprocessor import preprocess
 from nanopub.trustyuri.rdf.StatementComparator import StatementComparator
-from nanopub.utils import log
+
+logger = logging.getLogger(__name__)
 
 
 def normalize_quads(quads, hashstr=None, baseuri=None):
@@ -26,7 +28,7 @@ def normalize_quads(quads, hashstr=None, baseuri=None):
         if not e == previous:
             s = s + e
         previous = e
-    log.debug(f"Normalized quads before signing/hashing:\n{s}")
+    logger.debug(f"Normalized quads before signing/hashing:\n{s}")
     return s
 
 

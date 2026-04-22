@@ -4,15 +4,14 @@ from rdflib import Graph, Literal, URIRef
 
 from nanopub import Nanopub, NanopubConf, load_profile, namespaces
 
-log = logging.getLogger()
-log.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 console_handler = logging.StreamHandler()
 formatter = logging.Formatter(
     "%(asctime)s %(levelname)s: [%(module)s:%(funcName)s] %(message)s"
 )
 console_handler.setFormatter(formatter)
-log.addHandler(console_handler)
-
+logger.addHandler(console_handler)
 
 conf = NanopubConf(
     add_prov_generated_time=False,

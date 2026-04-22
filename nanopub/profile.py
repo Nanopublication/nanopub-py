@@ -1,6 +1,7 @@
 """
 This module holds objects and functions to load a nanopub user profile.
 """
+import logging
 import os
 from base64 import decodebytes
 from pathlib import Path
@@ -10,7 +11,8 @@ import yatiml
 from Crypto.PublicKey import RSA
 
 from nanopub.definitions import DEFAULT_PROFILE_PATH, RSA_KEY_SIZE, USER_CONFIG_DIR
-from nanopub.utils import log
+
+logger = logging.getLogger(__name__)
 
 PROFILE_INSTRUCTIONS_MESSAGE = '''
     Follow these instructions to correctly setup your nanopub profile:
@@ -63,7 +65,7 @@ class Profile:
             self._private_key = private_key
 
         if not public_key and private_key:
-            log.info(
+            logger.info(
                 'The public key was not provided when loading the Nanopub profile, generating it from the provided private key')
             key = RSA.import_key(decodebytes(self._private_key.encode()))
             self._public_key = format_key(key.publickey().export_key().decode('utf-8'))
@@ -88,7 +90,7 @@ class Profile:
 
         self._private_key = format_key(private_key_str)
         self._public_key = format_key(public_key_str)
-        log.info(f"Public/private RSA key pair has been generated for {self.orcid_id} ({self.name})")
+        logger.info(f"Public/private RSA key pair has been generated for {self.orcid_id} ({self.name})")
         return public_key_str
 
     def store(self, folder: Path = USER_CONFIG_DIR) -> str:
@@ -243,7 +245,7 @@ def generate_keyfiles(path: Path = USER_CONFIG_DIR) -> str:
     public_key_file = open(public_path, "w")
     public_key_file.write(public_key_str)
     public_key_file.close()
-    log.info(f"Public/private RSA key pair has been generated in {private_path} and {public_path}")
+    logger.info(f"Public/private RSA key pair has been generated in {private_path} and {public_path}")
     return public_key_str
 
 

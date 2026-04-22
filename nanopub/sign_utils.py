@@ -1,3 +1,4 @@
+import logging
 import re
 from base64 import decodebytes, encodebytes
 
@@ -12,7 +13,9 @@ from nanopub.namespaces import NPX
 from nanopub.profile import Profile
 from nanopub.trustyuri.rdf import RdfHasher, RdfUtils
 from nanopub.trustyuri.rdf.RdfPreprocessor import transform
-from nanopub.utils import MalformedNanopubError, log
+from nanopub.utils import MalformedNanopubError
+
+logger = logging.getLogger(__name__)
 
 
 def add_signature(g: Dataset, profile: Profile, dummy_namespace: Namespace, pubinfo_g: Graph) -> Dataset:
@@ -56,7 +59,7 @@ def add_signature(g: Dataset, profile: Profile, dummy_namespace: Namespace, pubi
     signer = PKCS1_v1_5.new(private_key)
     signature_b = signer.sign(SHA256.new(normed_rdf.encode()))
     signature = encodebytes(signature_b).decode().replace("\n", "")
-    log.debug(f"Nanopub signature: {signature}")
+    logger.debug(f"Nanopub signature: {signature}")
 
     # Add the signature to the graph
     g.add((
@@ -73,7 +76,7 @@ def add_signature(g: Dataset, profile: Profile, dummy_namespace: Namespace, pubi
         baseuri=str(dummy_namespace),
         hashstr=" "
     )
-    log.debug(f"Trusty artefact: {trusty_artefact}")
+    logger.debug(f"Trusty artefact: {trusty_artefact}")
 
     g = replace_trusty_in_graph(trusty_artefact, str(dummy_namespace), g)
     return g
@@ -118,7 +121,7 @@ def replace_trusty_in_graph(trusty_artefact: str, dummy_ns: str, graph: Dataset)
 def publish_graph(g: Dataset, use_server: str = NANOPUB_REGISTRY_URLS[0]) -> bool:
     """Publish a signed nanopub to the given nanopub server.
     """
-    log.info(f"Publishing to the nanopub server {use_server}")
+    logger.info(f"Publishing to the nanopub server {use_server}")
     headers = {'Content-Type': 'application/trig'}
     # NOTE: nanopub-java uses {'Content-Type': 'application/x-www-form-urlencoded'}
     data = g.serialize(format="trig")
@@ -165,7 +168,7 @@ def verify_signature(g: Dataset, source_uri: str, source_namespace: Namespace) -
     if np_algo and str(np_algo).upper() != "RSA":
         if np_algo and str(np_algo).upper() == "DSA":
             # TODO implement DSA signature verification
-            log.info("DSA signature algorithm is not supported yet, skipping signature verification")
+            logger.info("DSA signature algorithm is not supported yet, skipping signature verification")
             return True
         else:
             raise MalformedNanopubError(

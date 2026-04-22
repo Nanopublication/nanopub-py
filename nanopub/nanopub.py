@@ -2,6 +2,7 @@
 This module holds code for representing the RDF of nanopublications, as well as helper functions to
 sign, publish, and make handling RDF easier.
 """
+import logging
 import re
 from copy import deepcopy
 from datetime import datetime
@@ -19,7 +20,9 @@ from nanopub.namespaces import HYCL, NP, NPX, NTEMPLATE, ORCID, PAV
 from nanopub.nanopub_conf import NanopubConf
 from nanopub.profile import ProfileError
 from nanopub.sign_utils import add_signature, publish_graph, verify_signature, verify_trusty
-from nanopub.utils import MalformedNanopubError, NanopubMetadata, extract_np_metadata, log
+from nanopub.utils import MalformedNanopubError, NanopubMetadata, extract_np_metadata
+
+logger = logging.getLogger(__name__)
 
 
 class Nanopub:
@@ -86,7 +89,9 @@ class Nanopub:
         else:
             # if provided as rdflib graph, or file
             if isinstance(rdf, Dataset):
+                logger.debug("Dataset provided by caller; making deepcopy to avoid mutating caller's store")
                 self._rdf = self._preformat_graph(deepcopy(rdf))
+                logger.debug("Deepcopied dataset quads: %d", sum(1 for _ in self._rdf.quads((None, None, None, None))))
                 self._metadata = extract_np_metadata(self._rdf)
             elif isinstance(rdf, Path):
                 self._rdf = self._preformat_graph(Dataset())
@@ -165,6 +170,7 @@ class Nanopub:
 
     def _preformat_graph(self, g: Dataset) -> Dataset:
         """Add a few default namespaces"""
+        logger.debug("Preformat graph: incoming quads=%d", sum(1 for _ in g.quads((None, None, None, None))))
         g.bind("np", NP)
         g.bind("npx", NPX)
         g.bind("prov", PROV)
@@ -176,11 +182,17 @@ class Nanopub:
         g.bind("ntemplate", NTEMPLATE)
         g.bind("foaf", FOAF)
         g = self._replace_blank_nodes(g)
+        logger.debug("Preformat graph: after replace_blank_nodes quads=%d",
+                     sum(1 for _ in g.quads((None, None, None, None))))
         return g
 
     def update_from_signed(self, signed_g: Dataset) -> None:
         """Update the pub RDF to the signed one"""
+        logger.info("Updating Nanopub instance from signed graph; previous np_uri=%s",
+                    getattr(self._metadata, "np_uri", None))
         self._metadata = extract_np_metadata(signed_g)
+        logger.info("New metadata: namespace=%s, np_uri=%s, trusty=%s", self._metadata.namespace, self._metadata.np_uri,
+                    self._metadata.trusty)
         if self._metadata.trusty:
             self._source_uri = str(self._metadata.np_uri)
         # self._source_uri = self.get_source_uri_from_graph
@@ -201,10 +213,14 @@ class Nanopub:
             raise MalformedNanopubError(f"The nanopub have already been signed: {self.source_uri}")
 
         if self.is_valid:
+            logger.info("Signing nanopub %s (quads=%d)", self.source_uri or "<unpublished>",
+                        sum(1 for _ in self.rdf.quads((None, None, None, None))))
+            logger.debug("Calling _replace_blank_nodes prior to signing (bnode_count=%d)", self._bnode_count)
             self._replace_blank_nodes(self._rdf)
+            logger.debug("Calling add_signature on dataset...")
             signed_g = add_signature(self.rdf, self._conf.profile, self._metadata.namespace, self._pubinfo)
             self.update_from_signed(signed_g)
-            log.info(f"Signed {self.source_uri}")
+            logger.info("Nanopub signed; new source_uri=%s", self.source_uri)
         else:
             raise MalformedNanopubError("The nanopub is not valid, cannot sign it")
 
@@ -214,7 +230,7 @@ class Nanopub:
             self.sign()
 
         publish_graph(self.rdf, use_server=self._conf.use_server)
-        log.info(f'Published {self.source_uri} to {self._conf.use_server}')
+        logger.info(f'Published {self.source_uri} to {self._conf.use_server}')
         self.published = True
 
         if self._introduces_concept:
@@ -222,7 +238,7 @@ class Nanopub:
             # If a blank node with name 'step' was passed as introduces_concept, the concept will be
             # published with a URI that looks like [published nanopub URI]#step.
             self._concept_uri = f"{self.source_uri}#{str(self._introduces_concept)}"
-            log.info(f"Published concept to {self._concept_uri}")
+            logger.info(f"Published concept to {self._concept_uri}")
             return self.source_uri, self._conf.use_server, self._concept_uri
 
         return self.source_uri, self._conf.use_server
@@ -607,6 +623,8 @@ class Nanopub:
                 o = self._metadata.namespace[f"_{bnode_map[str(o)]}"]
 
                 g.add((s, p, o, c))
+                logger.debug("Replaced object BNode %s -> %s (graph=%s, subj=%s, pred=%s)", old_o, o, c, s, p)
+        logger.debug("Blank node mapping: %s", bnode_map)
         return g
 
     def _check_named_graphs(self) -> None:

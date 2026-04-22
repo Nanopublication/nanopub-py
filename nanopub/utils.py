@@ -1,4 +1,3 @@
-import logging
 import re
 from dataclasses import asdict, dataclass
 from typing import Any, Optional
@@ -6,8 +5,6 @@ from typing import Any, Optional
 from rdflib import Dataset, Namespace, URIRef
 
 from nanopub.definitions import DUMMY_NAMESPACE, DUMMY_URI
-
-log = logging.getLogger()
 
 
 class MalformedNanopubError(ValueError):

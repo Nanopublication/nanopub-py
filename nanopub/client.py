@@ -2,11 +2,12 @@
 This module includes a client for the nanopub server.
 """
 
+import csv
+import logging
 import random
 import warnings
-from typing import Dict, List, Tuple, Union
-import csv
 from io import StringIO
+from typing import Dict, List, Tuple, Union
 
 import rdflib
 import requests
@@ -22,7 +23,8 @@ from nanopub.definitions import (
 )
 from nanopub.nanopub import Nanopub
 from nanopub.nanopub_conf import NanopubConf
-from nanopub.utils import log
+
+logger = logging.getLogger(__name__)
 
 DUMMY_NAMESPACE = rdflib.Namespace(DUMMY_NANOPUB_URI + "/")
 NP_URI = DUMMY_NAMESPACE[""]
@@ -38,10 +40,10 @@ class NanopubClient:
     """
 
     def __init__(
-        self,
-        use_test_server=False,
-        use_server=NANOPUB_REGISTRY_URLS[0],
-        query_urls=None,
+            self,
+            use_test_server=False,
+            use_server=NANOPUB_REGISTRY_URLS[0],
+            query_urls=None,
     ):
         self.use_test_server = use_test_server
         if use_test_server:
@@ -51,12 +53,13 @@ class NanopubClient:
             self.query_urls = NANOPUB_QUERY_URLS
             self.use_server = use_server
             if use_server not in NANOPUB_REGISTRY_URLS:
-                log.warn(f"{use_server} is not in our list of nanopub servers. {', '.join(NANOPUB_REGISTRY_URLS)}\nMake sure you are using an existing Nanopub server.")
+                logger.warn(
+                    f"{use_server} is not in our list of nanopub servers. {', '.join(NANOPUB_REGISTRY_URLS)}\nMake sure you are using an existing Nanopub server.")
         if query_urls is not None:
             self.query_urls = query_urls
 
     def find_nanopubs_with_text(
-        self, text: str, pubkey: str = None, filter_retracted: bool = True
+            self, text: str, pubkey: str = None, filter_retracted: bool = True
     ):
         """Text search.
 
@@ -86,14 +89,13 @@ class NanopubClient:
             endpoint = "RAWruhiSmyzgZhVRs8QY8YQPAgHzTfl7anxII1de-yaCs/fulltext-search-on-labels"
         return self._search(endpoint=endpoint, params=params)
 
-
     def find_nanopubs_with_pattern(
-        self,
-        subj: str = None,
-        pred: str = None,
-        obj: str = None,
-        filter_retracted: bool = True,
-        pubkey: str = None,
+            self,
+            subj: str = None,
+            pred: str = None,
+            obj: str = None,
+            filter_retracted: bool = True,
+            pubkey: str = None,
     ):
         """Pattern search.
 
@@ -130,13 +132,12 @@ class NanopubClient:
 
         yield from self._search(endpoint=endpoint, params=params)
 
-
     def find_things(
-        self,
-        type: str,
-        searchterm: str = "*:*",
-        pubkey: str = None,
-        filter_retracted: bool = True,
+            self,
+            type: str,
+            searchterm: str = "*:*",
+            pubkey: str = None,
+            filter_retracted: bool = True,
     ):
         """Search things (experimental).
 
@@ -170,9 +171,8 @@ class NanopubClient:
 
         yield from self._search(endpoint=endpoint, params=params)
 
-
     def find_retractions_of(
-        self, source: Union[str, Nanopub], valid_only=True
+            self, source: Union[str, Nanopub], valid_only=True
     ) -> List[str]:
         """Find retractions of given URI
 
@@ -221,7 +221,6 @@ class NanopubClient:
         )
         return [result["np"] for result in results]
 
-
     @staticmethod
     def _query_api(params: dict, endpoint: str, query_url: str) -> requests.Response:
         """Query a specific Nanopub Query endpoint."""
@@ -229,9 +228,8 @@ class NanopubClient:
         url = query_url + endpoint
         return requests.get(url, params=params, headers=headers)
 
-
     def _query_api_try_servers(
-        self, params: dict, endpoint: str
+            self, params: dict, endpoint: str
     ) -> Tuple[requests.Response, str]:
         """Query the Nanopub Query endpoint.
 
@@ -259,7 +257,6 @@ class NanopubClient:
             f"Could not get response from any of the Nanopub Query servers "
             f"endpoints.{resp}"
         )
-
 
     def _search(self, endpoint: str, params: dict):
         """
@@ -299,7 +296,6 @@ class NanopubClient:
         for result in bindings:
             yield self._parse_search_result(result)
 
-
     @staticmethod
     def _parse_search_result(result: dict):
         """
@@ -320,7 +316,7 @@ class NanopubClient:
             parsed["label"] = result["label"]["value"]
         parsed["date"] = result["date"]["value"]
         return parsed
-    
+
     def _query_api_csv(self, params, endpoint, query_url) -> str:
         headers = {"Accept": "text/csv"}
         url = query_url + endpoint
@@ -334,7 +330,7 @@ class NanopubClient:
         csv_text = csv_text.strip()
         reader = csv.DictReader(line for line in StringIO(csv_text) if line.strip())
         return list(reader)
-    
+
     def query_sparql(self, query: str, return_format: str = "json") -> Union[List[dict], str]:
         """
         Run a raw SPARQL query against a nanopub server using SPARQLWrapper.
@@ -348,7 +344,7 @@ class NanopubClient:
         """
         if return_format not in {"json", "csv"}:
             raise ValueError("return_format must be 'json' or 'csv'")
-        endpoints = ['https://query.knowledgepixels.com/repo/full'] # TODO: Consider adding more endpoints if needed
+        endpoints = ['https://query.knowledgepixels.com/repo/full']  # TODO: Consider adding more endpoints if needed
         for endpoint_url in endpoints:
             try:
                 sparql = SPARQLWrapper(endpoint_url)

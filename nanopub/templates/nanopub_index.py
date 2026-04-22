@@ -1,3 +1,4 @@
+import logging
 from copy import deepcopy
 from typing import List, Union
 
@@ -8,7 +9,8 @@ from nanopub.definitions import DUMMY_NAMESPACE, DUMMY_URI, MAX_NP_PER_INDEX
 from nanopub.namespaces import NPX, PAV
 from nanopub.nanopub import Nanopub
 from nanopub.nanopub_conf import NanopubConf
-from nanopub.utils import log
+
+logger = logging.getLogger(__name__)
 
 
 class NanopubIndex(Nanopub):
@@ -109,7 +111,7 @@ def create_nanopub_index(
             top_level=False
         )
         pub.sign()
-        log.info(f"Signed Nanopub Index: {pub.source_uri}")
+        logger.info(f"Signed Nanopub Index: {pub.source_uri}")
         pub_list.append(pub)
 
     if len(pub_list) > 1:
@@ -124,7 +126,7 @@ def create_nanopub_index(
             top_level=True
         )
         toplevel_pub.sign()
-        log.info(f"Signed top level Nanopub Index: {toplevel_pub.source_uri}")
+        logger.info(f"Signed top level Nanopub Index: {toplevel_pub.source_uri}")
         pub_list.append(toplevel_pub)
 
     return pub_list
