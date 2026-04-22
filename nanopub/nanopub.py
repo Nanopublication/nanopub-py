@@ -4,7 +4,7 @@ sign, publish, and make handling RDF easier.
 """
 import re
 from copy import deepcopy
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union, Tuple
 
@@ -95,9 +95,6 @@ class Nanopub:
             else:
                 self._rdf = self._preformat_graph(Dataset())
 
-        if self._metadata.trusty:
-            self._source_uri = str(self._metadata.np_uri)
-
         # Instantiate the different graph from the provided RDF (trig/nquads)
         self._head = Graph(self._rdf.store, self._metadata.head)
         self._assertion = Graph(self._rdf.store, self._metadata.assertion)
@@ -115,6 +112,11 @@ class Nanopub:
             if user_rdf is not None:
                 for prefix, namespace in user_rdf.namespaces():
                     self._rdf.bind(prefix, namespace)
+
+        if self._metadata.trusty:
+            self._source_uri = str(self._metadata.np_uri)
+            # if the newly created nanopub is trusty it means was fetched or read from a file therefore we need to ensure is a valid one and not taking that for granted
+            _ = self.is_valid
 
         # Add Head graph if the nanopub was not provided as trig/nquads
         if not rdf and not source_uri:
@@ -160,10 +162,6 @@ class Nanopub:
                 self._conf.publication_attributed_to
             )
             self._handle_derived_from(derived_from=self._conf.derived_from)
-
-            # if the newly created nanopub is trusty it means was fetched or read from a file therefore we need to ensure is a valid one and not taking that for granted
-            if self._metadata.trusty:
-                _ = self.is_valid
 
     def _preformat_graph(self, g: Dataset) -> Dataset:
         """Add a few default namespaces"""
