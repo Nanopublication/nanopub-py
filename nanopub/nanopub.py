@@ -97,8 +97,15 @@ class Nanopub:
                 self._rdf = self._preformat_graph(Dataset())
                 self._rdf.parse(rdf)
                 self._metadata = extract_np_metadata(self._rdf)
-            else:
+            elif rdf is None:
                 self._rdf = self._preformat_graph(Dataset())
+            else:
+                raise TypeError(
+                    f"The 'rdf' argument must be an rdflib Dataset or a pathlib.Path, "
+                    f"but got {type(rdf).__name__}. If you have the nanopublication as a "
+                    f"string (a file path or inline RDF), wrap it first: pass "
+                    f"Path('your_file.trig'), or parse the RDF into a Dataset."
+                )
 
         # Instantiate the different graph from the provided RDF (trig/nquads)
         self._head = Graph(self._rdf.store, self._metadata.head)

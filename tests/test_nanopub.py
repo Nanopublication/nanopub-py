@@ -304,6 +304,42 @@ class TestCreationFromFile:
         assert str(np.metadata.np_uri) == "http://example.org/nanopub-validator-example/"
 
 
+class TestInvalidRdfArgument:
+    """The ``rdf`` argument must be a Dataset or Path; other types must fail loudly.
+
+    Regression test for the silent-drop bug where passing ``rdf`` as a ``str``
+    (a filename or inline RDF) was ignored, producing an empty nanopub that only
+    failed later with a confusing "The Head graph is empty" at sign() time.
+    See https://github.com/Nanopublication/nanopub-py/issues/229
+    """
+
+    _TRIG = """@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix sub: <https://w3id.org/sciencelive/np> .
+
+<https://w3id.org/sciencelive/np/Head> {
+    sub: a np:Nanopublication ;
+        np:hasAssertion <https://w3id.org/sciencelive/np/assertion> ;
+        np:hasProvenance <https://w3id.org/sciencelive/np/provenance> ;
+        np:hasPublicationInfo <https://w3id.org/sciencelive/np/pubinfo> .
+}
+"""
+
+    def test_rdf_as_inline_string_raises_typeerror(self):
+        """Passing the RDF content as a str should fail immediately, not silently."""
+        with pytest.raises(TypeError, match="Dataset or a pathlib.Path"):
+            Nanopub(rdf=self._TRIG, conf=NanopubConf())
+
+    def test_rdf_as_filename_string_raises_typeerror(self):
+        """Passing a filename as a str (instead of Path) should fail immediately."""
+        with pytest.raises(TypeError, match="Dataset or a pathlib.Path"):
+            Nanopub(rdf="some_nanopub.trig", conf=NanopubConf())
+
+    def test_rdf_none_still_builds_empty_nanopub(self):
+        """rdf=None remains a valid 'build from scratch' path and must not raise."""
+        np = Nanopub(conf=NanopubConf())
+        assert len(np.head) > 0
+
+
 class TestCreationFromTrustyNanopub:
     """When a nanopub carries a trusty URI, source_uri should be resolved from
     the graph itself, not rely on an externally passed argument."""
