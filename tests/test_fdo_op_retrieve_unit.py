@@ -22,8 +22,9 @@ def test_resolve_id_via_nanopub_network(mock_resolve):
     assert record is not None
 
 
+@patch("nanopub.fdo.retrieve.resolve_in_nanopub_network", return_value=None)
 @patch("nanopub.fdo.retrieve.FdoNanopub.handle_to_nanopub")
-def test_resolve_id_with_handle(mock_handle):
+def test_resolve_id_with_handle(mock_handle, mock_resolve):
     fake_np = MagicMock()
     fake_np.assertion = Graph()
     mock_handle.return_value = fake_np
@@ -76,17 +77,20 @@ def test_get_fdo_uri_from_fdo_record_returns_subject():
     result = get_fdo_uri_from_fdo_record(g)
     assert str(result) == uri
 
+@patch("nanopub.fdo.retrieve.resolve_in_nanopub_network", return_value=None)
 @patch("nanopub.fdo.retrieve.FdoNanopub.handle_to_nanopub")
-def test_resolve_id_with_hdl_prefix(mock_handle):
+def test_resolve_id_with_hdl_prefix(mock_handle, mock_resolve):
     fake_np = MagicMock()
     fake_np.assertion = Graph()
     mock_handle.return_value = fake_np
     record = resolve_id("https://hdl.handle.net/21.T11966/test")
     assert isinstance(record, FdoRecord)
+    mock_handle.assert_called_with("21.T11966/test")
 
 
+@patch("nanopub.fdo.retrieve.resolve_in_nanopub_network", return_value=None)
 @patch("nanopub.fdo.retrieve.FdoNanopub.handle_to_nanopub")
-def test_resolve_id_with_doi_prefix(mock_handle):
+def test_resolve_id_with_doi_prefix(mock_handle, mock_resolve):
     fake_np = MagicMock()
     fake_np.assertion = Graph()
     mock_handle.return_value = fake_np
