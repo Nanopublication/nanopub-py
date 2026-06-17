@@ -4,7 +4,7 @@ from rdflib.graph import Dataset, Graph
 from rdflib.term import BNode, URIRef
 from rdflib.util import guess_format
 
-from nanopub.definitions import NP_PREFIX, NP_TEMP_PREFIX
+from nanopub.definitions import ARTIFACTCODE_PLACEHOLDER, NP_PREFIX, NP_TEMP_PREFIX
 from nanopub.trustyuri.TrustyUriUtils import is_trusty_uri, TRUSTY_ARTIFACT_RE
 
 
@@ -36,7 +36,19 @@ def get_trustyuri(resource, base_uri, hashstr, bnodemap):
         if get_str(resource).decode('utf-8') == np_uri:
             return str(f"{prefix}{hashstr}")
         if suffix is None and not get_str(resource).decode('utf-8') == get_str(base_uri).decode('utf-8'):
-            return str(resource)
+            # URI outside the nanopub's own namespace (e.g. a concept minted in a
+            # custom namespace). It may carry the artifact-code placeholder, or —
+            # when verifying an already-signed nanopub — this nanopub's trusty code.
+            # Substitute either with `hashstr` so it is part of the hash (and gets
+            # the real code substituted in when applying the trusty artifact).
+            # See issue #232.
+            res_str = str(resource).replace(ARTIFACTCODE_PLACEHOLDER, hashstr)
+            base_code = re.search(r'RA[A-Za-z0-9_\-]{40,}', str(base_uri))
+            if base_code:
+                # Only blank THIS nanopub's code; references to other trusty
+                # nanopubs (different codes) are left untouched.
+                res_str = res_str.replace(base_code.group(0), hashstr)
+            return res_str
         if suffix is None or suffix == "":
             return str(f"{prefix}{hashstr}")
         # External trusty URI or external reference — leave untouched

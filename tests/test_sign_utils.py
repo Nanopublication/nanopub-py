@@ -7,7 +7,68 @@ from nanopub.definitions import NP_PREFIX, NP_TEMP_PREFIX
 from nanopub.namespaces import NPX
 from nanopub.sign_utils import add_signature
 from nanopub.trustyuri.rdf import RdfUtils
-from tests.conftest import profile_test
+from tests.conftest import profile_test, testsuite_conf
+
+
+ARTIFACTCODE_PLAIN_TRIG = """\
+@prefix this: <http://purl.org/nanopub/temp/1029384756/> .
+@prefix np: <http://www.nanopub.org/nschema#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix npx: <http://purl.org/nanopub/x/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix orcid: <https://orcid.org/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix ex: <https://example.org/ns/> .
+
+this:Head {
+  this: a np:Nanopublication;
+    np:hasAssertion this:assertion;
+    np:hasProvenance this:provenance;
+    np:hasPublicationInfo this:pubinfo .
+}
+
+this:assertion {
+  <https://example.org/ns/~~~ARTIFACTCODE~~~> a ex:Concept;
+    rdfs:label "a concept minted in a custom namespace" .
+}
+
+this:provenance {
+  this:assertion prov:wasAttributedTo orcid:0000-0002-1267-0234 .
+}
+
+this:pubinfo {
+  this: dct:created "2024-09-18T11:19:06.183Z"^^xsd:dateTime;
+    dct:creator orcid:0000-0002-1267-0234;
+    npx:introduces <https://example.org/ns/~~~ARTIFACTCODE~~~> .
+}
+"""
+
+
+def test_sign_artifactcode_placeholder_in_custom_namespace():
+    """Signing a nanopub that mints a concept in a custom namespace via the
+    ``~~~ARTIFACTCODE~~~`` placeholder gives that concept the same trusty code
+    as the nanopub itself, and the result is valid (see issue #232)."""
+    ds = Dataset()
+    ds.parse(data=ARTIFACTCODE_PLAIN_TRIG, format="trig")
+    np = Nanopub(conf=testsuite_conf, rdf=ds)
+    np.sign()
+
+    assert np.has_valid_signature
+    assert np.has_valid_trusty
+    assert np.is_valid
+
+    artifact_code = str(np.source_uri).removeprefix(NP_PREFIX)
+    assert re.fullmatch(r"RA[A-Za-z0-9\-_]{43}", artifact_code)
+
+    # The placeholder must be gone and the concept must carry the nanopub's code.
+    concept = URIRef(f"https://example.org/ns/{artifact_code}")
+    subjects = {s for s, _, _, _ in np.rdf.quads((None, None, None, None))}
+    objects = {o for _, _, o, _ in np.rdf.quads((None, None, None, None))}
+    assert concept in subjects
+    assert concept in objects  # still referenced by npx:introduces
+    for term in subjects | objects:
+        assert "~~~ARTIFACTCODE~~~" not in str(term)
 
 
 class TestVerifyTrusty:
