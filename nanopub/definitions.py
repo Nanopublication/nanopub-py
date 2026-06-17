@@ -24,6 +24,11 @@ DUMMY_URI = DUMMY_NAMESPACE[""]
 NP_TEMP_PREFIX = "http://purl.org/nanopub/temp/"
 NP_PREFIX = "https://w3id.org/np/"
 
+# Placeholder that is substituted by the nanopub's trusty artifact code when
+# signing. It lets trusty codes be minted in custom namespaces rather than only
+# as sub-URIs of the nanopub itself (see issue #232).
+ARTIFACTCODE_PLACEHOLDER = "~~~ARTIFACTCODE~~~"
+
 MAX_NP_PER_INDEX = 1100
 MAX_TRIPLES_PER_NANOPUB = 1200
 
