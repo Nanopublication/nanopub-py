@@ -1,3 +1,19 @@
+## [2.2.1](https://github.com/Nanopublication/nanopub-py/compare/v2.2.0...v2.2.1) (2026-06-22)
+
+### Bug Fixes
+
+* support ~~~ARTIFACTCODE~~~ placeholder in custom namespaces ([#232](https://github.com/Nanopublication/nanopub-py/issues/232)) ([aae2bff](https://github.com/Nanopublication/nanopub-py/commit/aae2bff5fda6c282780b8ef99b62dc80e4fdcaf0)), closes [#233](https://github.com/Nanopublication/nanopub-py/issues/233)
+
+### Build and continuous integration
+
+* add workflow_dispatch to autorelease for manual triggering ([9196dfd](https://github.com/Nanopublication/nanopub-py/commit/9196dfd0aabc659c4bde4921f3308f48c4eb90d8))
+
+### General maintenance
+
+* add bug report issue template ([8163e59](https://github.com/Nanopublication/nanopub-py/commit/8163e592231a575dc977e8f106b2060495a34533))
+* **logging:** replace log with logger for consistent logging practices ([f81724e](https://github.com/Nanopublication/nanopub-py/commit/f81724e904b4c8e6ed0d9d751b29763d1bbfd456))
+* **nanopub:** unify checks when creating trusty nanopub ([d911cdf](https://github.com/Nanopublication/nanopub-py/commit/d911cdff5b678d72df56cc0124d75e9b9cbe0f2f))
+
 ## [2.2.0](https://github.com/Nanopublication/nanopub-py/compare/v2.1.0...v2.2.0) (2026-04-21)
 
 ### Features
