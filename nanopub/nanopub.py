@@ -627,6 +627,7 @@ class Nanopub:
                         bnode_map[str(o)] = self._bnode_count
                     else:
                         bnode_map[str(o)] = str(o)
+                old_o = o
                 o = self._metadata.namespace[f"_{bnode_map[str(o)]}"]
 
                 g.add((s, p, o, c))
