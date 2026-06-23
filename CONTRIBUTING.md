@@ -40,3 +40,35 @@ The sections below outline the steps in each case.
 1. create the pull request, e.g. following the instructions [here](https://help.github.com/articles/creating-a-pull-request/).
 
 In case you feel like you've made a valuable contribution, but you don't know how to write or run tests for it, or how to generate the documentation: don't let this discourage you from making the pull request; we can help you! Just go ahead and submit the pull request, but keep in mind that you might be asked to append additional commits to your pull request.
+
+## Commit messages
+
+This project follows the [Conventional Commits](https://www.conventionalcommits.org/) specification. Each commit message starts with a type, an optional scope, and a short description:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Common types used here:
+
+- `feat` — a new feature;
+- `fix` — a bug fix;
+- `docs` — documentation only;
+- `test` — adding or correcting tests;
+- `refactor` — a code change that neither fixes a bug nor adds a feature;
+- `chore` — build, tooling, or maintenance changes;
+- `ci` — changes to CI configuration.
+
+Indicate breaking changes with a `!` after the type/scope (e.g. `feat!:`) and/or a `BREAKING CHANGE:` footer. Examples:
+
+```
+fix(sign): define old_o before logging replaced object blank node
+docs: document the Conventional Commits convention
+feat(client)!: drop support for the legacy server URL
+```
+
+Keeping commit messages consistent makes the history easier to read and lets us generate the changelog automatically.
