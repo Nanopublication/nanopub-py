@@ -27,10 +27,19 @@ def pytest_configure(config):
         setattr(config.option, 'markexpr', 'not no_rsa_key')
 
 
+def _is_nanopub_server_available() -> bool:
+    try:
+        response = requests.get(
+            TEST_NANOPUB_QUERY_URL + 'RAkYh4UPJryajbtIDbLG-Bfd6A4JD2SbU9bmZdvaEdFRY/fdo-text-search?query=test',
+            timeout=10)
+        return response.status_code == 200
+    except requests.exceptions.RequestException:
+        return False
+
+
 skip_if_nanopub_server_unavailable = (
     pytest.mark.skipif(
-        requests.get(
-            TEST_NANOPUB_QUERY_URL + 'RAkYh4UPJryajbtIDbLG-Bfd6A4JD2SbU9bmZdvaEdFRY/fdo-text-search?query=test').status_code != 200,
+        not _is_nanopub_server_available(),
         reason='Nanopub server is unavailable'
     )
 )
