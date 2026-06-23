@@ -1,3 +1,21 @@
+## [2.2.2](https://github.com/Nanopublication/nanopub-py/compare/v2.2.1...v2.2.2) (2026-06-23)
+
+### Bug Fixes
+
+* **sign:** define old_o before logging replaced object blank node ([1f29dfd](https://github.com/Nanopublication/nanopub-py/commit/1f29dfd1ed3e68b438afb0f7fbd344a4d115bb95))
+
+### Documentation
+
+* document the Conventional Commits convention ([0392976](https://github.com/Nanopublication/nanopub-py/commit/0392976229957ce44ed81ab6439aa78e05dd5d14))
+
+### Tests
+
+* move artifactcode signing test to TestSign, source TRIG from testsuite ([8512712](https://github.com/Nanopublication/nanopub-py/commit/8512712703072b190118dcbd4b9e7970b1b9e79d))
+
+### Build and continuous integration
+
+* sync main via PR instead of direct push (main is protected) ([8c3161b](https://github.com/Nanopublication/nanopub-py/commit/8c3161b09a08ab95a9f859fb37fdeefefc450b9f))
+
 ## [2.2.1](https://github.com/Nanopublication/nanopub-py/compare/v2.2.0...v2.2.1) (2026-06-22)
 
 ### Bug Fixes
