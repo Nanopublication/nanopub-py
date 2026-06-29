@@ -392,6 +392,65 @@ class TestCreationFromTrustyNanopub:
         assert np.get_source_uri_from_graph == "http://purl.org/np/RA1sViVmXf-W2aZW4Qk74KTaiD9gpLBPe2LhMsinHKKz8"
 
 
+class TestProfileKeyFormats:
+    """Loading a Profile from a key file should accept a standard PEM key.
+
+    Regression test for the opaque ``binascii.Error: Incorrect padding`` raised
+    when ``np setup`` (or ``Profile(..., private_key=Path)``) is pointed at a
+    normal PEM private key. The read path at profile.py does ``f.read().strip()``
+    and then ``decodebytes(...)`` without stripping the ``-----BEGIN-----`` armor
+    or newlines, so anything that isn't nanopub's own bare single-line base64
+    blows up deep inside base64 instead of loading or failing with a clear error.
+    """
+
+    @staticmethod
+    def _write_pem(tmp_path, pkcs):
+        """Write a freshly generated RSA key as standard PEM (armor + newlines)."""
+        from Crypto.PublicKey import RSA
+
+        key = RSA.generate(2048)
+        pem = key.export_key("PEM", pkcs=pkcs).decode("utf-8")
+        key_file = tmp_path / "id_rsa"
+        key_file.write_text(pem)
+        return key_file, pem
+
+    def test_standard_pkcs1_pem_key_loads(self, tmp_path):
+        """A PKCS#1 PEM key (-----BEGIN RSA PRIVATE KEY-----) should load."""
+        from nanopub.profile import Profile
+
+        key_file, pem = self._write_pem(tmp_path, pkcs=1)
+        assert pem.startswith("-----BEGIN RSA PRIVATE KEY-----")
+
+        profile = Profile("0000-0000-0000-0000", "Tester", private_key=key_file)
+        assert profile.private_key
+        assert profile.public_key
+
+    def test_standard_pkcs8_pem_key_loads(self, tmp_path):
+        """A PKCS#8 PEM key (-----BEGIN PRIVATE KEY-----) should load."""
+        from nanopub.profile import Profile
+
+        key_file, pem = self._write_pem(tmp_path, pkcs=8)
+        assert pem.startswith("-----BEGIN PRIVATE KEY-----")
+
+        profile = Profile("0000-0000-0000-0000", "Tester", private_key=key_file)
+        assert profile.private_key
+        assert profile.public_key
+
+    def test_crlf_pem_key_loads(self, tmp_path):
+        """A PEM key with Windows CRLF line endings should load."""
+        from nanopub.profile import Profile
+        from Crypto.PublicKey import RSA
+
+        key = RSA.generate(2048)
+        pem = key.export_key("PEM", pkcs=8).decode("utf-8").replace("\n", "\r\n")
+        key_file = tmp_path / "id_rsa"
+        key_file.write_bytes(pem.encode("utf-8"))
+
+        profile = Profile("0000-0000-0000-0000", "Tester", private_key=key_file)
+        assert profile.private_key
+        assert profile.public_key
+
+
 class TestSign:
 
     def test_sign_errors(self, monkeypatch):

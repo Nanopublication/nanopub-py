@@ -3,7 +3,7 @@ This module holds objects and functions to load a nanopub user profile.
 """
 import logging
 import os
-from base64 import decodebytes
+from base64 import b64encode, decodebytes
 from pathlib import Path
 from typing import Optional, Union
 
@@ -54,33 +54,34 @@ class Profile:
         elif isinstance(private_key, Path):
             try:
                 with open(private_key) as f:
-                    self._private_key = f.read().strip()
+                    raw_private_key = f.read()
             except FileNotFoundError:
                 raise ProfileError(
                     f'Private key file {private_key} for nanopub not found.\n'
                     f'Maybe your nanopub profile was not set up yet or not set up '
                     f'correctly. \n{PROFILE_INSTRUCTIONS_MESSAGE}'
                 )
+            self._private_key = normalize_private_key(raw_private_key)
         else:
-            self._private_key = private_key
+            self._private_key = normalize_private_key(private_key)
 
         if not public_key and private_key:
             logger.info(
                 'The public key was not provided when loading the Nanopub profile, generating it from the provided private key')
-            key = RSA.import_key(decodebytes(self._private_key.encode()))
-            self._public_key = format_key(key.publickey().export_key().decode('utf-8'))
+            self._public_key = normalize_public_key(self._private_key)
         elif isinstance(public_key, Path):
             try:
                 with open(public_key) as f:
-                    self._public_key = f.read().strip()
+                    raw_public_key = f.read()
             except FileNotFoundError:
                 raise ProfileError(
-                    f'Private key file {public_key} for nanopub not found.\n'
+                    f'Public key file {public_key} for nanopub not found.\n'
                     f'Maybe your nanopub profile was not set up yet or not set up '
                     f'correctly. \n{PROFILE_INSTRUCTIONS_MESSAGE}'
                 )
+            self._public_key = normalize_public_key(raw_public_key)
         elif public_key:
-            self._public_key = public_key
+            self._public_key = normalize_public_key(public_key)
 
     def generate_keys(self) -> str:
         """Generate private/public RSA key pair at the path specified in the profile.yml, to be used to sign nanopubs"""
@@ -256,3 +257,56 @@ def format_key(key: str) -> str:
     if key.startswith("-----BEGIN PUBLIC KEY-----"):
         key = key.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "")
     return key.replace("\n", "").strip()
+
+
+def _load_rsa_key(key_data: str) -> RSA.RsaKey:
+    """Parse an RSA key from any standard serialization.
+
+    Accepts PEM (PKCS#1 ``BEGIN RSA PRIVATE KEY`` or PKCS#8 ``BEGIN PRIVATE
+    KEY``), DER, or the bare single-line base64 that nanopub itself stores (DER
+    without the PEM armor), with any line endings. Raises a clear ProfileError
+    instead of letting an opaque base64/parsing error surface from deep inside
+    the crypto library.
+    """
+    key_data = key_data.strip()
+    # RSA.import_key handles PEM (PKCS#1/#8), DER and OpenSSH, and tolerates
+    # surrounding whitespace and CR/LF line endings.
+    try:
+        return RSA.import_key(key_data)
+    except (ValueError, IndexError, TypeError):
+        pass
+    # Fall back to nanopub's own format: bare base64 of the DER, no armor.
+    try:
+        return RSA.import_key(decodebytes(key_data.encode()))
+    except Exception as e:
+        raise ProfileError(
+            'Could not parse the RSA key. Provide a standard PEM or DER RSA key '
+            "(e.g. the output of `openssl genrsa`), or nanopub's base64 key "
+            f'string. If the key is passphrase-protected, decrypt it first.\n'
+            f'Underlying error: {e}\n{PROFILE_INSTRUCTIONS_MESSAGE}'
+        ) from None
+
+
+def normalize_private_key(key_data: str) -> str:
+    """Normalize any RSA private key to nanopub's canonical single-line base64.
+
+    The canonical form is the base64 of the PKCS#8 DER with no PEM armor and no
+    newlines, as required by nanopub-java and assumed by the signing code.
+    """
+    key = _load_rsa_key(key_data)
+    if not key.has_private():
+        raise ProfileError(
+            'A public key was provided where a private key was expected.'
+        )
+    return b64encode(key.export_key(format='DER', pkcs=8)).decode('utf-8')
+
+
+def normalize_public_key(key_data: str) -> str:
+    """Normalize any RSA public key to nanopub's canonical single-line base64.
+
+    The canonical form is the base64 of the SubjectPublicKeyInfo DER with no PEM
+    armor and no newlines. A private key may be passed in, in which case the
+    corresponding public key is derived.
+    """
+    key = _load_rsa_key(key_data)
+    return b64encode(key.publickey().export_key(format='DER')).decode('utf-8')
