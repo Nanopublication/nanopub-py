@@ -3,6 +3,7 @@ This module holds objects and functions to load a nanopub user profile.
 """
 import logging
 import os
+import warnings
 from base64 import b64encode, decodebytes
 from pathlib import Path
 from typing import Optional, Union
@@ -86,11 +87,10 @@ class Profile:
     def generate_keys(self) -> str:
         """Generate private/public RSA key pair at the path specified in the profile.yml, to be used to sign nanopubs"""
         key = RSA.generate(RSA_KEY_SIZE)
-        private_key_str = key.export_key('PEM', pkcs=8).decode('utf-8')
         public_key_str = key.publickey().export_key().decode('utf-8')
 
-        self._private_key = format_key(private_key_str)
-        self._public_key = format_key(public_key_str)
+        self._private_key = _encode_private_key(key)
+        self._public_key = _encode_public_key(key)
         logger.info(f"Public/private RSA key pair has been generated for {self.orcid_id} ({self.name})")
         return public_key_str
 
@@ -230,11 +230,8 @@ def generate_keyfiles(path: Path = USER_CONFIG_DIR) -> str:
         Path(path).mkdir()
 
     key = RSA.generate(RSA_KEY_SIZE)
-    private_key_str = key.export_key('PEM', pkcs=8).decode('utf-8')
-    public_key_str = key.publickey().export_key().decode('utf-8')
-
-    private_key_str = format_key(private_key_str)
-    public_key_str = format_key(public_key_str)
+    private_key_str = _encode_private_key(key)
+    public_key_str = _encode_public_key(key)
     private_path = path / "id_rsa"
     public_path = path / "id_rsa.pub"
 
@@ -250,8 +247,41 @@ def generate_keyfiles(path: Path = USER_CONFIG_DIR) -> str:
     return public_key_str
 
 
+def _encode_private_key(key: RSA.RsaKey) -> str:
+    """Encode an RSA key to nanopub's canonical private-key form.
+
+    The canonical form is the base64 of the PKCS#8 DER with no PEM armor and no
+    newlines, as required by nanopub-java and assumed by the signing code.
+    """
+    return b64encode(key.export_key(format='DER', pkcs=8)).decode('utf-8')
+
+
+def _encode_public_key(key: RSA.RsaKey) -> str:
+    """Encode an RSA key to nanopub's canonical public-key form.
+
+    The canonical form is the base64 of the SubjectPublicKeyInfo DER with no PEM
+    armor and no newlines.
+    """
+    return b64encode(key.publickey().export_key(format='DER')).decode('utf-8')
+
+
 def format_key(key: str) -> str:
-    """Format private and public keys to remove header/footer and all newlines, as this is required by nanopub-java"""
+    """Format private and public keys to remove header/footer and all newlines, as this is required by nanopub-java.
+
+    .. deprecated::
+        ``format_key`` is deprecated and will be removed in an upcoming major
+        version. It only strips PEM armor from a PKCS#8/SPKI key via string
+        replacement and silently mishandles PKCS#1 and CRLF input. Use
+        :func:`normalize_private_key` / :func:`normalize_public_key` instead,
+        which accept any standard PEM/DER/bare key and return the same canonical
+        single-line base64 form.
+    """
+    warnings.warn(
+        "format_key() is deprecated and will be removed in an upcoming major "
+        "version; use normalize_private_key() / normalize_public_key() instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     if key.startswith("-----BEGIN PRIVATE KEY-----"):
         key = key.replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "")
     if key.startswith("-----BEGIN PUBLIC KEY-----"):
@@ -298,7 +328,7 @@ def normalize_private_key(key_data: str) -> str:
         raise ProfileError(
             'A public key was provided where a private key was expected.'
         )
-    return b64encode(key.export_key(format='DER', pkcs=8)).decode('utf-8')
+    return _encode_private_key(key)
 
 
 def normalize_public_key(key_data: str) -> str:
@@ -309,4 +339,4 @@ def normalize_public_key(key_data: str) -> str:
     corresponding public key is derived.
     """
     key = _load_rsa_key(key_data)
-    return b64encode(key.publickey().export_key(format='DER')).decode('utf-8')
+    return _encode_public_key(key)
