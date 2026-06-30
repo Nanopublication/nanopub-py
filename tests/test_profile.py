@@ -12,11 +12,11 @@ from nanopub.profile import (
 )
 from tests.conftest import profile_test_path, _signing_key
 
-TEST_PRIVATE_KEY = 'MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAPdEfIdHtZYoFh6/DWorzoHpFXMjugqW+CGpe9uk4BfUq54MToi2u7fgdGGtXLg4wsJFBYETdVeS0p1uA7EPe8LhwjHPktf5c6AZbO/lYpKM59e7/Ih4mvOy4iTIe/Dv+1OgasTSK0nXAbKUm/5iJ6LOYa82JQeE/QnT5gUw2e97AgMBAAECgYBbNQnyJINYpeSy5qoeFZaQ2Ncup2kCavmQASJMvJ5ka+/51nRJfY30n3iOZxIiad19J1SGbhUEfoXtyBzYfOubF2i2GJtdF5VyjdSoU6w/gOo2/vnbH+GCHnMclrWshohOADGQU/Y8pYhIvlQqcb6xEOts9m9C9g4uwvPXqjmhoQJBAPkmSFIZwF3i2UvJlHyeXi599L0jkGTUJy/Y4IjieUx5suwvAtG47ejhgIPKK06VtW49oGPHWjWc3cJAmnV+vTMCQQD+EPTvNtLpX9QiDEJD7b8woDwmVrvH/RUosP/cXpMQd7BUVgPlpffAlFJGDlOzwwjZjy+8kc6MYevh1kWqobSZAkEAyCs+nV99ErEHnYEFoB1oU3f0oeSpxKhCF4np03AIvi1kV6bpX+9wjNJnevp5UriqvDgc3S0zx7EQ5Vkb/1vkywJBAMMw59y4tAVT+DhITsi9aTvEfzG9RPt6trzSb2Aw0K/AJJpGkyvl/JfZ2/Oyoh/jYXM0DKrFIni76mtRIajcH1ECQQCJi6aXOaRkRPmf7FYY9cRaJdR1BtZkKZbDg6ZMD1bY97cGiM9STTMeldYcCtQBtyhVCTEObI/V6/0FAvY9Zi7w'
-TEST_PUBLIC_KEY = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQD3RHyHR7WWKBYevw1qK86B6RVzI7oKlvghqXvbpOAX1KueDE6Itru34HRhrVy4OMLCRQWBE3VXktKdbgOxD3vC4cIxz5LX+XOgGWzv5WKSjOfXu/yIeJrzsuIkyHvw7/tToGrE0itJ1wGylJv+YieizmGvNiUHhP0J0+YFMNnvewIDAQAB'
-
 
 def test_instantiate_profile_path():
+    assert isinstance(_signing_key.private_key, Path)
+    assert isinstance(_signing_key.public_key, Path)
+
     p = Profile(
         name='Python Tests',
         orcid_id='https://orcid.org/0000-0000-0000-0000',
@@ -27,25 +27,29 @@ def test_instantiate_profile_path():
     assert p.orcid_id == 'https://orcid.org/0000-0000-0000-0000'
     assert p.name == 'Python Tests'
     assert p.introduction_nanopub_uri is None
-    assert p.private_key == TEST_PRIVATE_KEY
-    assert p.public_key == TEST_PUBLIC_KEY
-    assert p.private_key == TEST_PRIVATE_KEY
-    assert p.public_key == TEST_PUBLIC_KEY
+    assert p.private_key == _signing_key.private_key.read_text()
+    assert p.public_key == _signing_key.public_key.read_text()
 
 
 def test_instantiate_profile_str():
+    private_key_str = _signing_key.private_key.read_text()
+    public_key_str = _signing_key.public_key.read_text()
+
+    assert isinstance(private_key_str, str)
+    assert isinstance(public_key_str, str)
+
     p = Profile(
         name='Python Tests',
         orcid_id='https://orcid.org/0000-0000-0000-0000',
-        private_key=TEST_PRIVATE_KEY,
-        public_key=TEST_PUBLIC_KEY
+        private_key=private_key_str,
+        public_key=public_key_str
     )
 
     assert p.orcid_id == 'https://orcid.org/0000-0000-0000-0000'
     assert p.name == 'Python Tests'
     assert p.introduction_nanopub_uri is None
-    assert p.private_key == TEST_PRIVATE_KEY
-    assert p.public_key == TEST_PUBLIC_KEY
+    assert p.private_key == private_key_str
+    assert p.public_key == public_key_str
 
 
 def test_load_profile():
@@ -54,8 +58,8 @@ def test_load_profile():
     assert p.orcid_id == 'https://orcid.org/0000-0000-0000-0000'
     assert p.name == 'Python Tests'
     assert p.introduction_nanopub_uri is None
-    assert p.private_key == TEST_PRIVATE_KEY
-    assert p.public_key == TEST_PUBLIC_KEY
+    assert p.private_key == _signing_key.private_key.read_text()
+    assert p.public_key == _signing_key.public_key.read_text()
 
 
 def test_fail_loading_incomplete_profile(tmpdir):
@@ -81,8 +85,8 @@ def test_store_profile(tmpdir):
     p = Profile(
         name='Python Tests',
         orcid_id='https://orcid.org/0000-0000-0000-0000',
-        private_key=TEST_PRIVATE_KEY,
-        public_key=TEST_PUBLIC_KEY
+        private_key=_signing_key.private_key.read_text(),
+        public_key=_signing_key.public_key.read_text()
     )
     p.store(test_folder)
 
@@ -143,20 +147,20 @@ def test_canonical_pubkey_literal_is_stable():
     already in nanopub's canonical bare-base64 form.
     """
     # Identity for a public key already in canonical form.
-    assert normalize_public_key(TEST_PUBLIC_KEY) == TEST_PUBLIC_KEY
+    assert normalize_public_key(_signing_key.public_key.read_text()) == _signing_key.public_key.read_text()
     # Identity for a private key already in canonical form (signing determinism).
-    assert normalize_private_key(TEST_PRIVATE_KEY) == TEST_PRIVATE_KEY
+    assert normalize_private_key(_signing_key.private_key.read_text()) == _signing_key.private_key.read_text()
     # Public key derived from the private key yields the same canonical literal.
-    assert normalize_public_key(TEST_PRIVATE_KEY) == TEST_PUBLIC_KEY
+    assert normalize_public_key(_signing_key.private_key.read_text()) == _signing_key.public_key.read_text()
 
 
 def test_format_key_is_deprecated():
     """format_key is retained as a deprecated shim; it must warn but still work."""
     pem = (
         "-----BEGIN PUBLIC KEY-----\n"
-        f"{TEST_PUBLIC_KEY}\n"
+        f"{_signing_key.public_key.read_text()}\n"
         "-----END PUBLIC KEY-----\n"
     )
     with pytest.warns(DeprecationWarning, match="format_key"):
         result = format_key(pem)
-    assert result == TEST_PUBLIC_KEY
+    assert result == _signing_key.public_key.read_text()
