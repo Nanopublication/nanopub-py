@@ -2,7 +2,14 @@ from pathlib import Path
 
 import pytest
 
-from nanopub.profile import Profile, ProfileError, format_key, load_profile
+from nanopub.profile import (
+    Profile,
+    ProfileError,
+    format_key,
+    load_profile,
+    normalize_private_key,
+    normalize_public_key,
+)
 from tests.conftest import profile_test_path, _signing_key
 
 TEST_PRIVATE_KEY = 'MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAPdEfIdHtZYoFh6/DWorzoHpFXMjugqW+CGpe9uk4BfUq54MToi2u7fgdGGtXLg4wsJFBYETdVeS0p1uA7EPe8LhwjHPktf5c6AZbO/lYpKM59e7/Ih4mvOy4iTIe/Dv+1OgasTSK0nXAbKUm/5iJ6LOYa82JQeE/QnT5gUw2e97AgMBAAECgYBbNQnyJINYpeSy5qoeFZaQ2Ncup2kCavmQASJMvJ5ka+/51nRJfY30n3iOZxIiad19J1SGbhUEfoXtyBzYfOubF2i2GJtdF5VyjdSoU6w/gOo2/vnbH+GCHnMclrWshohOADGQU/Y8pYhIvlQqcb6xEOts9m9C9g4uwvPXqjmhoQJBAPkmSFIZwF3i2UvJlHyeXi599L0jkGTUJy/Y4IjieUx5suwvAtG47ejhgIPKK06VtW49oGPHWjWc3cJAmnV+vTMCQQD+EPTvNtLpX9QiDEJD7b8woDwmVrvH/RUosP/cXpMQd7BUVgPlpffAlFJGDlOzwwjZjy+8kc6MYevh1kWqobSZAkEAyCs+nV99ErEHnYEFoB1oU3f0oeSpxKhCF4np03AIvi1kV6bpX+9wjNJnevp5UriqvDgc3S0zx7EQ5Vkb/1vkywJBAMMw59y4tAVT+DhITsi9aTvEfzG9RPt6trzSb2Aw0K/AJJpGkyvl/JfZ2/Oyoh/jYXM0DKrFIni76mtRIajcH1ECQQCJi6aXOaRkRPmf7FYY9cRaJdR1BtZkKZbDg6ZMD1bY97cGiM9STTMeldYcCtQBtyhVCTEObI/V6/0FAvY9Zi7w'
@@ -124,6 +131,23 @@ def test_generate_keys_store_profile(tmpdir):
 
     p2 = load_profile(profile_path)
     assert p2.private_key == p.private_key
+
+
+def test_canonical_pubkey_literal_is_stable():
+    """Normalizing an already-canonical key must be a byte-for-byte identity.
+
+    The public key is published verbatim into the nanopub's pubinfo as
+    ``Literal(profile.public_key)`` and matched exactly in SPARQL queries. Any
+    variation in this literal silently breaks exact matching against every
+    previously published nanopub, so normalization must not alter a key that is
+    already in nanopub's canonical bare-base64 form.
+    """
+    # Identity for a public key already in canonical form.
+    assert normalize_public_key(TEST_PUBLIC_KEY) == TEST_PUBLIC_KEY
+    # Identity for a private key already in canonical form (signing determinism).
+    assert normalize_private_key(TEST_PRIVATE_KEY) == TEST_PRIVATE_KEY
+    # Public key derived from the private key yields the same canonical literal.
+    assert normalize_public_key(TEST_PRIVATE_KEY) == TEST_PUBLIC_KEY
 
 
 def test_format_key_is_deprecated():
