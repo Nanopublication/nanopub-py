@@ -12,71 +12,109 @@ from nanopub.profile import (
 )
 from tests.conftest import profile_test_path, _signing_key
 
-
-def test_instantiate_profile_path():
-    assert isinstance(_signing_key.private_key, Path)
-    assert isinstance(_signing_key.public_key, Path)
-
-    p = Profile(
-        name='Python Tests',
-        orcid_id='https://orcid.org/0000-0000-0000-0000',
-        private_key=_signing_key.private_key,
-        public_key=_signing_key.public_key
-    )
-
-    assert p.orcid_id == 'https://orcid.org/0000-0000-0000-0000'
-    assert p.name == 'Python Tests'
-    assert p.introduction_nanopub_uri is None
-    assert p.private_key == _signing_key.private_key.read_text()
-    assert p.public_key == _signing_key.public_key.read_text()
+ORCID_ID = "https://orcid.org/0000-0000-0000-0000"
 
 
-def test_instantiate_profile_str():
-    private_key_str = _signing_key.private_key.read_text()
-    public_key_str = _signing_key.public_key.read_text()
+class TestProfileInstantiation:
+    _private_key = _signing_key.private_key
+    _public_key = _signing_key.public_key
 
-    assert isinstance(private_key_str, str)
-    assert isinstance(public_key_str, str)
+    _private_key_str = _private_key.read_text()
+    _public_key_str = _public_key.read_text()
 
-    p = Profile(
-        name='Python Tests',
-        orcid_id='https://orcid.org/0000-0000-0000-0000',
-        private_key=private_key_str,
-        public_key=public_key_str
-    )
+    def test_instantiate_profile_with_empty_orcid_id(self):
+        with pytest.raises(ProfileError):
+            Profile(
+                name='Python Tests',
+                orcid_id='',
+                private_key=self._private_key,
+                public_key=self._public_key
+            )
 
-    assert p.orcid_id == 'https://orcid.org/0000-0000-0000-0000'
-    assert p.name == 'Python Tests'
-    assert p.introduction_nanopub_uri is None
-    assert p.private_key == private_key_str
-    assert p.public_key == public_key_str
+    def test_instantiate_profile_with_url_orcid_id(self):
+        p = Profile(
+            name='Python Tests',
+            orcid_id=ORCID_ID,
+            private_key=self._private_key,
+            public_key=self._public_key
+        )
+
+        assert p.orcid_id == ORCID_ID
+
+    def test_instantiate_profile_with_raw_orcid_id(self):
+        p = Profile(
+            name='Python Tests',
+            orcid_id='0000-0000-0000-0000',
+            private_key=self._private_key,
+            public_key=self._public_key
+        )
+
+        assert p.orcid_id == ORCID_ID
+
+    def test_instantiate_profile_path(self):
+        assert isinstance(self._private_key, Path)
+        assert isinstance(self._public_key, Path)
+
+        p = Profile(
+            name='Python Tests',
+            orcid_id=ORCID_ID,
+            private_key=self._private_key,
+            public_key=self._public_key
+        )
+
+        assert p.orcid_id == ORCID_ID
+        assert p.name == 'Python Tests'
+        assert p.introduction_nanopub_uri is None
+        assert p.private_key == self._private_key_str
+        assert p.public_key == self._public_key_str
+
+    def test_instantiate_profile_str(self):
+        assert isinstance(self._private_key_str, str)
+        assert isinstance(self._public_key_str, str)
+
+        p = Profile(
+            name='Python Tests',
+            orcid_id=ORCID_ID,
+            private_key=self._private_key_str,
+            public_key=self._public_key_str
+        )
+
+        assert p.orcid_id == ORCID_ID
+        assert p.name == 'Python Tests'
+        assert p.introduction_nanopub_uri is None
+        assert p.private_key == self._private_key_str
+        assert p.public_key == self._public_key_str
 
 
-def test_load_profile():
-    p = load_profile(profile_test_path)
+class TestProfileLoader:
+    _private_key = _signing_key.private_key
+    _public_key = _signing_key.public_key
 
-    assert p.orcid_id == 'https://orcid.org/0000-0000-0000-0000'
-    assert p.name == 'Python Tests'
-    assert p.introduction_nanopub_uri is None
-    assert p.private_key == _signing_key.private_key.read_text()
-    assert p.public_key == _signing_key.public_key.read_text()
+    _private_key_str = _private_key.read_text()
+    _public_key_str = _public_key.read_text()
 
+    def test_load_profile(self):
+        p = load_profile(profile_test_path)
 
-def test_fail_loading_incomplete_profile(tmpdir):
-    test_file = Path(tmpdir / 'profile.yml')
-    profile_yaml = """orcid_id: https://orcid.org/0000-0000-0000-0000
-name: Python Tests"""
-    with open(test_file, "w") as f:
-        f.write(profile_yaml)
+        assert p.orcid_id == ORCID_ID
+        assert p.name == 'Python Tests'
+        assert p.introduction_nanopub_uri is None
+        assert p.private_key == self._private_key_str
+        assert p.public_key == self._public_key_str
 
-    with pytest.raises(ProfileError):
-        load_profile(test_file)
+    def test_fail_loading_incomplete_profile(self, tmpdir):
+        test_file = Path(tmpdir / 'profile.yml')
+        profile_yaml = f"orcid_id: {ORCID_ID}\nname: Python Tests"
+        with open(test_file, "w") as f:
+            f.write(profile_yaml)
 
+        with pytest.raises(ProfileError):
+            load_profile(test_file)
 
-def test_profile_file_not_found(tmpdir):
-    test_file = Path(tmpdir / 'profile.yml')
-    with pytest.raises(ProfileError):
-        load_profile(test_file)
+    def test_profile_file_not_found(self, tmpdir):
+        test_file = Path(tmpdir / 'profile.yml')
+        with pytest.raises(ProfileError):
+            load_profile(test_file)
 
 
 def test_store_profile(tmpdir):
@@ -84,7 +122,7 @@ def test_store_profile(tmpdir):
 
     p = Profile(
         name='Python Tests',
-        orcid_id='https://orcid.org/0000-0000-0000-0000',
+        orcid_id=ORCID_ID,
         private_key=_signing_key.private_key.read_text(),
         public_key=_signing_key.public_key.read_text()
     )
@@ -95,7 +133,7 @@ def test_store_profile(tmpdir):
     privkey_path = test_folder / "id_rsa"
     with profile_path.open('r') as f:
         assert f.read() == (
-            'orcid_id: https://orcid.org/0000-0000-0000-0000\n'
+            f"orcid_id: {ORCID_ID}\n"
             'name: Python Tests\n'
             f"public_key: {pubkey_path}\n"
             f"private_key: {privkey_path}\n"
@@ -105,7 +143,7 @@ def test_store_profile(tmpdir):
 def test_generate_keys(tmpdir):
     p = Profile(
         name='Python Tests',
-        orcid_id='https://orcid.org/0000-0000-0000-0000',
+        orcid_id=ORCID_ID,
     )
     assert p.private_key is not None
     assert p.public_key is not None
@@ -114,7 +152,7 @@ def test_generate_keys(tmpdir):
 def test_generate_keys_store_profile(tmpdir):
     p = Profile(
         name='Python Tests',
-        orcid_id='https://orcid.org/0000-0000-0000-0000',
+        orcid_id=ORCID_ID,
     )
     assert p.private_key is not None
     assert p.public_key is not None
@@ -127,7 +165,7 @@ def test_generate_keys_store_profile(tmpdir):
     privkey_path = test_folder / "id_rsa"
     with profile_path.open('r') as f:
         assert f.read() == (
-            'orcid_id: https://orcid.org/0000-0000-0000-0000\n'
+            f"orcid_id: {ORCID_ID}\n"
             'name: Python Tests\n'
             f"public_key: {pubkey_path}\n"
             f"private_key: {privkey_path}\n"
