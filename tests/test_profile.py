@@ -85,6 +85,25 @@ class TestProfileInstantiation:
         assert p.private_key == self._private_key_str
         assert p.public_key == self._public_key_str
 
+    def test_private_key_path_not_found_raises_profile_error(self, tmp_path):
+        missing = tmp_path / "does_not_exist_id_rsa"
+        with pytest.raises(ProfileError, match="Private key file"):
+            Profile(
+                orcid_id=ORCID_ID,
+                name="Python Tests",
+                private_key=missing,
+            )
+
+    def test_public_key_path_not_found_raises_profile_error(self, tmp_path):
+        missing_public = tmp_path / "does_not_exist_id_rsa.pub"
+        with pytest.raises(ProfileError, match="Public key file"):
+            Profile(
+                orcid_id=ORCID_ID,
+                name="Python Tests",
+                private_key=_signing_key.private_key,
+                public_key=missing_public,
+            )
+
 
 class TestProfileLoader:
     _private_key = _signing_key.private_key
