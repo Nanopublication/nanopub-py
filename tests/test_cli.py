@@ -3,8 +3,10 @@ from unittest.mock import MagicMock
 
 import pytest
 from nanopub_testsuite_connector import TestSuiteSubfolder
+from rdflib import Dataset, URIRef
 from typer.testing import CliRunner
 
+from nanopub import namespaces
 from nanopub.__main__ import cli, validate_orcid_id
 from nanopub._version import __version__
 from nanopub.definitions import DEFAULT_PROFILE_PATH
@@ -68,6 +70,28 @@ def test_sign_with_key(testsuite):
     ])
     assert result.exit_code == 0
     assert "Nanopub signed in" in result.stdout
+
+
+def test_sign_with_orcid(testsuite, tmp_path):
+    """A bare ORCID passed to --orcid is normalized and recorded as signedBy."""
+    tc = testsuite.get_transform_cases()[0]
+    test_file = tmp_path / "to_sign.trig"
+    test_file.write_text(tc.plain.path.read_text())
+    private_key = str(testsuite.get_signing_key(tc.key_name).private_key)
+
+    result = runner.invoke(cli, [
+        "sign", str(test_file),
+        "-k", private_key,
+        "-o", "1234-5678-1234-5678",
+    ])
+
+    assert result.exit_code == 0
+    signed = tmp_path / "signed.to_sign.trig"
+    assert signed.exists()
+    ds = Dataset()
+    ds.parse(signed, format="trig")
+    signed_by = {o for _, _, o, _ in ds.quads((None, namespaces.NPX.signedBy, None, None))}
+    assert URIRef("https://orcid.org/1234-5678-1234-5678") in signed_by
 
 
 def test_version():
