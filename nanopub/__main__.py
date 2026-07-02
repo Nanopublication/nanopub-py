@@ -28,6 +28,7 @@ DEFAULT_PRIVATE_KEY_PATH = USER_CONFIG_DIR / PRIVATE_KEY_FILE
 DEFAULT_PUBLIC_KEY_PATH = USER_CONFIG_DIR / PUBLIC_KEY_FILE
 RSA = 'RSA'
 ORCID_ID_REGEX = r'^https://orcid.org/(\d{4}-){3}\d{3}(\d|X)$'
+PLACEHOLDER_ORCID_ID = 'https://orcid.org/0000-0000-0000-0000'
 
 
 def validate_orcid_id(ctx, param, orcid_id: str):
@@ -65,12 +66,15 @@ def sign(
             None, "--private-key", "-k",
             help="Path to the RSA private key with which the nanopub will be signed."
         ),
+        orcid_id: str = typer.Option(
+            PLACEHOLDER_ORCID_ID, "--orcid", "-o",
+            help="ORCID iD to record as the signer (full URI or bare 0000-0000-0000-0000 form)."
+        ),
 ):
     if private_key:
         config = NanopubConf(
             profile=Profile(
-                # TODO: better handle Profile without name or orcid_id
-                name='', orcid_id='',
+                name='', orcid_id=orcid_id,
                 private_key=private_key
             ),
         )
