@@ -3,6 +3,7 @@ This module holds objects and functions to load a nanopub user profile.
 """
 import logging
 import os
+import re
 import warnings
 from base64 import b64encode, decodebytes
 from pathlib import Path
@@ -27,6 +28,30 @@ class ProfileError(RuntimeError):
     """
 
 
+ORCID_URL_PREFIX = "https://orcid.org/"
+_ORCID_ID_PATTERN = re.compile(r"\d{4}-\d{4}-\d{4}-\d{3}[\dX]")
+
+
+def _normalize_orcid_id(orcid_id: str) -> str:
+    """Validate an ORCID and normalize it to its canonical URI form.
+
+    Accepts either the full ORCID URI (``https://orcid.org/0000-0000-0000-0000``)
+    or the bare identifier (``0000-0000-0000-0000``), always returning the
+    canonical ``https://orcid.org/<id>`` URI. This URI is published verbatim in
+    a nanopub and matched exactly in SPARQL queries, so it must be consistent.
+    Raises ProfileError if no ORCID is provided.
+    """
+    if not orcid_id or not orcid_id.strip():
+        raise ProfileError(
+            "An ORCID iD is required to create a nanopub profile.\n"
+            f"{PROFILE_INSTRUCTIONS_MESSAGE}"
+        )
+    orcid_id = orcid_id.strip()
+    if _ORCID_ID_PATTERN.fullmatch(orcid_id):
+        return f"{ORCID_URL_PREFIX}{orcid_id}"
+    return orcid_id
+
+
 class Profile:
 
     def __init__(
@@ -46,7 +71,7 @@ class Profile:
                 public_key (Optional[Union[Path, str]]): Path to the user's public key, or the key as string
                 introduction_nanopub_uri (Optional[str]): URI of the user's profile nanopub
             """
-        self._orcid_id = orcid_id
+        self.orcid_id = orcid_id
         self._name = name
         self._introduction_nanopub_uri = introduction_nanopub_uri
 
@@ -138,7 +163,7 @@ introduction_nanopub_uri:{intro_uri}
 
     @orcid_id.setter
     def orcid_id(self, value):
-        self._orcid_id = value
+        self._orcid_id = _normalize_orcid_id(value)
 
     @property
     def name(self):
