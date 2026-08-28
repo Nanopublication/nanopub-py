@@ -21,11 +21,12 @@ from nanopub.definitions import (
     NANOPUB_FETCH_FORMAT,
     TEST_NANOPUB_REGISTRY_URL,
 )
-from nanopub.namespaces import HYCL, NP, NPX, NTEMPLATE, ORCID, PAV
+from nanopub.namespaces import HYCL, KPXL_GRLC, NP, NPX, NTEMPLATE, ORCID, PAV
 from nanopub.nanopub_conf import NanopubConf
 from nanopub.profile import ProfileError
 from nanopub.serialize import serialize_nanopub_trig
 from nanopub.sign_utils import add_signature, publish_graph, verify_signature, verify_trusty
+from nanopub.sparql import sparql_syntax_error
 from nanopub.utils import MalformedNanopubError, NanopubMetadata, extract_np_metadata
 
 logger = logging.getLogger(__name__)
@@ -229,6 +230,7 @@ class Nanopub:
         if self._metadata.signature:
             raise MalformedNanopubError(f"The nanopub have already been signed: {self.source_uri}")
         self._check_ill_typed_literals()
+        self._check_invalid_sparql()
 
         if self.is_valid:
             logger.info("Signing nanopub %s (quads=%d)", self.source_uri or "<unpublished>",
@@ -251,6 +253,7 @@ class Nanopub:
             if not self.is_valid:
                 raise MalformedNanopubError("The nanopub is not valid, cannot publish it")
             self._check_ill_typed_literals()
+            self._check_invalid_sparql()
 
         publish_graph(self.rdf, use_server=self._conf.use_server)
         logger.info(f'Published {self.source_uri} to {self._conf.use_server}')
@@ -364,6 +367,20 @@ class Nanopub:
             else:
                 self._check_ill_typed_literals()
 
+        # Same for a grlc query whose SPARQL does not parse: it can never run, and a
+        # nanopub cannot be corrected after the fact, so only a new one can fix it.
+        invalid_sparql = self.invalid_sparql
+        if invalid_sparql:
+            if self._metadata.signature or self._metadata.trusty:
+                logger.warning(
+                    "Invalid SPARQL found in %s: %s. This grlc query cannot be run, and "
+                    "the only remedy is publishing a corrected version",
+                    self._source_uri or self._metadata.np_uri,
+                    "; ".join(description for _, _, description in invalid_sparql),
+                )
+            else:
+                self._check_invalid_sparql()
+
         if self._metadata.signature:
             if not self.has_valid_signature:
                 raise MalformedNanopubError("The nanopub is not valid")
@@ -385,6 +402,24 @@ class Nanopub:
             for s, p, o, c in self._rdf.quads((None, None, None, None))
             if isinstance(o, Literal) and o.ill_typed
         ]
+
+    @property
+    def invalid_sparql(self) -> List[Tuple[Literal, URIRef, str]]:
+        """The grlc queries carried by this nanopub whose SPARQL does not parse.
+
+        Returns a list of ``(literal, graph, description)`` triples, empty when the
+        nanopub carries no grlc query or every query it carries parses. Which literal
+        holds a query is knowable from the statement that carries it: the predicate is
+        ``https://w3id.org/kpxl/grlc/sparql``.
+        """
+        found = []
+        for _, _, o, c in self._rdf.quads((None, KPXL_GRLC.sparql, None, None)):
+            if not isinstance(o, Literal):
+                continue
+            description = sparql_syntax_error(str(o))
+            if description:
+                found.append((o, c, description))
+        return found
 
     @property
     def rdf(self) -> Dataset:
@@ -703,6 +738,22 @@ class Nanopub:
             raise MalformedNanopubError(
                 f"\033[1mIll-typed literal(s) found\033[0m: {details}. "
                 "The lexical form of a literal must be valid for its datatype"
+            )
+
+    def _check_invalid_sparql(self) -> None:
+        """Refuses a grlc query whose SPARQL does not parse.
+
+        A nanopub cannot be edited after the fact, so such a query is broken permanently:
+        it can never run, and the only remedy is publishing a corrected version.
+        """
+        invalid = self.invalid_sparql
+        if invalid:
+            details = "; ".join(
+                f"{description} (in graph {c})" for _, c, description in invalid
+            )
+            raise MalformedNanopubError(
+                f"\033[1mInvalid SPARQL found\033[0m in the grlc query of this "
+                f"nanopub: {details}"
             )
 
     def _check_named_graphs(self) -> None:

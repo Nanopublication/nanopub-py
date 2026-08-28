@@ -218,3 +218,34 @@ np_conf = NanopubConf(
     publication_attributed_to = creator_orcid,
 )
 ```
+
+## grlc queries
+
+A nanopublication cannot be edited after the fact, so a [grlc query](https://w3id.org/kpxl/grlc/) whose
+SPARQL does not parse is broken permanently: it can never run, and the only remedy is publishing a
+corrected version. The SPARQL carried by `https://w3id.org/kpxl/grlc/sparql` is therefore checked
+before the nanopublication is signed, and again before it is published. Nanopublications published
+before this check existed still load and read as before; `is_valid` only warns about them.
+
+Most of these queries are not broken by hand-written syntax errors but by a character picked up on
+the way through a word processor or a web page, which reads as the plain one it replaced, so the
+error names it:
+
+```text
+Invalid SPARQL found in the grlc query of this nanopub: This is not valid SPARQL. The character at
+line 2, column 8 is U+00A0 (NO-BREAK SPACE), which SPARQL doesn't allow there. Characters like this
+one tend to slip in when a query is copied from a word processor or a web page, and replacing them
+with their plain equivalents makes the query valid again. (in graph ...)
+```
+
+The check is available on its own, and the queries a nanopublication carries can be inspected
+without signing anything:
+
+```python
+from nanopub.sparql import is_valid_sparql, sparql_syntax_error
+
+is_valid_sparql("select ?np where { ?np ?p ?o }")  # True
+sparql_syntax_error(query)  # the description above, or None
+
+np.invalid_sparql  # (literal, graph, description) for each broken query the nanopub carries
+```

@@ -136,6 +136,8 @@ def check(filepath: Path):
         for literal, graph in np.ill_typed_literals:
             print(f"\033[1m⚠️  Ill-typed literal\033[0m {literal.n3()} in graph {graph}: "
                   "strict RDF stores may be missing this nanopub")
+        for _, graph, description in np.invalid_sparql:
+            print(f"\033[1m⚠️  Invalid SPARQL\033[0m in graph {graph}: {description}")
     except MalformedNanopubError as e:
         print(f"\033[1m❌ Invalid nanopub\033[0m: {e}")
 
