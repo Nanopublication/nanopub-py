@@ -64,7 +64,7 @@ docs = [
 ]
 
 dev = [
-    "pre-commit >=3.8.0,<3.9.0",
+    "pre-commit >=4.6.2,<4.7.0",
     "autoflake >=2.4.0,<2.5.0",
     "jupyter",
     "notebook",
