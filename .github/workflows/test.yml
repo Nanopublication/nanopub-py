@@ -33,10 +33,6 @@ jobs:
           uv sync --group test --group dev
           uv add ${{ matrix.rdflib-version }}
 
-      - name: Setup nanopub profile (including RSA keys)
-        run: |
-          uv run np setup --orcid-id https://orcid.org/0000-0000-0000-0001 --no-publish --name test --newkeys
-
       - name: Test with pytest
         run: uv run pytest -v --cov
 

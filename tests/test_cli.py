@@ -1,4 +1,5 @@
-from pathlib import Path
+import os
+import stat
 from unittest.mock import MagicMock
 
 import pytest
@@ -9,11 +10,24 @@ from typer.testing import CliRunner
 from nanopub import namespaces
 from nanopub.__main__ import cli
 from nanopub._version import __version__
-from nanopub.definitions import DEFAULT_PROFILE_PATH
-from nanopub.profile import _validate_agent_id, ProfileError
+from nanopub.profile import _validate_agent_id, load_profile, ProfileError
 from nanopub.utils import MalformedNanopubError
+from tests.conftest import profile_test
 
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def cli_profile(monkeypatch):
+    """Give the CLI commands a profile that is not the developer's own.
+
+    They call `load_profile()` with no argument, and its default path is bound
+    at import time, so the `nanopub_config_dir` fixture does not cover it. Left
+    alone, the tests below read `~/.nanopub/profile.yml` and fail on a machine
+    that has none (see issue #269).
+    """
+    monkeypatch.setattr("nanopub.__main__.load_profile", lambda: profile_test)
+    return profile_test
 
 
 def test_validate_agent_id():
@@ -44,17 +58,40 @@ def test_validate_agent_id():
             _validate_agent_id(agent_id=agent_id)
 
 
-def test_setup():
-    # np setup --orcid-id https://orcid.org/0000-0000-0000-0000 --name "Python test" --newkeys --no-publish
+def test_setup(nanopub_config_dir):
+    """`setup --newkeys` writes a profile and a fresh key pair, and nothing else."""
+    # np setup --orcid-id https://orcid.org/0000-0000-0000-0001 --name "Python test" --newkeys --no-publish
     result = runner.invoke(cli, [
         "setup",
         "--orcid-id", "https://orcid.org/0000-0000-0000-0001",
         "--name", "Python test",
         "--newkeys", "--no-publish"
     ])
-    assert result.exit_code == 1
+    assert result.exit_code == 0
     assert "Setting up nanopub profile" in result.stdout
-    assert Path(DEFAULT_PROFILE_PATH).exists()
+
+    private_key = nanopub_config_dir / "id_rsa"
+    assert (nanopub_config_dir / "profile.yml").exists()
+    assert private_key.exists()
+    assert (nanopub_config_dir / "id_rsa.pub").exists()
+
+    profile = load_profile(nanopub_config_dir / "profile.yml")
+    assert profile.agent_id == "https://orcid.org/0000-0000-0000-0001"
+    assert profile.name == "Python test"
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX file permissions do not apply on Windows")
+def test_setup_private_key_is_not_world_readable(nanopub_config_dir):
+    """The generated private key is readable only by its owner."""
+    runner.invoke(cli, [
+        "setup",
+        "--orcid-id", "https://orcid.org/0000-0000-0000-0001",
+        "--name", "Python test",
+        "--newkeys", "--no-publish"
+    ])
+
+    mode = stat.S_IMODE((nanopub_config_dir / "id_rsa").stat().st_mode)
+    assert mode == 0o600
 
 
 def test_profile():
@@ -113,33 +150,29 @@ def test_version():
     assert __version__ == result.stdout.strip()
 
 
-def test_setup_with_keypair(monkeypatch, tmp_path):
-    monkeypatch.setattr("nanopub.__main__._rsa_keys_exist", lambda: False)
-    monkeypatch.setattr("nanopub.__main__.generate_keyfiles", lambda path: None)
+def test_setup_with_keypair(monkeypatch, testsuite, nanopub_config_dir):
+    """`setup --keypair` copies the given key pair into the config dir and uses it."""
     mock_np = MagicMock()
     monkeypatch.setattr("nanopub.__main__.NanopubIntroduction", lambda **kw: mock_np)
 
-    pub_key = tmp_path / "pub.pem"
-    priv_key = tmp_path / "priv.pem"
-    pub_key.write_text("pub")
-    priv_key.write_text("priv")
+    signing_key = testsuite.get_signing_key("rsa-key1")
 
     result = runner.invoke(cli, [
         "setup",
         "--orcid-id", "https://orcid.org/0000-0000-0000-0001",
         "--name", "Python test",
-        "--keypair", str(pub_key), str(priv_key),
+        "--keypair", str(signing_key.public_key), str(signing_key.private_key),
         "--no-publish"
     ])
     assert "Introduction Nanopub signed but not published" in result.output
     mock_np.sign.assert_called_once()
     mock_np.publish.assert_not_called()
 
+    assert (nanopub_config_dir / "id_rsa").read_text() == signing_key.private_key.read_text()
+    assert (nanopub_config_dir / "id_rsa.pub").read_text() == signing_key.public_key.read_text()
+
 
 def test_setup_publish_yes(monkeypatch):
-    monkeypatch.setattr("nanopub.__main__._rsa_keys_exist", lambda: False)
-    monkeypatch.setattr("nanopub.__main__.generate_keyfiles", lambda path: None)
-
     monkeypatch.setattr("typer.prompt", lambda prompt, type=str, default=None: "y")
 
     mock_np = MagicMock()
@@ -157,9 +190,6 @@ def test_setup_publish_yes(monkeypatch):
 
 
 def test_setup_publish_no(monkeypatch):
-    monkeypatch.setattr("nanopub.__main__._rsa_keys_exist", lambda: False)
-    monkeypatch.setattr("nanopub.__main__.generate_keyfiles", lambda path: None)
-
     monkeypatch.setattr("typer.prompt", lambda prompt, type=str, default=None: "n")
 
     mock_np = MagicMock()

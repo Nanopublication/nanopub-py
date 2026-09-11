@@ -148,8 +148,7 @@ class Profile:
 
         # Store keys
         if not os.path.exists(private_key_path):
-            with open(private_key_path, "w") as f:
-                f.write(self.private_key + '\n')
+            _write_private_key(private_key_path, self.private_key + '\n')
         if not os.path.exists(public_key_path):
             with open(public_key_path, "w") as f:
                 f.write(self.public_key)
@@ -294,15 +293,27 @@ def generate_keyfiles(path: Path = USER_CONFIG_DIR) -> str:
     public_path = path / "id_rsa.pub"
 
     # Store key pair
-    private_key_file = open(private_path, "w")
-    private_key_file.write(private_key_str)
-    private_key_file.close()
+    _write_private_key(private_path, private_key_str)
 
     public_key_file = open(public_path, "w")
     public_key_file.write(public_key_str)
     public_key_file.close()
     logger.info(f"Public/private RSA key pair has been generated in {private_path} and {public_path}")
     return public_key_str
+
+
+def _write_private_key(path: Union[Path, str], content: str) -> None:
+    """Write a private key to `path`, readable and writable only by its owner.
+
+    The file is created with mode 600 rather than chmod'ed after the fact, so
+    the key is never briefly world-readable; the chmod that follows covers the
+    case of a file that was already there with wider permissions. On Windows,
+    where POSIX permissions do not apply, both are effectively no-ops.
+    """
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        f.write(content)
+    os.chmod(path, 0o600)
 
 
 def _encode_private_key(key: RSA.RsaKey) -> str:

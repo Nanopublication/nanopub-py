@@ -1,11 +1,13 @@
 import os
 import tempfile
+from pathlib import Path
 
 import pytest
 import requests
 from nanopub_testsuite_connector import NanopubTestSuite
 
-from nanopub import NanopubConf, load_profile
+from nanopub import NanopubConf, definitions, load_profile
+from nanopub import __main__ as nanopub_cli
 from nanopub.client import TEST_NANOPUB_QUERY_URL
 
 _suite = NanopubTestSuite.get_latest()
@@ -15,6 +17,37 @@ _signing_key = _suite.get_signing_key("rsa-key1")
 @pytest.fixture(scope="session")
 def testsuite() -> NanopubTestSuite:
     return _suite
+
+
+@pytest.fixture(autouse=True)
+def nanopub_config_dir(monkeypatch, tmp_path) -> Path:
+    """Point the user config dir at a temporary directory, for every test.
+
+    Without this, the `setup` command exercised by `tests/test_cli.py` writes
+    RSA keys and a profile into the developer's own `~/.nanopub`, overwriting
+    the profile that is already there (see issue #269).
+
+    `USER_CONFIG_DIR` and the paths derived from it are computed at import time,
+    in `nanopub.definitions` and again in `nanopub.__main__`, so every one of
+    those names has to be redirected. They are patched without `raising=False`
+    on purpose: if one is ever renamed, the fixture should fail loudly rather
+    than quietly stop isolating the home directory.
+    """
+    config_dir = tmp_path / ".nanopub"
+    config_dir.mkdir()
+
+    for module in (definitions, nanopub_cli):
+        monkeypatch.setattr(module, "USER_CONFIG_DIR", config_dir)
+        monkeypatch.setattr(module, "DEFAULT_PROFILE_PATH", config_dir / "profile.yml")
+    monkeypatch.setattr(nanopub_cli, "DEFAULT_KEYS_PATH_PREFIX", config_dir / "id")
+    monkeypatch.setattr(
+        nanopub_cli, "DEFAULT_PRIVATE_KEY_PATH", config_dir / nanopub_cli.PRIVATE_KEY_FILE
+    )
+    monkeypatch.setattr(
+        nanopub_cli, "DEFAULT_PUBLIC_KEY_PATH", config_dir / nanopub_cli.PUBLIC_KEY_FILE
+    )
+
+    return config_dir
 
 
 def pytest_addoption(parser):
