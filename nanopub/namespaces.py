@@ -32,3 +32,6 @@ FDOF = Namespace("https://w3id.org/fdof/ontology#")
 
 FDOC = Namespace("https://w3id.org/fdoc/o/terms/")
 """FDO Connect namespace"""
+
+KPXL_GRLC = Namespace("https://w3id.org/kpxl/grlc/")
+"""grlc query namespace, whose sparql property carries the query of a grlc query nanopub"""

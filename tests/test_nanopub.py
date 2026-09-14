@@ -892,3 +892,113 @@ class TestIllTypedLiterals:
                 np.publish()
         mock_publish.assert_not_called()
         assert not np.published
+
+
+class TestInvalidSparql:
+    """A grlc query whose SPARQL does not parse must not be signed or published (see
+    issue #266): a nanopub cannot be edited after the fact, so such a query is broken
+    permanently, and the only remedy is publishing a corrected version. A nanopub that is
+    still plain is therefore invalid, while an already signed one stays readable, since
+    nanopubs carrying broken queries are already out there."""
+
+    BROKEN = "select ?np\nwhere {\u00a0?np ?p ?o }"
+    VALID = "select ?np where { ?np ?p ?o }"
+
+    def _grlc_query(self, sparql: str, conf: Optional[NanopubConf] = None) -> Nanopub:
+        np = _minimal_valid_nanopub(conf=conf)
+        np.assertion.add(
+            (URIRef("http://test/query"), RDF.type, namespaces.KPXL_GRLC["grlc-query"])
+        )
+        np.assertion.add(
+            (URIRef("http://test/query"), namespaces.KPXL_GRLC.sparql, Literal(sparql))
+        )
+        return np
+
+    def test_query_that_parses_is_accepted(self):
+        np = self._grlc_query(self.VALID)
+        assert np.invalid_sparql == []
+        assert np.is_valid
+
+    def test_query_that_does_not_parse_names_the_character(self):
+        np = self._grlc_query(self.BROKEN)
+        invalid = np.invalid_sparql
+
+        assert len(invalid) == 1
+        assert str(invalid[0][1]) == str(np.assertion.identifier)
+        assert "U+00A0 (NO-BREAK SPACE)" in invalid[0][2]
+        with pytest.raises(MalformedNanopubError, match="NO-BREAK SPACE"):
+            np.is_valid
+
+    def test_looks_at_every_graph_not_just_the_assertion(self):
+        np = _minimal_valid_nanopub()
+        np.pubinfo.add(
+            (
+                np._metadata.namespace[""],
+                namespaces.KPXL_GRLC.sparql,
+                Literal(self.BROKEN),
+            )
+        )
+        assert len(np.invalid_sparql) == 1
+
+    def test_ignores_a_nanopub_that_carries_no_grlc_query(self):
+        np = _minimal_valid_nanopub()
+        np.assertion.add(
+            (
+                URIRef("http://test"),
+                URIRef("http://example.org/note"),
+                Literal("not a query at all"),
+            )
+        )
+        assert np.invalid_sparql == []
+        assert np.is_valid
+
+    def test_ignores_the_predicate_when_its_object_is_not_a_literal(self):
+        np = _minimal_valid_nanopub()
+        np.assertion.add(
+            (
+                URIRef("http://test/query"),
+                namespaces.KPXL_GRLC.sparql,
+                URIRef("http://example.org/elsewhere"),
+            )
+        )
+        assert np.invalid_sparql == []
+
+    def test_broken_query_in_signed_nanopub_only_warns(self, caplog):
+        """Such nanopubs are out there and cannot be fixed, so they stay readable."""
+        np = self._grlc_query(self.BROKEN)
+        np._metadata.signature = "dummy-signature"
+        with patch.object(Nanopub, "has_valid_signature", True), \
+                caplog.at_level(logging.WARNING, logger="nanopub.nanopub"):
+            assert np.is_valid
+        assert "NO-BREAK SPACE" in caplog.text
+
+    def test_sign_rejects_a_query_that_does_not_parse(self):
+        np = self._grlc_query(self.BROKEN, conf=default_conf)
+        with pytest.raises(MalformedNanopubError, match="NO-BREAK SPACE"):
+            np.sign()
+        assert np.source_uri is None
+
+    def test_sign_accepts_a_query_that_parses(self):
+        np = self._grlc_query(self.VALID, conf=default_conf)
+        np.sign()
+        assert np.source_uri is not None
+
+    def test_publish_rejects_a_broken_query_signed_before_this_check(self, monkeypatch):
+        np = self._grlc_query(self.VALID, conf=default_conf)
+        np.sign()
+        np.pubinfo.add(
+            (
+                np._metadata.namespace[""],
+                namespaces.KPXL_GRLC.sparql,
+                Literal(self.BROKEN),
+            )
+        )
+        # editing the graph after signing breaks the trusty artefact, which is not what
+        # this test is about
+        monkeypatch.setattr(type(np), "is_valid", property(lambda self: True))
+
+        with patch("nanopub.nanopub.publish_graph") as mock_publish:
+            with pytest.raises(MalformedNanopubError, match="NO-BREAK SPACE"):
+                np.publish()
+        mock_publish.assert_not_called()
+        assert not np.published
