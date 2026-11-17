@@ -682,9 +682,11 @@ class TestPublish:
 
     def test_publish_calls_sign(self, monkeypatch):
         np = Nanopub(conf=NanopubConf(profile=None))
-        monkeypatch.setattr(np, "sign", lambda: setattr(np, "_published", True))
+        called = []
+        monkeypatch.setattr(np, "sign", lambda: called.append(True))
+        monkeypatch.setattr("nanopub.nanopub.publish_graph", lambda *a, **k: None)
         np.publish()
-        assert np.published
+        assert called and np.published
 
 
 class TestReplaceBlankNodes:
